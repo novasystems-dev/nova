@@ -76,6 +76,9 @@ run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(sha256sum bin/nov
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"
 run_test "Benchmark suite execution" "./benchmarks/run_benchmarks.sh"
 
+# Cleanup generated test binaries
+rm -f *.out
+
 echo "=========================================================="
 echo "  TEST RESULTS: $PASSED PASSED, $FAILED FAILED"
 echo "=========================================================="
