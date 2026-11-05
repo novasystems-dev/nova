@@ -448,7 +448,7 @@ parsePrimaryExpr = choice
         _ <- sepBy parseIdentifier (symbol ",")
         _ <- symbol ")"
         _ <- symbol "=>"
-        ExprCall <$> spanned parseExpr <*> pure []
+        parseExpr
 
     parseStructInit = do
         _ <- optional parseCapability

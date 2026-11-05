@@ -9,7 +9,8 @@ type WorkItem = struct:
 # Channel receives isolated reference: exactly one owner exists
 pub fn worker(rx: Channel[iso WorkItem]):
     while let Some(item) = rx.recv():
-        print("Processing task: {item.id} - {item.payload}")
+        print("Processing task:")
+        print(item.payload)
 
 pub fn main():
     let (tx, rx) = Channel[iso WorkItem].create()

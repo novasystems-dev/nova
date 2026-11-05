@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,7 +12,7 @@ extern "C" {
 
 // ============================================================================
 // NOVA MINIMAL RUNTIME (nova-rt)
-// Region-Based Arena Allocation + Safe Reference Counting Support
+// Region-Based Arena Allocation + Safe Concurrency Channel Support
 // ============================================================================
 
 typedef struct NovaArena {
@@ -20,6 +21,19 @@ typedef struct NovaArena {
     size_t offset;
     struct NovaArena *next;
 } NovaArena;
+
+// Concurrency: Thread-safe Bounded Channel (iso message passing)
+typedef struct NovaChannel {
+    void **buffer;
+    size_t capacity;
+    size_t count;
+    size_t head;
+    size_t tail;
+    bool closed;
+    pthread_mutex_t mutex;
+    pthread_cond_t not_empty;
+    pthread_cond_t not_full;
+} NovaChannel;
 
 // Runtime Initialization and Teardown
 void nova_rt_init(void);
@@ -30,6 +44,15 @@ NovaArena *nova_arena_create(size_t capacity);
 void *nova_arena_alloc(NovaArena *arena, size_t size, size_t align);
 void nova_arena_reset(NovaArena *arena);
 void nova_arena_destroy(NovaArena *arena);
+
+// Concurrency Primitives
+NovaChannel *nova_channel_create(size_t capacity);
+void nova_channel_send(NovaChannel *chan, void *item);
+void *nova_channel_recv(NovaChannel *chan);
+void nova_channel_close(NovaChannel *chan);
+void nova_channel_destroy(NovaChannel *chan);
+pthread_t nova_spawn(void *(*func)(void *), void *arg);
+void nova_join(pthread_t thread);
 
 // Builtin Console Output
 void nova_print_str(const char *str);

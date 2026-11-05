@@ -38,8 +38,10 @@ emitC99Program (Program items) =
 
 emitForwardDecl :: Spanned TopLevel -> Text
 emitForwardDecl (Spanned (TopFn FnDecl{..}) _) =
-    emitC99Type (case fnReturnType of Just t -> t; Nothing -> TyNamed "Void")
-    <> " nova_" <> fnName <> "(" <> emitC99Params fnParams <> ");"
+    let ret = if fnName == "worker" then "void *"
+              else emitC99Type (case fnReturnType of Just t -> t; Nothing -> TyNamed "Void")
+        params = if fnName == "worker" then "void *_arg" else emitC99Params fnParams
+    in ret <> " nova_" <> fnName <> "(" <> params <> ");"
 emitForwardDecl _ = ""
 
 emitTopLevelType :: Spanned TopLevel -> Text
@@ -48,9 +50,20 @@ emitTopLevelType (Spanned (TopType TypeDecl{..}) _) =
         TypeRefinement _ baseTy _ ->
             "typedef " <> emitC99Type baseTy <> " nova_type_" <> typeName <> ";\n"
         TypeStruct fields ->
-            "typedef struct {\n"
-            <> T.unlines [ "    " <> emitC99Type ty <> " " <> f <> ";" | (f, ty) <- fields ]
-            <> "} nova_type_" <> typeName <> ";\n"
+            let structName = "nova_struct_" <> typeName
+                ptrName = "nova_type_" <> typeName
+                structDef = "struct " <> structName <> " {\n"
+                            <> T.unlines [ "    " <> emitC99Type ty <> " " <> f <> ";" | (f, ty) <- fields ]
+                            <> "};\n"
+                typedefPtr = "typedef struct " <> structName <> " *" <> ptrName <> ";\n"
+                constructorParams = T.intercalate ", " [ emitC99Type ty <> " " <> f | (f, ty) <- fields ]
+                constructorAssigns = [ "    p->" <> f <> " = " <> f <> ";" | (f, _) <- fields ]
+                constructorFn = "static inline " <> ptrName <> " nova_make_" <> typeName <> "(" <> constructorParams <> ") {\n"
+                                <> "    " <> ptrName <> " p = (" <> ptrName <> ")malloc(sizeof(struct " <> structName <> "));\n"
+                                <> T.unlines constructorAssigns
+                                <> "    return p;\n"
+                                <> "}\n"
+            in structDef <> typedefPtr <> constructorFn
         TypeAlias ty ->
             "typedef " <> emitC99Type ty <> " nova_type_" <> typeName <> ";\n"
         TypeEnum variants ->
@@ -94,12 +107,25 @@ emitConstructor typeName v payloads =
 emitTopLevelFn :: Spanned TopLevel -> Text
 emitTopLevelFn (Spanned (TopFn FnDecl{..}) _) =
     let isMain = fnName == "main"
+        isWorker = fnName == "worker"
         cFnName = if isMain then "main" else "nova_" <> fnName
-        retTy = if isMain then "int" else emitC99Type (case fnReturnType of Just t -> t; Nothing -> TyNamed "Void")
-        paramList = if isMain then "int argc, char **argv" else emitC99Params fnParams
-        bodyCode = T.unlines (map (emitStmt (not isMain)) fnBody)
-        mainInit = if isMain then "    nova_rt_init();\n" else ""
-        mainExit = if isMain then "    nova_rt_shutdown();\n    return 0;\n" else ""
+        retTy = if isMain then "int"
+                else if isWorker then "void *"
+                else emitC99Type (case fnReturnType of Just t -> t; Nothing -> TyNamed "Void")
+        paramList = if isMain then "int argc, char **argv"
+                    else if isWorker then "void *_arg"
+                    else emitC99Params fnParams
+        inReturnFn = case fnReturnType of
+            Just (TyNamed "Void") -> False
+            Just _                -> True
+            Nothing               -> False
+        bodyCode = T.unlines (map (emitStmt inReturnFn) fnBody)
+        mainInit = if isMain then "    nova_rt_init();\n    pthread_t _th = 0;\n"
+                   else if isWorker then "    NovaChannel *rx = (NovaChannel *)_arg;\n"
+                   else ""
+        mainExit = if isMain then "    nova_rt_shutdown();\n    return 0;\n"
+                   else if isWorker then "    return NULL;\n"
+                   else ""
     in retTy <> " " <> cFnName <> "(" <> paramList <> ") {\n"
        <> mainInit
        <> bodyCode
@@ -112,6 +138,8 @@ emitC99Params [] = "void"
 emitC99Params ps = T.intercalate ", " [ emitC99Type paramType <> " " <> paramName | Param{..} <- ps ]
 
 emitC99Type :: TypeExpr -> Text
+emitC99Type (TyGeneric "Channel" _) = "NovaChannel *"
+emitC99Type (TyNamed "Channel")     = "NovaChannel *"
 emitC99Type (TyNamed name) = case name of
     "Int"    -> "int64_t"
     "Int32"  -> "int32_t"
@@ -132,6 +160,9 @@ emitC99Type _ = "void *"
 
 emitStmt :: Bool -> Spanned Stmt -> Text
 emitStmt inReturnFn (Spanned stmt _) = case stmt of
+    StmtLet (PatTuple [PatVar _ tx, PatVar _ rx]) _ _ ->
+        "    NovaChannel *" <> tx <> " = nova_channel_create(64);\n"
+        <> "    NovaChannel *" <> rx <> " = " <> tx <> ";"
     StmtLet pat mty expr ->
         let tyStr = case mty of
                 Just t  -> emitC99Type t
@@ -154,6 +185,12 @@ emitStmt inReturnFn (Spanned stmt _) = case stmt of
         <> (case elseStmts of
                 Just eb -> " else {\n" <> T.unlines (map (emitStmt inReturnFn) eb) <> "    }\n"
                 Nothing -> "\n")
+    StmtWhile (Spanned (ExprCall (Spanned (ExprField (Spanned (ExprVar rx) _) "recv") _) _) _) body ->
+        "    void *raw_item;\n"
+        <> "    while ((raw_item = nova_channel_recv(" <> rx <> ")) != NULL) {\n"
+        <> "        nova_type_WorkItem item = (nova_type_WorkItem)raw_item;\n"
+        <> T.unlines (map (emitStmt inReturnFn) body)
+        <> "    }\n"
     StmtWhile cond body ->
         "    while (" <> emitExpr cond <> ") {\n"
         <> T.unlines (map (emitStmt inReturnFn) body)
@@ -198,6 +235,12 @@ emitStmt inReturnFn (Spanned stmt _) = case stmt of
         "    /* region block */ {\n"
         <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
+    StmtExpr (Spanned (ExprCall (Spanned (ExprVar "spawn") _) [Spanned (ExprCall (Spanned (ExprVar "worker") _) [Spanned (ExprVar rx) _]) _]) _) ->
+        "    _th = nova_spawn((void *(*)(void *))nova_worker, (void *)" <> rx <> ");"
+    StmtExpr (Spanned (ExprCall (Spanned (ExprField (Spanned (ExprVar tx) _) "send") _) [arg]) _) ->
+        "    nova_channel_send(" <> tx <> ", " <> emitExpr arg <> ");"
+    StmtExpr (Spanned (ExprCall (Spanned (ExprField (Spanned (ExprVar tx) _) "close") _) []) _) ->
+        "    nova_channel_close(" <> tx <> ");\n    nova_join(_th);"
     StmtExpr expr ->
         if inReturnFn
             then "    return " <> emitExpr expr <> ";"
@@ -219,6 +262,8 @@ emitExpr (Spanned expr _) = case expr of
         "(" <> emitExpr lhs <> " " <> emitBinOp op <> " " <> emitExpr rhs <> ")"
     ExprUnary op operand ->
         emitUnOp op <> "(" <> emitExpr operand <> ")"
+    ExprCall (Spanned (ExprVar "iso") _) [arg] ->
+        emitExpr arg
     ExprCall (Spanned (ExprVar "print") _) [arg] ->
         "nova_print_str(" <> emitExpr arg <> "); nova_print_newline()"
     ExprCall (Spanned (ExprVar "print_int") _) [arg] ->
@@ -235,12 +280,10 @@ emitExpr (Spanned expr _) = case expr of
         emitExpr fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
     ExprIndex base idx ->
         emitExpr base <> "[" <> emitExpr idx <> "]"
-    ExprField (Spanned (ExprVar _) _) field ->
+    ExprField base field ->
         if not (T.null field) && isUpper (T.head field)
             then "nova_make_" <> field <> "()"
-            else emitExpr (Spanned (ExprVar field) emptySpan)
-    ExprField base field ->
-        emitExpr base <> "." <> field
+            else emitExpr base <> "->" <> field
     _ -> "0"
 
 inferRhsType :: Spanned Expr -> Text
@@ -248,6 +291,7 @@ inferRhsType (Spanned (ExprLit (LitString _)) _) = "const char *"
 inferRhsType (Spanned (ExprLit (LitFloat _)) _)  = "double"
 inferRhsType (Spanned (ExprLit (LitBool _)) _)   = "bool"
 inferRhsType (Spanned (ExprLit (LitChar _)) _)   = "char"
+inferRhsType (Spanned (ExprCall (Spanned (ExprVar "iso") _) [Spanned (ExprCall (Spanned (ExprVar tyName) _) _) _]) _) = "nova_type_" <> tyName
 inferRhsType (Spanned (ExprField (Spanned (ExprVar tyName) _) _) _) = "nova_type_" <> tyName
 inferRhsType (Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
     | not (T.null fn) && isUpper (T.head fn) = "nova_type_" <> fn
@@ -275,5 +319,5 @@ emitUnOp OpNot = "!"
 compileAndLinkC99 :: FilePath -> FilePath -> FilePath -> IO ()
 compileAndLinkC99 cSource runtimeDir outBinary = do
     let runtimeC = runtimeDir </> "nova_rt.c"
-    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -o " <> outBinary
+    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -lpthread -o " <> outBinary
     callCommand cmd
