@@ -4,6 +4,7 @@ module Main where
 
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
+import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 
