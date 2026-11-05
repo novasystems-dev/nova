@@ -32,28 +32,28 @@
 - [x] **M1.2 Source Loader & Span Tracker**: UTF-8 source mapping with line/column coordinates.
 - [x] **M1.3 Indentation Layout Lexer**: Virtual `INDENT`, `DEDENT`, and `NEWLINE` token generation.
 - [x] **M1.4 Surface AST Modeling**: Algebraic Data Types representing top-level declarations, statements, and expressions.
-- [ ] **M1.5 Pratt Parser Implementation**: Fast $O(n)$ precedence climbing for operators and expressions.
-- [ ] **M1.6 Error Recovery & Aggregation**: Continuous parsing with multi-error diagnostic accumulation.
+- [x] **M1.5 Pratt Parser Implementation**: Fast $O(n)$ precedence climbing for operators and expressions.
+- [x] **M1.6 Error Recovery & Aggregation**: Continuous parsing with multi-error diagnostic accumulation.
 
 ### Stage 2: Syntax Lowering & High-Level IR (AST -> HIR)
-- [ ] **M2.1 AST Desugaring**: Lowering syntax sugars (for-loops, string interpolation, `?` operator) into core primitives.
-- [ ] **M2.2 Name Resolution & DefId Assignment**: Lexical scope analysis and symbol resolution.
-- [ ] **M2.3 Import Cycle Detection**: Tarjan's strongly connected components algorithm preventing circular imports.
+- [x] **M2.1 AST Desugaring**: Lowering syntax sugars (for-loops, string interpolation, `?` operator) into core primitives.
+- [x] **M2.2 Name Resolution & DefId Assignment**: Lexical scope analysis and symbol resolution.
+- [x] **M2.3 Import Cycle Detection**: Tarjan's strongly connected components algorithm preventing circular imports.
 - [ ] **M2.4 HIR Construction**: Well-formed High-Level Intermediate Representation.
 - [ ] **M2.5 Hygienic Macro System**: Compile-time syntax transformations without variable capture.
 
 ### Stage 3: Static Type Engine
-- [ ] **M3.1 Bidirectional Type Inference**: Local type deduction combining Hindley-Milner with bidirectional checking.
-- [ ] **M3.2 Algebraic Sum & Product Types**: Structs and tagged enums without null pointers.
-- [ ] **M3.3 Pattern Match Exhaustiveness**: Static verification of 100% case coverage in match blocks.
+- [x] **M3.1 Bidirectional Type Inference**: Local type deduction combining Hindley-Milner with bidirectional checking.
+- [x] **M3.2 Algebraic Sum & Product Types**: Structs and tagged enums without null pointers.
+- [x] **M3.3 Pattern Match Exhaustiveness**: Static verification of 100% case coverage in match blocks.
 - [ ] **M3.4 Generics & Traits**: Polymorphic abstraction with compile-time monomorphization.
-- [ ] **M3.5 Value-based Error Handling**: Native `Result[T, E]` and `Option[T]` types.
+- [x] **M3.5 Value-based Error Handling**: Native `Result[T, E]` and `Option[T]` types.
 
 ### Stage 4: Logical Proof Engine (Refinement Types via Z3)
-- [ ] **M4.1 Refinement Type Syntax**: Predicate-qualified types (`type NonZero = x: Int where x != 0`).
-- [ ] **M4.2 Verification Condition Generation (VCG)**: Translating code invariants into SMT formulas.
-- [ ] **M4.3 Z3 SMT Solver Integration**: Automatic theorem proving in sub-millisecond execution.
-- [ ] **M4.4 Static Elimination of Division-by-Zero & Buffer Overflows**: Mathematical proofs at compile time.
+- [x] **M4.1 Refinement Type Syntax**: Predicate-qualified types (`type NonZero = x: Int where x != 0`).
+- [x] **M4.2 Verification Condition Generation (VCG)**: Translating code invariants into SMT formulas.
+- [x] **M4.3 Z3 SMT Solver Integration**: Automatic theorem proving in sub-millisecond execution.
+- [x] **M4.4 Static Elimination of Division-by-Zero & Buffer Overflows**: Mathematical proofs at compile time.
 - [ ] **M4.5 Arithmetic Overflow Verification**: Compile-time proof of CPU register boundary safety.
 
 ### Stage 5: Region & Capability-Gated Memory Safety
@@ -77,15 +77,15 @@
 - [ ] **M7.5 Bounds-Check Elimination**: Stripping runtime checks for Z3-proven invariants.
 
 ### Stage 8: Code Generation Backend (MIR -> C99 / LLVM)
-- [ ] **M8.1 C99 Transpiler Backend**: Portable C code generation for immediate bootstrapping.
+- [x] **M8.1 C99 Transpiler Backend**: Portable C code generation for immediate bootstrapping.
 - [ ] **M8.2 LLVM IR Backend**: Direct native compilation leveraging LLVM -O3.
-- [ ] **M8.3 Zero-Cost C FFI**: Native C function call interface without runtime wrappers.
+- [x] **M8.3 Zero-Cost C FFI**: Native C function call interface without runtime wrappers.
 - [ ] **M8.4 SIMD Auto-Vectorization**: Explicit `noalias` annotations driving AVX-512 / NEON execution.
 - [ ] **M8.5 Debug Information**: DWARF debug symbols for GDB and LLDB.
 
 ### Stage 9: Runtime & Standard Library (nova-rt & std)
-- [ ] **M9.1 Minimal Runtime (`nova-rt`)**: Lightweight bump/arena allocator (<2000 LOC).
-- [ ] **M9.2 Core Library (`core`)**: Zero-allocation primitives for embedded / bare-metal targets.
+- [x] **M9.1 Minimal Runtime (`nova-rt`)**: Lightweight bump/arena allocator (<2000 LOC).
+- [x] **M9.2 Core Library (`core`)**: Zero-allocation primitives for embedded / bare-metal targets.
 - [ ] **M9.3 Standard Library (`std`)**: High-performance `Vec`, `Map`, `String`, IO, and Networking.
 - [ ] **M9.4 M:N Work-Stealing Scheduler**: Lightweight green threads for high concurrency.
 
