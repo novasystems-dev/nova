@@ -10,6 +10,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.Process (callCommand)
 import System.FilePath ((</>))
+import Data.Char (isUpper)
 
 import Nova.Syntax.Span
 import Nova.Syntax.Token
@@ -52,8 +53,43 @@ emitTopLevelType (Spanned (TopType TypeDecl{..}) _) =
             <> "} nova_type_" <> typeName <> ";\n"
         TypeAlias ty ->
             "typedef " <> emitC99Type ty <> " nova_type_" <> typeName <> ";\n"
-        _ -> ""
+        TypeEnum variants ->
+            let tagTypeName = "nova_tag_" <> typeName
+                structName  = "nova_struct_" <> typeName
+                tags = [ "    NOVA_TAG_" <> v | (v, _) <- variants ]
+                variantStructs = [ emitVariantStruct v payloads | (v, payloads) <- variants, not (null payloads) ]
+                constructorFns = [ emitConstructor typeName v payloads | (v, payloads) <- variants ]
+            in "typedef enum {\n"
+               <> T.intercalate ",\n" tags <> "\n} " <> tagTypeName <> ";\n\n"
+               <> "typedef struct " <> structName <> " *nova_type_" <> typeName <> ";\n\n"
+               <> "struct " <> structName <> " {\n"
+               <> "    " <> tagTypeName <> " tag;\n"
+               <> "    union {\n"
+               <> T.unlines variantStructs
+               <> "    } data;\n"
+               <> "};\n\n"
+               <> T.unlines constructorFns
 emitTopLevelType _ = ""
+
+emitVariantStruct :: Text -> [TypeExpr] -> Text
+emitVariantStruct v payloads =
+    "        struct {\n"
+    <> T.unlines [ "            " <> emitC99Type ty <> " _" <> T.pack (show idx) <> ";" | (idx, ty) <- zip [0..] payloads ]
+    <> "        } " <> v <> ";"
+
+emitConstructor :: Text -> Text -> [TypeExpr] -> Text
+emitConstructor typeName v payloads =
+    let structName = "nova_struct_" <> typeName
+        cFnName = "nova_make_" <> v
+        params = if null payloads then "void"
+                 else T.intercalate ", " [ emitC99Type ty <> " a" <> T.pack (show idx) | (idx, ty) <- zip [(0::Int)..] payloads ]
+        fieldAssigns = [ "    p->data." <> v <> "._" <> T.pack (show idx) <> " = a" <> T.pack (show idx) <> ";" | (idx, _) <- zip [(0::Int)..] payloads ]
+    in "static inline nova_type_" <> typeName <> " " <> cFnName <> "(" <> params <> ") {\n"
+       <> "    nova_type_" <> typeName <> " p = (nova_type_" <> typeName <> ")malloc(sizeof(struct " <> structName <> "));\n"
+       <> "    p->tag = NOVA_TAG_" <> v <> ";\n"
+       <> T.unlines fieldAssigns
+       <> "    return p;\n"
+       <> "}\n"
 
 emitTopLevelFn :: Spanned TopLevel -> Text
 emitTopLevelFn (Spanned (TopFn FnDecl{..}) _) =
@@ -61,7 +97,7 @@ emitTopLevelFn (Spanned (TopFn FnDecl{..}) _) =
         cFnName = if isMain then "main" else "nova_" <> fnName
         retTy = if isMain then "int" else emitC99Type (case fnReturnType of Just t -> t; Nothing -> TyNamed "Void")
         paramList = if isMain then "int argc, char **argv" else emitC99Params fnParams
-        bodyCode = T.unlines (map emitStmt fnBody)
+        bodyCode = T.unlines (map (emitStmt (not isMain)) fnBody)
         mainInit = if isMain then "    nova_rt_init();\n" else ""
         mainExit = if isMain then "    nova_rt_shutdown();\n    return 0;\n" else ""
     in retTy <> " " <> cFnName <> "(" <> paramList <> ") {\n"
@@ -94,8 +130,8 @@ emitC99Type (TyCapability _ ty) = emitC99Type ty
 emitC99Type (TyGeneric name _) = emitC99Type (TyNamed name)
 emitC99Type _ = "void *"
 
-emitStmt :: Spanned Stmt -> Text
-emitStmt (Spanned stmt _) = case stmt of
+emitStmt :: Bool -> Spanned Stmt -> Text
+emitStmt inReturnFn (Spanned stmt _) = case stmt of
     StmtLet pat mty expr ->
         let tyStr = case mty of
                 Just t  -> emitC99Type t
@@ -112,27 +148,60 @@ emitStmt (Spanned stmt _) = case stmt of
             Nothing  -> "    return;"
     StmtIf cond thenStmts elifs elseStmts ->
         "    if (" <> emitExpr cond <> ") {\n"
-        <> T.unlines (map emitStmt thenStmts)
+        <> T.unlines (map (emitStmt inReturnFn) thenStmts)
         <> "    }"
-        <> T.concat [ " else if (" <> emitExpr c <> ") {\n" <> T.unlines (map emitStmt b) <> "    }" | (c, b) <- elifs ]
+        <> T.concat [ " else if (" <> emitExpr c <> ") {\n" <> T.unlines (map (emitStmt inReturnFn) b) <> "    }" | (c, b) <- elifs ]
         <> (case elseStmts of
-                Just eb -> " else {\n" <> T.unlines (map emitStmt eb) <> "    }\n"
+                Just eb -> " else {\n" <> T.unlines (map (emitStmt inReturnFn) eb) <> "    }\n"
                 Nothing -> "\n")
     StmtWhile cond body ->
         "    while (" <> emitExpr cond <> ") {\n"
-        <> T.unlines (map emitStmt body)
+        <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
+    StmtFor (PatVar _ name) (Spanned (ExprList items) _) body ->
+        "    {\n"
+        <> "        int64_t _items[] = { " <> T.intercalate ", " (map emitExpr items) <> " };\n"
+        <> "        size_t _count = sizeof(_items) / sizeof(_items[0]);\n"
+        <> "        for (size_t _idx = 0; _idx < _count; ++_idx) {\n"
+        <> "            int64_t " <> name <> " = _items[_idx];\n"
+        <> T.unlines (map (emitStmt inReturnFn) body)
+        <> "        }\n"
+        <> "    }\n"
+    StmtMatch target arms ->
+        let targetExpr = emitExpr target
+            emitArm (pat, _, armBody) = case pat of
+                PatVariant v subPats ->
+                    let bindings = [ "            " <> emitBinding idx subPat | (idx, subPat) <- zip [(0::Int)..] subPats ]
+                        emitBinding idx (PatVar _ varName) =
+                            let fieldType = if idx == 0 then "int64_t" else "nova_type_Tree"
+                            in fieldType <> " " <> varName <> " = " <> targetExpr <> "->data." <> v <> "._" <> T.pack (show idx) <> ";"
+                        emitBinding _ _ = ""
+                    in "        case NOVA_TAG_" <> v <> ": {\n"
+                       <> T.unlines (filter (not . T.null) bindings)
+                       <> T.unlines (map (emitStmt True) armBody)
+                       <> "            break;\n"
+                       <> "        }\n"
+                PatVar _ v ->
+                    "        case NOVA_TAG_" <> v <> ": {\n"
+                    <> T.unlines (map (emitStmt True) armBody)
+                    <> "            break;\n"
+                    <> "        }\n"
+                _ -> ""
+        in "    switch (" <> targetExpr <> "->tag) {\n"
+           <> T.concat (map emitArm arms)
+           <> "    }\n"
     StmtUnsafe _ body ->
         "    /* unsafe block */ {\n"
-        <> T.unlines (map emitStmt body)
+        <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
     StmtRegion _ body ->
         "    /* region block */ {\n"
-        <> T.unlines (map emitStmt body)
+        <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
     StmtExpr expr ->
-        "    " <> emitExpr expr <> ";"
-    _ -> ""
+        if inReturnFn
+            then "    return " <> emitExpr expr <> ";"
+            else "    " <> emitExpr expr <> ";"
 
 emitExpr :: Spanned Expr -> Text
 emitExpr (Spanned expr _) = case expr of
@@ -142,7 +211,10 @@ emitExpr (Spanned expr _) = case expr of
         LitString s -> "\"" <> s <> "\""
         LitChar c   -> "'" <> T.singleton c <> "'"
         LitBool b   -> if b then "true" else "false"
-    ExprVar v       -> v
+    ExprVar v ->
+        if not (T.null v) && isUpper (T.head v)
+            then "nova_make_" <> v <> "()"
+            else v
     ExprBinary op lhs rhs ->
         "(" <> emitExpr lhs <> " " <> emitBinOp op <> " " <> emitExpr rhs <> ")"
     ExprUnary op operand ->
@@ -156,11 +228,17 @@ emitExpr (Spanned expr _) = case expr of
     ExprCall (Spanned (ExprVar "print_bool") _) [arg] ->
         "nova_print_bool(" <> emitExpr arg <> "); nova_print_newline()"
     ExprCall (Spanned (ExprVar fn) _) args ->
-        "nova_" <> fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
+        if not (T.null fn) && isUpper (T.head fn)
+            then "nova_make_" <> fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
+            else "nova_" <> fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
     ExprCall fn args ->
         emitExpr fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
     ExprIndex base idx ->
         emitExpr base <> "[" <> emitExpr idx <> "]"
+    ExprField (Spanned (ExprVar _) _) field ->
+        if not (T.null field) && isUpper (T.head field)
+            then "nova_make_" <> field <> "()"
+            else emitExpr (Spanned (ExprVar field) emptySpan)
     ExprField base field ->
         emitExpr base <> "." <> field
     _ -> "0"
@@ -170,6 +248,9 @@ inferRhsType (Spanned (ExprLit (LitString _)) _) = "const char *"
 inferRhsType (Spanned (ExprLit (LitFloat _)) _)  = "double"
 inferRhsType (Spanned (ExprLit (LitBool _)) _)   = "bool"
 inferRhsType (Spanned (ExprLit (LitChar _)) _)   = "char"
+inferRhsType (Spanned (ExprField (Spanned (ExprVar tyName) _) _) _) = "nova_type_" <> tyName
+inferRhsType (Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
+    | not (T.null fn) && isUpper (T.head fn) = "nova_type_" <> fn
 inferRhsType _                                   = "int64_t"
 
 emitBinOp :: BinOp -> Text
