@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""
+Nova Language Linter (nova-lint)
+Static code analysis, style checking, and capability hygiene for Nova.
+"""
+
+import sys
+import re
+from pathlib import Path
+
+def lint_file(file_path):
+    issues = []
+    lines = file_path.read_text(encoding="utf-8").splitlines()
+
+    for idx, line in enumerate(lines, 1):
+        # 1. No hard tabs
+        if "\t" in line:
+            issues.append((idx, "L001", "Hard tab found. Nova requires 4-space indentation."))
+
+        # 2. Trailing whitespace
+        if line.endswith(" ") or line.endswith("\t"):
+            issues.append((idx, "L002", "Trailing whitespace detected."))
+
+        # 3. Snake_case for function names
+        fn_match = re.match(r"^\s*(pub\s+)?fn\s+([A-Za-z0-9_]+)", line)
+        if fn_match:
+            fn_name = fn_match.group(2)
+            if not re.match(r"^[a-z_][a-z0-9_]*$", fn_name):
+                issues.append((idx, "L003", f"Function '{fn_name}' should use snake_case naming."))
+
+        # 4. PascalCase for Type names
+        type_match = re.match(r"^\s*(pub\s+)?type\s+([A-Za-z0-9_]+)", line)
+        if type_match:
+            t_name = type_match.group(2)
+            if not t_name[0].isupper():
+                issues.append((idx, "L004", f"Type '{t_name}' should use PascalCase naming."))
+
+        # 5. Capability-gated unsafe audit
+        if "unsafe:" in line:
+            issues.append((idx, "C001", "Unsafe block detected. Ensure capability token is strictly audited."))
+
+    return issues
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: nova-lint <files.nova...>")
+        sys.exit(1)
+
+    total_issues = 0
+    files = [Path(p) for p in sys.argv[1:]]
+
+    for p in files:
+        if not p.exists() or p.suffix != ".nova":
+            continue
+        issues = lint_file(p)
+        for line_no, code, msg in issues:
+            total_issues += 1
+            print(f"{p}:{line_no}: [{code}] {msg}")
+
+    if total_issues == 0:
+        print(f"Nova Linter: Scanned {len(files)} files. 0 issues found.")
+        sys.exit(0)
+    else:
+        print(f"\nNova Linter: Found {total_issues} issues.")
+        # Capability warnings (C001) do not fail the build unless strict mode
+        error_count = sum(1 for _, code, _ in issues if not code.startswith("C"))
+        sys.exit(1 if error_count > 0 else 0)
+
+if __name__ == "__main__":
+    main()

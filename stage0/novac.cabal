@@ -37,7 +37,10 @@ library
         Nova.Parser.Parser
         Nova.Diagnostic.Report
         Nova.Typecheck.Checker
+        Nova.IR.HIR
+        Nova.IR.MIR
         Nova.Codegen.C99
+        Nova.Codegen.LLVM
     build-depends:
         base >= 4.17 && < 5,
         text >= 2.0,

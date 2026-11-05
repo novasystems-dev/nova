@@ -1,0 +1,12 @@
+# Benchmark 2: Arithmetic Throughput
+pub fn compute_sum(limit: Int) -> Int:
+    let mut sum = 0
+    let mut i = 0
+    while i < limit:
+        sum = sum + i
+        i = i + 1
+    sum
+
+pub fn main():
+    let res = compute_sum(1000000)
+    print_int(res)

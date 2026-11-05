@@ -14,14 +14,14 @@ pub fn worker(rx: Channel[iso WorkItem]):
 
 pub fn main():
     let (tx, rx) = Channel[iso WorkItem].create()
-    
+
     # Spawn worker thread
     spawn(fn() => worker(rx))
-    
+
     # Create isolated instances
     let task1 = iso WorkItem { id: 1, payload: "Mathematical computation" }
     let task2 = iso WorkItem { id: 2, payload: "Database synchronization" }
-    
+
     # Send moves ownership across threads with zero copy
     tx.send(task1)
     tx.send(task2)

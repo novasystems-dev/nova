@@ -1,0 +1,20 @@
+# Nova Standard Library: std/string.nova
+# Safe UTF-8 string slicing and byte manipulation
+
+type StringSlice = struct:
+    ptr: Int
+    len: Int
+
+fn string_slice_new(pointer: Int, length: Int) -> StringSlice:
+    StringSlice(pointer, length)
+
+fn string_slice_len(s: StringSlice) -> Int:
+    s.len
+
+fn string_slice_is_empty(s: StringSlice) -> Bool:
+    s.len == 0
+
+fn string_subslice(s: StringSlice, start: Int, finish: Int) -> StringSlice:
+    let new_len = finish - start
+    let new_ptr = s.ptr + start
+    StringSlice(new_ptr, new_len)

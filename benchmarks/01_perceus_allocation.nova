@@ -1,0 +1,20 @@
+# Benchmark 1: Perceus Allocation In-Place Reuse
+type Tree = enum:
+    Leaf
+    Node(val: Int, left: Tree, right: Tree)
+
+pub fn insert(t: Tree, v: Int) -> Tree:
+    match t:
+        Leaf =>
+            Node(v, Leaf, Leaf)
+        Node(val, left, right) =>
+            if v < val:
+                Node(val, insert(left, v), right)
+            else:
+                Node(val, left, insert(right, v))
+
+pub fn main():
+    let mut root = Tree.Leaf
+    for i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+        root = insert(root, i)
+    print("Benchmark 1 (Perceus Tree) completed.")

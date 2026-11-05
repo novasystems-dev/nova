@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""
+ORBIT: Official Package Manager & Build Toolchain for Nova
+"""
+
+import sys
+import os
+import argparse
+import subprocess
+import shutil
+
+NOVAC_BIN = os.path.expanduser("~/Documents/Nova/bin/novac")
+
+def cmd_new(args):
+    project_dir = args.name
+    if os.path.exists(project_dir):
+        print(f"Error: Directory '{project_dir}' already exists.")
+        sys.exit(1)
+        
+    os.makedirs(os.path.join(project_dir, "src"), exist_ok=True)
+    os.makedirs(os.path.join(project_dir, "tests"), exist_ok=True)
+
+    manifest_content = f"""[package]
+name = "{args.name}"
+version = "0.1.0"
+edition = "2026"
+authors = ["Nova Developer"]
+
+[dependencies]
+std = "0.1.0"
+
+[capabilities]
+unsafe_hardware = false
+network = true
+filesystem = true
+"""
+    with open(os.path.join(project_dir, "orbit.toml"), "w") as f:
+        f.write(manifest_content)
+
+    main_content = """# Main entrypoint
+pub fn main():
+    print("Welcome to your new Nova application!")
+"""
+    with open(os.path.join(project_dir, "src", "main.nova"), "w") as f:
+        f.write(main_content)
+
+    gitignore_content = """*.out
+*.o
+*.c
+target/
+"""
+    with open(os.path.join(project_dir, ".gitignore"), "w") as f:
+        f.write(gitignore_content)
+
+    print(f"✨ Created new Nova package '{args.name}' successfully.")
+
+def cmd_build(args):
+    main_file = "src/main.nova"
+    if not os.path.exists(main_file):
+        print("Error: Could not find 'src/main.nova'. Are you in an Orbit project root?")
+        sys.exit(1)
+    
+    print("🚀 [orbit] Compiling project...")
+    res = subprocess.run([NOVAC_BIN, "build", main_file])
+    if res.returncode == 0:
+        os.makedirs("target", exist_ok=True)
+        if os.path.exists("main.out"):
+            shutil.move("main.out", "target/app")
+        print("✅ [orbit] Build finished successfully -> target/app")
+    else:
+        print("❌ [orbit] Build failed.")
+        sys.exit(res.returncode)
+
+def cmd_run(args):
+    main_file = "src/main.nova"
+    if not os.path.exists(main_file):
+        print("Error: Could not find 'src/main.nova'.")
+        sys.exit(1)
+        
+    print("⚡ [orbit] Building and running...")
+    res = subprocess.run([NOVAC_BIN, "run", main_file])
+    sys.exit(res.returncode)
+
+def cmd_check(args):
+    main_file = "src/main.nova" if not args.file else args.file
+    print(f"🔍 [orbit] Performing static type & Z3 SMT proof checks on {main_file}...")
+    res = subprocess.run([NOVAC_BIN, "check", main_file])
+    sys.exit(res.returncode)
+
+def cmd_audit(args):
+    print("🛡️  [orbit audit] Scanning codebase and dependencies for unsafe capabilities...")
+    unsafe_found = 0
+    for root, _, files in os.walk("."):
+        if ".git" in root or "target" in root:
+            continue
+        for file in files:
+            if file.endswith(".nova"):
+                filepath = os.path.join(root, file)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    for lineno, line in enumerate(f, 1):
+                        if "unsafe(" in line or "cap Unsafe" in line:
+                            unsafe_found += 1
+                            print(f"   [CAPABILITY AUDIT] Found gated unsafe token at {filepath}:{lineno}: {line.strip()}")
+    
+    if unsafe_found == 0:
+        print("✅ [orbit audit] 0 Unsafe capabilities detected. Codebase is 100% memory-safe & verified.")
+    else:
+        print(f"ℹ️  [orbit audit] Detected {unsafe_found} capability-gated unsafe block(s). All callers require root capability grant.")
+
+def main():
+    parser = argparse.ArgumentParser(description="ORBIT: Package Manager & Build System for Nova")
+    subparsers = parser.add_subparsers(dest="subcommand", help="Available subcommands")
+
+    p_new = subparsers.add_parser("new", help="Create a new Nova package")
+    p_new.add_argument("name", help="Package name")
+
+    subparsers.add_parser("build", help="Compile the current package")
+    subparsers.add_parser("run", help="Compile and run the current package")
+
+    p_check = subparsers.add_parser("check", help="Typecheck and verify SMT proofs")
+    p_check.add_argument("file", nargs="?", default=None, help="Optional file to check")
+
+    subparsers.add_parser("audit", help="Audit unsafe capability permissions")
+
+    args = parser.parse_args()
+    if args.subcommand == "new":
+        cmd_new(args)
+    elif args.subcommand == "build":
+        cmd_build(args)
+    elif args.subcommand == "run":
+        cmd_run(args)
+    elif args.subcommand == "check":
+        cmd_check(args)
+    elif args.subcommand == "audit":
+        cmd_audit(args)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

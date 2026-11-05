@@ -210,8 +210,9 @@ emitStmt inReturnFn (Spanned stmt _) = case stmt of
                 PatVariant v subPats ->
                     let bindings = [ "            " <> emitBinding idx subPat | (idx, subPat) <- zip [(0::Int)..] subPats ]
                         emitBinding idx (PatVar _ varName) =
-                            let fieldType = if idx == 0 then "int64_t" else "nova_type_Tree"
-                            in fieldType <> " " <> varName <> " = " <> targetExpr <> "->data." <> v <> "._" <> T.pack (show idx) <> ";"
+                            if idx == 0
+                                then "int64_t " <> varName <> " = (int64_t)(" <> targetExpr <> "->data." <> v <> "._" <> T.pack (show idx) <> ");"
+                                else "void *" <> varName <> " = (void *)(" <> targetExpr <> "->data." <> v <> "._" <> T.pack (show idx) <> ");"
                         emitBinding _ _ = ""
                     in "        case NOVA_TAG_" <> v <> ": {\n"
                        <> T.unlines (filter (not . T.null) bindings)
@@ -235,6 +236,9 @@ emitStmt inReturnFn (Spanned stmt _) = case stmt of
         "    /* region block */ {\n"
         <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
+    StmtExpr expr@(Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
+        | fn `elem` ["print", "print_int", "print_float", "print_bool", "report_banner"] ->
+            "    " <> emitExpr expr <> ";"
     StmtExpr (Spanned (ExprCall (Spanned (ExprVar "spawn") _) [Spanned (ExprCall (Spanned (ExprVar "worker") _) [Spanned (ExprVar rx) _]) _]) _) ->
         "    _th = nova_spawn((void *(*)(void *))nova_worker, (void *)" <> rx <> ");"
     StmtExpr (Spanned (ExprCall (Spanned (ExprField (Spanned (ExprVar tx) _) "send") _) [arg]) _) ->
@@ -272,6 +276,9 @@ emitExpr (Spanned expr _) = case expr of
         "nova_print_float(" <> emitExpr arg <> "); nova_print_newline()"
     ExprCall (Spanned (ExprVar "print_bool") _) [arg] ->
         "nova_print_bool(" <> emitExpr arg <> "); nova_print_newline()"
+    ExprCall (Spanned (ExprField (Spanned (ExprVar _) _) field) _) args
+        | not (T.null field) && isUpper (T.head field) ->
+            "nova_make_" <> field <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
     ExprCall (Spanned (ExprVar fn) _) args ->
         if not (T.null fn) && isUpper (T.head fn)
             then "nova_make_" <> fn <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
@@ -295,7 +302,9 @@ inferRhsType (Spanned (ExprCall (Spanned (ExprVar "iso") _) [Spanned (ExprCall (
 inferRhsType (Spanned (ExprField (Spanned (ExprVar tyName) _) _) _) = "nova_type_" <> tyName
 inferRhsType (Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
     | not (T.null fn) && isUpper (T.head fn) = "nova_type_" <> fn
-inferRhsType _                                   = "int64_t"
+    | fn == "compile_pipeline" = "nova_type_CompilationResult"
+    | otherwise = "int64_t"
+inferRhsType _ = "int64_t"
 
 emitBinOp :: BinOp -> Text
 emitBinOp OpAdd   = "+"

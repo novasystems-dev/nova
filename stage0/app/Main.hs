@@ -13,7 +13,10 @@ import qualified Data.Text as T
 
 import Nova.Parser.Parser (parseNovaProgram)
 import Nova.Typecheck.Checker (typecheckProgram, TypeError(..))
+import Nova.IR.HIR (lowerASTtoHIR, dumpHIR)
+import Nova.IR.MIR (lowerHIRtoMIR, optimizeMIR, dumpMIR)
 import Nova.Codegen.C99 (emitC99Program, compileAndLinkC99)
+import Nova.Codegen.LLVM (emitLLVMProgram)
 
 banner :: Text
 banner = T.unlines
@@ -32,6 +35,10 @@ helpText = T.unlines
     , "  check <file>       Run lexer, parser, typechecker, and Z3 SMT verifier"
     , "  build <file>       Transpile to C99 and compile to native executable"
     , "  run   <file>       Compile and execute native binary immediately"
+    , "  --emit-c <file>    Emit transpiled C99 source code to stdout"
+    , "  --emit-llvm <file> Emit target LLVM IR assembly (.ll) to stdout"
+    , "  --dump-hir <file>  Dump High-Level Intermediate Representation"
+    , "  --dump-mir <file>  Dump SSA Control Flow Graph Mid-Level IR"
     , "  version            Display compiler build and version info"
     ]
 
@@ -66,6 +73,49 @@ main = do
             TIO.putStrLn "----------------------------------------------------------"
             callCommand ("./" <> outBin)
             exitSuccess
+
+        ["--emit-c", file] -> do
+            content <- TIO.readFile file
+            case parseNovaProgram (T.pack file) content of
+                Left parseErr -> do
+                    TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+                    exitFailure
+                Right ast -> do
+                    TIO.putStrLn (emitC99Program ast)
+                    exitSuccess
+
+        ["--emit-llvm", file] -> do
+            content <- TIO.readFile file
+            case parseNovaProgram (T.pack file) content of
+                Left parseErr -> do
+                    TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+                    exitFailure
+                Right ast -> do
+                    TIO.putStrLn (emitLLVMProgram ast)
+                    exitSuccess
+
+        ["--dump-hir", file] -> do
+            content <- TIO.readFile file
+            case parseNovaProgram (T.pack file) content of
+                Left parseErr -> do
+                    TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+                    exitFailure
+                Right ast -> do
+                    let hir = lowerASTtoHIR ast
+                    TIO.putStrLn (dumpHIR hir)
+                    exitSuccess
+
+        ["--dump-mir", file] -> do
+            content <- TIO.readFile file
+            case parseNovaProgram (T.pack file) content of
+                Left parseErr -> do
+                    TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+                    exitFailure
+                Right ast -> do
+                    let hir = lowerASTtoHIR ast
+                    let mir = optimizeMIR (lowerHIRtoMIR hir)
+                    TIO.putStrLn (dumpMIR mir)
+                    exitSuccess
 
         [] -> do
             TIO.putStrLn banner

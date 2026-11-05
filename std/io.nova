@@ -1,0 +1,15 @@
+# Nova Standard Library: std/io.nova
+# Standard Input / Output and File Streaming Primitives
+
+type FileHandle = struct:
+    descriptor: Int
+    is_open: Bool
+
+fn io_open(fd: Int) -> FileHandle:
+    FileHandle(fd, true)
+
+fn io_close(handle: FileHandle) -> FileHandle:
+    FileHandle(handle.descriptor, false)
+
+fn io_is_valid(handle: FileHandle) -> Bool:
+    handle.is_open

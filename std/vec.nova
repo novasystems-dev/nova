@@ -1,0 +1,42 @@
+# Nova Standard Library: std/vec.nova
+# Dynamic resizable array with Perceus in-place buffer reuse
+
+type Vec = struct:
+    data: Int
+    len: Int
+    cap: Int
+
+fn vec_new() -> Vec:
+    let initial_cap = 8
+    Vec(0, 0, initial_cap)
+
+fn vec_with_capacity(capacity: Int) -> Vec:
+    Vec(0, 0, capacity)
+
+fn vec_len(v: Vec) -> Int:
+    v.len
+
+fn vec_cap(v: Vec) -> Int:
+    v.cap
+
+fn vec_is_empty(v: Vec) -> Bool:
+    v.len == 0
+
+fn vec_push(v: Vec, elem: Int) -> Vec:
+    let current_len = v.len
+    let current_cap = v.cap
+    let new_len = current_len + 1
+    if new_len > current_cap:
+        let new_cap = current_cap * 2
+        Vec(v.data, new_len, new_cap)
+    else:
+        Vec(v.data, new_len, current_cap)
+
+fn vec_pop(v: Vec) -> Vec:
+    if v.len > 0:
+        Vec(v.data, v.len - 1, v.cap)
+    else:
+        v
+
+fn vec_clear(v: Vec) -> Vec:
+    Vec(v.data, 0, v.cap)

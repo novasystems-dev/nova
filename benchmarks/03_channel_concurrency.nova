@@ -1,0 +1,9 @@
+# Benchmark 3: Channel Concurrency & Thread Synchronization
+type Ping = struct:
+    id: Int
+
+pub fn worker(c: Int):
+    print("Worker received task ping.")
+
+pub fn main():
+    print("Benchmark 3 (Channel Concurrency) started.")

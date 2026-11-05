@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""
+NOVA-FMT: Code Formatter for Nova
+"""
+
+import sys
+import os
+
+def format_source(content: str) -> str:
+    lines = content.splitlines()
+    formatted = []
+    for line in lines:
+        stripped = line.rstrip()
+        formatted.append(stripped)
+    
+    # Ensure single trailing newline
+    result = "\n".join(formatted) + "\n"
+    return result
+
+def format_file(filepath: str):
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    new_content = format_source(content)
+    if new_content != content:
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(new_content)
+        print(f"Formatted: {filepath}")
+    else:
+        print(f"Already formatted: {filepath}")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: nova-fmt <file.nova ...>")
+        sys.exit(1)
+        
+    for path in sys.argv[1:]:
+        if os.path.isfile(path) and path.endswith(".nova"):
+            format_file(path)
+
+if __name__ == "__main__":
+    main()
