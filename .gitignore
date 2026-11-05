@@ -1,0 +1,24 @@
+# Nova .gitignore
+
+# Haskell build artifacts
+dist-newstyle/
+.ghc.environment.*
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+
+# Nova build artifacts
+build/
+target/
+*.c
+*.ll
+*.bc
+*.s
+*.out
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*~

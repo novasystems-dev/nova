@@ -1,0 +1,147 @@
+(* ===========================================================================
+   NOVA FORMAL GRAMMAR SPECIFICATION (EBNF)
+   Version: 0.1.0-alpha
+   Indentation-sensitive grammar: INDENT, DEDENT, NEWLINE are emitted by Lexer.
+   =========================================================================== *)
+
+Program          ::= { TopLevelItem } EOF ;
+
+TopLevelItem     ::= ImportDecl
+                   | FnDecl
+                   | TypeDecl
+                   | TraitDecl
+                   | ImplDecl
+                   | NEWLINE ;
+
+(* --- Declarations --- *)
+
+ImportDecl       ::= [ "pub" ] "import" ModulePath [ "as" IDENT ] [ "{" ImportSymbols "}" ] NEWLINE ;
+ModulePath       ::= IDENT { "." IDENT } ;
+ImportSymbols    ::= IDENT { "," IDENT } ;
+
+FnDecl           ::= [ "pub" ] "fn" IDENT [ TypeParams ] "(" [ ParamList ] ")" [ "->" Type ] [ FnContracts ] ":" Block ;
+FnContracts      ::= "where" Expr ;
+
+ParamList        ::= Param { "," Param } ;
+Param            ::= [ "mut" ] [ CapSpec ] IDENT ":" Type [ "where" Expr ] ;
+CapSpec          ::= "iso" | "val" | "ref" | "cap" ;
+
+TypeDecl         ::= [ "pub" ] "type" IDENT [ TypeParams ] "=" TypeDef NEWLINE ;
+TypeDef          ::= StructDef
+                   | EnumDef
+                   | RefinementTypeDef
+                   | Type ;
+
+StructDef        ::= "struct" [ ":" NEWLINE INDENT StructFields DEDENT | "{" [ StructInlineFields ] "}" ] ;
+StructFields     ::= { [ "pub" ] IDENT ":" Type NEWLINE } ;
+StructInlineFields ::= [ "pub" ] IDENT ":" Type { "," [ "pub" ] IDENT ":" Type } ;
+
+EnumDef          ::= "enum" [ ":" NEWLINE INDENT EnumVariants DEDENT | "{" [ EnumInlineVariants ] "}" ] ;
+EnumVariants     ::= { IDENT [ "(" TypeList ")" ] NEWLINE } ;
+EnumInlineVariants ::= IDENT [ "(" TypeList ")" ] { "," IDENT [ "(" TypeList ")" ] } ;
+
+RefinementTypeDef::= IDENT ":" Type "where" Expr ;
+
+TraitDecl        ::= [ "pub" ] "trait" IDENT [ TypeParams ] ":" NEWLINE INDENT { TraitMethodDecl } DEDENT ;
+TraitMethodDecl  ::= "fn" IDENT [ TypeParams ] "(" [ ParamList ] ")" [ "->" Type ] NEWLINE ;
+
+ImplDecl         ::= "impl" [ TypeParams ] IDENT [ "for" Type ] ":" NEWLINE INDENT { FnDecl } DEDENT ;
+
+TypeParams       ::= "[" TypeParam { "," TypeParam } "]" ;
+TypeParam        ::= IDENT [ ":" IDENT ] ;
+
+(* --- Types --- *)
+
+Type             ::= [ CapSpec ] ( BaseType | RefinementType | GenericType | TupleType | FnType ) ;
+BaseType         ::= "Int" | "Int8" | "Int16" | "Int32" | "Int64"
+                   | "UInt" | "UInt8" | "UInt16" | "UInt32" | "UInt64"
+                   | "Float" | "Float32" | "Float64"
+                   | "Bool" | "Char" | "String"
+                   | IDENT ;
+RefinementType   ::= IDENT ":" Type "where" Expr ;
+GenericType      ::= IDENT "[" TypeList "]" ;
+TypeList         ::= Type { "," Type } ;
+TupleType        ::= "(" Type { "," Type } ")" ;
+FnType           ::= "fn" "(" [ TypeList ] ")" "->" Type ;
+
+(* --- Statements & Blocks --- *)
+
+Block            ::= NEWLINE INDENT StatementList DEDENT ;
+StatementList    ::= { Statement } ;
+
+Statement        ::= LetStmt
+                   | AssignStmt
+                   | ReturnStmt
+                   | IfStmt
+                   | MatchStmt
+                   | WhileStmt
+                   | ForStmt
+                   | UnsafeBlock
+                   | RegionBlock
+                   | ExprStmt ;
+
+LetStmt          ::= "let" [ "mut" ] Pattern [ ":" Type ] "=" Expr NEWLINE ;
+AssignStmt       ::= LValue AssignOp Expr NEWLINE ;
+AssignOp         ::= "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
+ReturnStmt       ::= "return" [ Expr ] NEWLINE ;
+ExprStmt         ::= Expr NEWLINE ;
+
+IfStmt           ::= "if" Expr ":" Block { "elif" Expr ":" Block } [ "else" ":" Block ] ;
+WhileStmt        ::= "while" Expr ":" Block ;
+ForStmt          ::= "for" Pattern "in" Expr ":" Block ;
+
+MatchStmt        ::= "match" Expr ":" NEWLINE INDENT { MatchArm } DEDENT ;
+MatchArm         ::= Pattern [ "if" Expr ] "=>" ( Block | Expr NEWLINE ) ;
+
+UnsafeBlock      ::= "unsafe" "(" IDENT ")" ":" Block ;
+RegionBlock      ::= "region" IDENT ":" Block ;
+
+(* --- Patterns --- *)
+
+Pattern          ::= LiteralPattern
+                   | WildcardPattern
+                   | VarPattern
+                   | VariantPattern
+                   | TuplePattern
+                   | StructPattern ;
+
+LiteralPattern   ::= INT_LIT | FLOAT_LIT | STRING_LIT | BOOL_LIT ;
+WildcardPattern  ::= "_" ;
+VarPattern       ::= [ "mut" ] IDENT ;
+VariantPattern   ::= IDENT [ "(" PatternList ")" ] ;
+TuplePattern     ::= "(" PatternList ")" ;
+StructPattern    ::= IDENT "{" [ FieldPatternList ] "}" ;
+PatternList      ::= Pattern { "," Pattern } ;
+FieldPatternList ::= IDENT [ ":" Pattern ] { "," IDENT [ ":" Pattern ] } ;
+
+(* --- Expressions (Pratt Parsing Precedence) --- *)
+
+Expr             ::= LogicalOrExpr ;
+LogicalOrExpr    ::= LogicalAndExpr { "or" LogicalAndExpr } ;
+LogicalAndExpr   ::= EqualityExpr { "and" EqualityExpr } ;
+EqualityExpr     ::= RelationalExpr { ( "==" | "!=" ) RelationalExpr } ;
+RelationalExpr   ::= AdditiveExpr { ( "<" | "<=" | ">" | ">=" ) AdditiveExpr } ;
+AdditiveExpr     ::= MultiplicativeExpr { ( "+" | "-" ) MultiplicativeExpr } ;
+MultiplicativeExpr ::= PrefixExpr { ( "*" | "/" | "%" ) PrefixExpr } ;
+PrefixExpr       ::= ( "-" | "not" ) PrefixExpr | PostfixExpr ;
+PostfixExpr      ::= PrimaryExpr { CallSuffix | IndexSuffix | FieldSuffix | TrySuffix } ;
+
+CallSuffix       ::= "(" [ ArgList ] ")" ;
+IndexSuffix      ::= "[" Expr "]" ;
+FieldSuffix      ::= "." IDENT ;
+TrySuffix        ::= "?" ;
+
+PrimaryExpr      ::= INT_LIT
+                   | FLOAT_LIT
+                   | STRING_LIT
+                   | BOOL_LIT
+                   | IDENT
+                   | TupleExpr
+                   | ListExpr
+                   | LambdaExpr
+                   | "(" Expr ")" ;
+
+ArgList          ::= Expr { "," Expr } ;
+TupleExpr        ::= "(" Expr "," [ ArgList ] ")" ;
+ListExpr         ::= "[" [ ArgList ] "]" ;
+LambdaExpr       ::= "fn" "(" [ ParamList ] ")" [ "->" Type ] "=>" Expr ;

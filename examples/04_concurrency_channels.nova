@@ -1,0 +1,27 @@
+# 04_concurrency_channels.nova - Đa luồng Không Deadlock & Không Data Race
+
+import std.concurrency { Channel, spawn }
+
+type WorkItem = struct:
+    id: Int
+    payload: String
+
+# Kênh truyền mang kiểu sở hữu cô lập (iso): Chỉ một luồng sở hữu gói tin tại một thời điểm
+pub fn worker(rx: Channel[iso WorkItem]):
+    while let Some(item) = rx.recv():
+        print("Đang xử lý tác vụ: {item.id} - {item.payload}")
+
+pub fn main():
+    let (tx, rx) = Channel[iso WorkItem].create()
+    
+    # Spawn luồng con chạy worker
+    spawn(fn() => worker(rx))
+    
+    # Tạo đối tượng mang quyền sở hữu iso
+    let task1 = iso WorkItem { id: 1, payload: "Tác vụ tính toán toán học" }
+    let task2 = iso WorkItem { id: 2, payload: "Tác vụ đồng bộ cơ sở dữ liệu" }
+    
+    # Gửi qua channel chuyển giao quyền sở hữu hoàn toàn (zero-copy)
+    tx.send(task1)
+    tx.send(task2)
+    tx.close()

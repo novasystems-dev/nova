@@ -1,0 +1,5 @@
+# 01_hello.nova - Chương trình đầu tiên viết bằng Nova
+
+pub fn main():
+    let greeting = "Xin chào thế giới từ Nova!"
+    print(greeting)
