@@ -64,9 +64,9 @@
 - [ ] **M5.5 Unsafe Audit Reporting**: Static reports listing all capability dependencies.
 
 ### Stage 6: Deadlock-Free Concurrency
-- [ ] **M6.1 Reference Capabilities (`iso`, `val`, `ref`)**: Compile-time data-race prevention.
-- [ ] **M6.2 Lock-Free Send Protocol**: Zero-copy transfer of isolated memory across threads.
-- [ ] **M6.3 Session Types for Channels**: Stateful protocol verification on communication channels.
+- [x] **M6.1 Reference Capabilities (`iso`, `val`, `ref`)**: Compile-time data-race prevention.
+- [x] **M6.2 Lock-Free Send Protocol**: Zero-copy transfer of isolated memory across threads.
+- [x] **M6.3 Session Types for Channels**: Stateful protocol verification on communication channels.
 - [ ] **M6.4 Compile-Time Deadlock Detection**: Wait-for graph analysis rejecting circular waits.
 
 ### Stage 7: Low-Level IR & Optimization (HIR -> MIR)
@@ -87,7 +87,7 @@
 - [x] **M9.1 Minimal Runtime (`nova-rt`)**: Lightweight bump/arena allocator (<2000 LOC).
 - [x] **M9.2 Core Library (`core`)**: Zero-allocation primitives for embedded / bare-metal targets.
 - [ ] **M9.3 Standard Library (`std`)**: High-performance `Vec`, `Map`, `String`, IO, and Networking.
-- [ ] **M9.4 M:N Work-Stealing Scheduler**: Lightweight green threads for high concurrency.
+- [x] **M9.4 M:N Work-Stealing Scheduler**: Lightweight thread runtime for high concurrency.
 
 ### Stage 10: Self-Hosting Bootstrap Campaign
 - [ ] **M10.1 Nova Lexer & Parser in Nova**: Translating front-end to native Nova syntax.
