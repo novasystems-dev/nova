@@ -1,0 +1,39 @@
+# Nova Standard Library: std/sync.nova
+# Hardware-level Atomics and Mutex Synchronization Primitives
+
+type AtomicInt = struct:
+    val: Int
+
+fn atomic_new(initial: Int) -> AtomicInt:
+    AtomicInt(initial)
+
+fn atomic_get(a: AtomicInt) -> Int:
+    atomic_load(&a.val)
+
+fn atomic_set(a: AtomicInt, v: Int):
+    atomic_store(&a.val, v)
+
+fn atomic_fetch_add(a: AtomicInt, delta: Int) -> Int:
+    atomic_add(&a.val, delta)
+
+fn atomic_fetch_sub(a: AtomicInt, delta: Int) -> Int:
+    atomic_sub(&a.val, delta)
+
+fn atomic_compare_and_swap(a: AtomicInt, expected: Int, desired: Int) -> Bool:
+    atomic_cas(&a.val, expected, desired)
+
+type Mutex = struct:
+    handle: Int
+
+fn mutex_new() -> Mutex:
+    let h = mutex_create()
+    Mutex(h)
+
+fn mutex_acquire(m: Mutex):
+    mutex_lock(m.handle)
+
+fn mutex_release(m: Mutex):
+    mutex_unlock(m.handle)
+
+fn mutex_free(m: Mutex):
+    mutex_destroy(m.handle)

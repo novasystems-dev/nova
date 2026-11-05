@@ -1,0 +1,37 @@
+# Nova Standard Library: std/net.nova
+# Safe POSIX TCP Networking and HTTP Service Abstractions
+
+type TcpListener = struct:
+    port: Int
+    fd: Int
+    is_active: Bool
+
+fn tcp_listener_bind(port: Int) -> TcpListener:
+    let server_fd = tcp_listen(port)
+    if server_fd >= 0:
+        TcpListener(port, server_fd, true)
+    else:
+        TcpListener(port, server_fd, false)
+
+fn tcp_listener_accept(listener: TcpListener) -> Int:
+    if listener.is_active:
+        tcp_accept(listener.fd)
+    else:
+        0 - 1
+
+fn tcp_listener_close(listener: TcpListener):
+    if listener.is_active:
+        tcp_close(listener.fd)
+
+type HttpResponse = struct:
+    status_code: String
+    body: String
+
+fn http_response_ok(body: String) -> HttpResponse:
+    HttpResponse("200 OK", body)
+
+fn http_response_not_found() -> HttpResponse:
+    HttpResponse("404 Not Found", "Resource Not Found")
+
+fn http_send(client_fd: Int, resp: HttpResponse) -> Int:
+    tcp_send_response(client_fd, resp.status_code, resp.body)

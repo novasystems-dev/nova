@@ -54,6 +54,20 @@ emptyTypeEnv = Map.fromList
     , ("tcp_accept", TyInt)
     , ("tcp_send_response", TyInt)
     , ("tcp_close", TyUnit)
+    , ("atomic_load", TyInt)
+    , ("atomic_store", TyUnit)
+    , ("atomic_add", TyInt)
+    , ("atomic_sub", TyInt)
+    , ("atomic_cas", TyBool)
+    , ("mutex_create", TyInt)
+    , ("mutex_lock", TyUnit)
+    , ("mutex_unlock", TyUnit)
+    , ("mutex_destroy", TyUnit)
+    , ("fs_read_to_string", TyString)
+    , ("fs_write_string", TyBool)
+    , ("fs_exists", TyBool)
+    , ("fs_file_size", TyInt)
+    , ("fs_remove", TyBool)
     , ("true", TyBool)
     , ("false", TyBool)
     ]
@@ -71,12 +85,33 @@ typecheckProgram (Program items) = do
                 Just (TyNamed "String") -> TyString
                 _                       -> TyUnit
         in Map.insert fnName retT env
+    collectTopTypes env (Spanned (TopImpl ImplDecl{..}) _) =
+        foldl (\e FnDecl{..} ->
+            let retT = case fnReturnType of
+                    Just (TyNamed "Int")    -> TyInt
+                    Just (TyNamed "Float")  -> TyFloat
+                    Just (TyNamed "Bool")   -> TyBool
+                    Just (TyNamed "String") -> TyString
+                    _                       -> TyUnit
+            in Map.insert fnName retT e
+        ) env implMethods
+    collectTopTypes env (Spanned (TopType TypeDecl{..}) _) =
+        case typeDef of
+            TypeEnum variants ->
+                foldl (\e (vname, _) ->
+                    let e' = Map.insert vname (TyUser typeName) e
+                    in Map.insert (typeName <> "." <> vname) (TyUser typeName) e'
+                ) env variants
+            _ -> env
     collectTopTypes env _ = env
 
 checkTopLevel :: TypeEnv -> Spanned TopLevel -> Either TypeError ()
 checkTopLevel env (Spanned (TopFn FnDecl{..}) _) = do
     let fnEnv = foldl (\e p -> Map.insert (paramName p) (convertType (paramType p)) e) env fnParams
     _ <- checkBlock fnEnv fnBody
+    Right ()
+checkTopLevel env (Spanned (TopImpl ImplDecl{..}) _) = do
+    mapM_ (\fn -> checkTopLevel env (Spanned (TopFn fn) emptySpan)) implMethods
     Right ()
 checkTopLevel _ _ = Right ()
 
@@ -122,6 +157,14 @@ checkStmt env (Spanned stmt sp) = case stmt of
         _ <- inferExpr env iter
         let loopEnv = Map.insert name TyInt env
         _ <- checkBlock loopEnv body
+        Right env
+    StmtRegion _ body -> do
+        _ <- checkBlock env body
+        Right env
+    StmtUnsafe _ body -> do
+        _ <- checkBlock env body
+        Right env
+    StmtAsm _ ->
         Right env
     StmtExpr expr -> do
         _ <- inferExpr env expr
@@ -171,11 +214,25 @@ inferExpr env (Spanned expr sp) = case expr of
         case Map.lookup fn env of
             Just t  -> Right t
             Nothing -> Right TyUnit
+    ExprField (Spanned (ExprVar enumName) _) variant ->
+        case Map.lookup (enumName <> "." <> variant) env of
+            Just t  -> Right t
+            Nothing ->
+                if isBoolField variant
+                    then Right TyBool
+                    else Right (TyUser enumName)
     ExprField _ field ->
-        if field `elem` ["alive", "is_open", "occupied", "is_empty"]
+        if isBoolField field
             then Right TyBool
             else Right TyInt
+    ExprUnary OpDeref expr -> inferExpr env expr
+    ExprUnary OpAddrOf expr -> inferExpr env expr
     _ -> Right TyUnit
+  where
+    isBoolField f =
+        f `elem` ["alive", "is_open", "occupied", "is_empty", "is_active", "valid", "closed"]
+        || "is_" `T.isPrefixOf` f
+        || "has_" `T.isPrefixOf` f
 
 convertType :: TypeExpr -> Type
 convertType (TyNamed name) = case name of
@@ -184,6 +241,7 @@ convertType (TyNamed name) = case name of
     "Bool"   -> TyBool
     "String" -> TyString
     other    -> TyUser other
+convertType (TyRawPtr _ _) = TyUser "RawPtr"
 convertType _ = TyUnit
 
 -- ============================================================================

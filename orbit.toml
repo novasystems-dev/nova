@@ -1,0 +1,15 @@
+[package]
+name = "nova-system"
+version = "0.1.0"
+edition = "2026"
+authors = ["Nova Architecture & Systems Team"]
+description = "Industrial Production-Grade Systems Programming Language"
+
+[dependencies]
+std = "0.1.0"
+
+[capabilities]
+unsafe_hardware = true
+network = true
+filesystem = true
+concurrency = true

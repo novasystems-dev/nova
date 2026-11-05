@@ -35,6 +35,7 @@ helpText = T.unlines
     , "  check <file>       Run lexer, parser, typechecker, and Z3 SMT verifier"
     , "  build <file>       Transpile to C99 and compile to native executable"
     , "  run   <file>       Compile and execute native binary immediately"
+    , "  repl               Launch interactive Nova REPL"
     , "  --emit-c <file>    Emit transpiled C99 source code to stdout"
     , "  --emit-llvm <file> Emit target LLVM IR assembly (.ll) to stdout"
     , "  --dump-hir <file>  Dump High-Level Intermediate Representation"
@@ -72,6 +73,10 @@ main = do
             TIO.putStrLn $ "-> Executing binary: ./" <> T.pack outBin
             TIO.putStrLn "----------------------------------------------------------"
             callCommand ("./" <> outBin)
+            exitSuccess
+
+        ["repl"] -> do
+            callCommand "nova-repl"
             exitSuccess
 
         ["--emit-c", file] -> do

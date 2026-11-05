@@ -86,6 +86,11 @@ lowerASTtoHIR (Program items) =
             in (nextId', HIRTopFn hirFn : acc)
         TopType ty ->
             (nextId, HIRTopType ty : acc)
+        TopTrait _ ->
+            (nextId, acc)
+        TopImpl ImplDecl{..} ->
+            let (nextId', fns) = foldl (\(nid, fs) fn -> let (nid', hf) = lowerFn nid fn in (nid', HIRTopFn hf : fs)) (nextId, acc) implMethods
+            in (nextId', fns)
         TopImport _ _ _ ->
             (nextId, acc)
 

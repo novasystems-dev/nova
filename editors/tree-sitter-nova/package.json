@@ -1,0 +1,20 @@
+{
+  "name": "tree-sitter-nova",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for Nova Systems Programming Language",
+  "main": "bindings/node",
+  "keywords": [
+    "parser",
+    "lexer",
+    "tree-sitter",
+    "nova"
+  ],
+  "author": "Nova Architecture Team",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.19.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.22.6"
+  }
+}

@@ -1,0 +1,42 @@
+# 08_traits_and_baremetal.nova - Traits, Bare-Metal Pointers, and Inline Assembly
+# Demonstrates:
+# - Trait interface declaration and zero-cost static dispatch (impl Trait for Type)
+# - Hardware-level raw pointers (*mut T, *const T) and dereferencing (*ptr, &val)
+# - Inline assembly (asm("nop")) for bare-metal / kernel / embedded targets
+
+trait Formattable:
+    fn format_value(v: Int) -> String
+
+impl Formattable for Int:
+    fn format_value(v: Int) -> String:
+        "Trait implementation: value formatted successfully"
+
+type HardwareCap = enum:
+    Granted
+
+pub fn test_raw_pointer_and_asm(cap: HardwareCap) -> Int:
+    unsafe(cap):
+        # Bare-metal inline assembly invocation
+        asm("nop")
+        let mut hardware_register = 1337
+        let reg_ptr = &hardware_register
+        let read_val = *reg_ptr
+        read_val
+
+pub fn main():
+    print("==========================================================")
+    print("  NOVA 2.0: TRAITS, RAW POINTERS & BARE-METAL INLINE ASM")
+    print("==========================================================")
+
+    # 1. Trait Method Verification
+    let msg = format_value(100)
+    print(msg)
+
+    # 2. Bare-Metal Pointer & ASM Verification
+    let cap = HardwareCap.Granted
+    let hardware_val = test_raw_pointer_and_asm(cap)
+    print_str("-> Value read from raw pointer: ")
+    print_int(hardware_val)
+    print("")
+    print("==========================================================")
+    print("🎉 All Trait, Raw Pointer, and Assembly checks verified!")

@@ -9,6 +9,8 @@ module Nova.Syntax.AST
     , TypeDecl(..)
     , TypeDef(..)
     , TypeExpr(..)
+    , TraitDecl(..)
+    , ImplDecl(..)
     , Capability(..)
     , Stmt(..)
     , Expr(..)
@@ -29,8 +31,23 @@ newtype Program = Program
 data TopLevel
     = TopFn !(FnDecl)
     | TopType !(TypeDecl)
+    | TopTrait !(TraitDecl)
+    | TopImpl !(ImplDecl)
     | TopImport ![Text] !(Maybe Text) ![Text]
     deriving stock (Eq, Show, Generic)
+
+data TraitDecl = TraitDecl
+    { traitIsPub   :: !Bool
+    , traitName    :: !Text
+    , traitParams  :: ![Text]
+    , traitMethods :: ![FnDecl]
+    } deriving stock (Eq, Show, Generic)
+
+data ImplDecl = ImplDecl
+    { implTraitName :: !Text
+    , implForType   :: !TypeExpr
+    , implMethods   :: ![FnDecl]
+    } deriving stock (Eq, Show, Generic)
 
 data Capability
     = CapIso
@@ -75,6 +92,7 @@ data TypeExpr
     = TyNamed !Text
     | TyGeneric !Text ![TypeExpr]
     | TyCapability !Capability !TypeExpr
+    | TyRawPtr !Bool !TypeExpr
     | TyTuple ![TypeExpr]
     | TyList !TypeExpr
     | TyFn ![TypeExpr] !TypeExpr
@@ -90,6 +108,7 @@ data Stmt
     | StmtMatch !(Spanned Expr) ![(Pattern, Maybe (Spanned Expr), [Spanned Stmt])]
     | StmtUnsafe !Text ![Spanned Stmt]
     | StmtRegion !Text ![Spanned Stmt]
+    | StmtAsm !Text
     | StmtExpr !(Spanned Expr)
     deriving stock (Eq, Show, Generic)
 
@@ -121,5 +140,5 @@ data BinOp
     deriving stock (Eq, Show, Generic)
 
 data UnOp
-    = OpNeg | OpNot | OpBitNot
+    = OpNeg | OpNot | OpBitNot | OpDeref | OpAddrOf
     deriving stock (Eq, Show, Generic)

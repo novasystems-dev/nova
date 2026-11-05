@@ -1,0 +1,23 @@
+# Nova Standard Library: std/fs.nova
+# Safe Systems Filesystem & Path Manipulation Primitives
+
+type Path = struct:
+    raw: String
+
+fn path_new(s: String) -> Path:
+    Path(s)
+
+fn fs_read(p: Path) -> String:
+    fs_read_to_string(p.raw)
+
+fn fs_write(p: Path, content: String) -> Bool:
+    fs_write_string(p.raw, content)
+
+fn fs_check_exists(p: Path) -> Bool:
+    fs_exists(p.raw)
+
+fn fs_get_size(p: Path) -> Int:
+    fs_file_size(p.raw)
+
+fn fs_delete(p: Path) -> Bool:
+    fs_remove(p.raw)

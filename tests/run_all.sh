@@ -41,6 +41,8 @@ run_test "Check 03_perceus_tree.nova" "./bin/novac check examples/03_perceus_tre
 run_test "Check 04_concurrency_channels.nova" "./bin/novac check examples/04_concurrency_channels.nova"
 run_test "Check 06_snake_game.nova" "./bin/novac check examples/06_snake_game.nova"
 run_test "Check 07_network_http_server.nova" "./bin/novac check examples/07_network_http_server.nova"
+run_test "Check 08_traits_and_baremetal.nova" "./bin/novac check examples/08_traits_and_baremetal.nova"
+run_test "Check 09_std_industrial.nova" "./bin/novac check examples/09_std_industrial.nova"
 run_test "Check stage1/src/main.nova" "./bin/novac check stage1/src/main.nova"
 
 # 2. Standard Library checks
@@ -48,6 +50,10 @@ run_test "Check std/vec.nova" "./bin/novac check std/vec.nova"
 run_test "Check std/map.nova" "./bin/novac check std/map.nova"
 run_test "Check std/string.nova" "./bin/novac check std/string.nova"
 run_test "Check std/io.nova" "./bin/novac check std/io.nova"
+run_test "Check std/sync.nova" "./bin/novac check std/sync.nova"
+run_test "Check std/fs.nova" "./bin/novac check std/fs.nova"
+run_test "Check std/net.nova" "./bin/novac check std/net.nova"
+run_test "Check std/json.nova" "./bin/novac check std/json.nova"
 
 # 3. Negative safety tests (Z3 SMT proof rejection)
 run_rejection_test "Reject division by unproven zero (05_bad_division.nova)" "./bin/novac check examples/05_bad_division.nova"
@@ -57,6 +63,8 @@ run_test "Execute 01_hello.out" "./bin/novac run examples/01_hello.nova"
 run_test "Execute 02_refinements_z3.out" "./bin/novac run examples/02_refinements_z3.nova"
 run_test "Execute 03_perceus_tree.out" "./bin/novac run examples/03_perceus_tree.nova"
 run_test "Execute 04_concurrency_channels.out" "./bin/novac run examples/04_concurrency_channels.nova"
+run_test "Execute 08_traits_and_baremetal.out" "./bin/novac run examples/08_traits_and_baremetal.nova"
+run_test "Execute 09_std_industrial.out" "./bin/novac run examples/09_std_industrial.nova"
 
 # 5. Intermediate Representations & Codegen
 run_test "Dump HIR (--dump-hir)" "./bin/novac --dump-hir examples/01_hello.nova"
@@ -66,6 +74,8 @@ run_test "Emit C99 (--emit-c)" "./bin/novac --emit-c examples/01_hello.nova"
 
 # 6. Tooling checks
 run_test "Orbit capability audit" "./bin/orbit audit"
+run_test "Orbit lockfile generation (orbit lock)" "./bin/orbit lock"
+run_test "Interactive REPL evaluation pipeline" "echo -e 'let x = 21\nx * 2\n:quit' | ./bin/nova-repl | grep -q '42'"
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 

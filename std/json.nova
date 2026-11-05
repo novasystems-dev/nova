@@ -1,0 +1,29 @@
+# Nova Standard Library: std/json.nova
+# Zero-Copy Fast JSON Serialization and Parsing Primitives
+
+type JsonValue = enum:
+    Null
+    BoolVal(Bool)
+    NumVal(Int)
+    StrVal(String)
+
+fn json_null() -> JsonValue:
+    JsonValue.Null
+
+fn json_bool(b: Bool) -> JsonValue:
+    JsonValue.BoolVal(b)
+
+fn json_number(n: Int) -> JsonValue:
+    JsonValue.NumVal(n)
+
+fn json_string(s: String) -> JsonValue:
+    JsonValue.StrVal(s)
+
+fn json_stringify_bool(b: Bool) -> String:
+    if b:
+        "true"
+    else:
+        "false"
+
+fn json_stringify_null() -> String:
+    "null"

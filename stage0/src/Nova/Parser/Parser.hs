@@ -47,8 +47,44 @@ topLevelItem :: P (Spanned TopLevel)
 topLevelItem = spanned $ choice
     [ TopFn     <$> parseFnDecl
     , TopType   <$> parseTypeDecl
+    , TopTrait  <$> parseTraitDecl
+    , TopImpl   <$> parseImplDecl
     , parseImportDecl
     ]
+
+parseTraitDecl :: P TraitDecl
+parseTraitDecl = do
+    traitPos <- getSourcePos
+    let baseCol = unPos (sourceColumn traitPos)
+    isPub <- isJust <$> optional (symbol "pub")
+    _ <- symbol "trait"
+    name <- parseIdentifier
+    tparams <- parseOptionalTypeParams
+    _ <- symbol ":"
+    methods <- some (try (checkIndent baseCol) >> parseFnDecl)
+    return $ TraitDecl isPub name tparams methods
+  where
+    isJust (Just _) = True
+    isJust Nothing  = False
+    checkIndent col = do
+        pos <- getSourcePos
+        if unPos (sourceColumn pos) > col then return () else empty
+
+parseImplDecl :: P ImplDecl
+parseImplDecl = do
+    implPos <- getSourcePos
+    let baseCol = unPos (sourceColumn implPos)
+    _ <- symbol "impl"
+    tName <- parseIdentifier
+    _ <- symbol "for"
+    forTy <- parseTypeExpr
+    _ <- symbol ":"
+    methods <- some (try (checkIndent baseCol) >> parseFnDecl)
+    return $ ImplDecl tName forTy methods
+  where
+    checkIndent col = do
+        pos <- getSourcePos
+        if unPos (sourceColumn pos) > col then return () else empty
 
 parseImportDecl :: P TopLevel
 parseImportDecl = do
@@ -73,8 +109,8 @@ parseFnDecl = do
     params <- symbol "(" >> parseParamList <* symbol ")"
     retType <- optional (symbol "->" >> parseTypeExpr)
     contract <- optional (symbol "where" >> spanned parseExpr)
-    _ <- symbol ":"
-    body <- parseBlock baseCol
+    mBody <- optional (symbol ":" >> parseBlock baseCol)
+    let body = case mBody of Just b -> b; Nothing -> []
     return $ FnDecl isPub name tparams params retType contract body
   where
     isJust (Just _) = True
@@ -86,7 +122,7 @@ parseParamList = sepBy parseParam (symbol ",")
 parseParam :: P Param
 parseParam = do
     isMut <- isJust <$> optional (symbol "mut")
-    cap <- optional parseCapability
+    cap <- optional (try (parseCapability <* lookAhead parseIdentifier))
     name <- parseIdentifier
     _ <- symbol ":"
     ty <- parseTypeExpr
@@ -183,6 +219,8 @@ parseEnumVariant = do
 parseTypeExpr :: P TypeExpr
 parseTypeExpr = choice
     [ TyCapability <$> parseCapability <*> parseTypeExpr
+    , try (symbol "*mut" >> TyRawPtr True <$> parseTypeExpr)
+    , try (symbol "*const" >> TyRawPtr False <$> parseTypeExpr)
     , try parseGenericType
     , TyList <$> between (symbol "[") (symbol "]") parseTypeExpr
     , TyNamed <$> parseIdentifier
@@ -231,9 +269,18 @@ parseStmt = do
         , parseForStmt baseCol
         , parseUnsafeBlock baseCol
         , parseRegionBlock baseCol
+        , try parseAsmStmt
         , try parseAssignStmt
         , StmtExpr <$> spanned parseExpr
         ]
+
+parseAsmStmt :: P Stmt
+parseAsmStmt = do
+    _ <- symbol "asm"
+    lit <- between (symbol "(") (symbol ")") parseLiteral
+    case lit of
+        LitString code -> return $ StmtAsm code
+        _              -> return $ StmtAsm ""
 
 parseMatchStmt :: Int -> P Stmt
 parseMatchStmt baseCol = do
@@ -357,7 +404,7 @@ parseRegionBlock baseCol = do
 
 parsePattern :: P Pattern
 parsePattern = choice
-    [ PatWildcard <$ symbol "_"
+    [ try (PatWildcard <$ (lexeme (string "_" <* notFollowedBy (alphaNumChar <|> char '_'))))
     , PatLit      <$> parseLiteral
     , try (between (symbol "(") (symbol ")") (PatTuple <$> sepBy parsePattern (symbol ",")))
     , try (PatVar True  <$> (symbol "mut" >> parseIdentifier))
@@ -383,6 +430,8 @@ operatorTable =
     [ [ E.Prefix ((\e -> ExprUnary OpNot (Spanned e emptySpan)) <$ symbol "not")
       , E.Prefix ((\e -> ExprUnary OpNeg (Spanned e emptySpan)) <$ symbol "-")
       , E.Prefix ((\e -> ExprUnary OpBitNot (Spanned e emptySpan)) <$ symbol "~")
+      , E.Prefix ((\e -> ExprUnary OpDeref (Spanned e emptySpan)) <$ symbol "*")
+      , E.Prefix ((\e -> ExprUnary OpAddrOf (Spanned e emptySpan)) <$ symbol "&")
       ]
     , [ E.InfixL (binaryOp OpMul <$ symbol "*")
       , E.InfixL (binaryOp OpDiv <$ symbol "/")

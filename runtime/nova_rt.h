@@ -74,6 +74,26 @@ int64_t nova_tcp_accept(int64_t server_fd);
 int64_t nova_tcp_send_response(int64_t client_fd, const char *status_code, const char *body);
 void nova_tcp_close(int64_t fd);
 
+// Hardware-level Atomic Operations (std/sync)
+int64_t nova_atomic_load(int64_t *ptr);
+void nova_atomic_store(int64_t *ptr, int64_t val);
+int64_t nova_atomic_add(int64_t *ptr, int64_t delta);
+int64_t nova_atomic_sub(int64_t *ptr, int64_t delta);
+bool nova_atomic_cas(int64_t *ptr, int64_t expected, int64_t desired);
+
+// Mutex Synchronization
+pthread_mutex_t *nova_mutex_create(void);
+void nova_mutex_lock(pthread_mutex_t *mutex);
+void nova_mutex_unlock(pthread_mutex_t *mutex);
+void nova_mutex_destroy(pthread_mutex_t *mutex);
+
+// High-Performance Filesystem Operations (std/fs)
+const char *nova_fs_read_to_string(const char *path);
+bool nova_fs_write_string(const char *path, const char *content);
+bool nova_fs_exists(const char *path);
+int64_t nova_fs_file_size(const char *path);
+bool nova_fs_remove(const char *path);
+
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);
 
