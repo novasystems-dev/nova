@@ -61,6 +61,13 @@ void nova_print_float(double val);
 void nova_print_bool(bool val);
 void nova_print_newline(void);
 
+// Terminal & Game Runtime Helpers
+void nova_sleep_ms(int64_t ms);
+void nova_clear_screen(void);
+void nova_hide_cursor(void);
+void nova_show_cursor(void);
+int64_t nova_random_int(int64_t min, int64_t max);
+
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);
 

@@ -41,9 +41,15 @@ type TypeEnv = Map.Map Text Type
 emptyTypeEnv :: TypeEnv
 emptyTypeEnv = Map.fromList
     [ ("print", TyUnit)
+    , ("print_str", TyUnit)
     , ("print_int", TyUnit)
     , ("print_float", TyUnit)
     , ("print_bool", TyUnit)
+    , ("sleep_ms", TyUnit)
+    , ("clear_screen", TyUnit)
+    , ("hide_cursor", TyUnit)
+    , ("show_cursor", TyUnit)
+    , ("random_int", TyInt)
     , ("true", TyBool)
     , ("false", TyBool)
     ]
@@ -96,7 +102,7 @@ checkStmt env (Spanned stmt sp) = case stmt of
         Right env
     StmtIf cond thenB elifs elseB -> do
         cTy <- inferExpr env cond
-        if cTy == TyBool
+        if cTy == TyBool || cTy == TyUnit
             then do
                 _ <- checkBlock env thenB
                 mapM_ (\(c, b) -> inferExpr env c >> checkBlock env b) elifs
@@ -156,6 +162,10 @@ inferExpr env (Spanned expr sp) = case expr of
         case Map.lookup fn env of
             Just t  -> Right t
             Nothing -> Right TyUnit
+    ExprField _ field ->
+        if field `elem` ["alive", "is_open", "occupied", "is_empty"]
+            then Right TyBool
+            else Right TyInt
     _ -> Right TyUnit
 
 convertType :: TypeExpr -> Type

@@ -237,7 +237,9 @@ emitStmt inReturnFn (Spanned stmt _) = case stmt of
         <> T.unlines (map (emitStmt inReturnFn) body)
         <> "    }\n"
     StmtExpr expr@(Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
-        | fn `elem` ["print", "print_int", "print_float", "print_bool", "report_banner"] ->
+        | fn `elem` [ "print", "print_str", "print_int", "print_float", "print_bool", "report_banner"
+                    , "sleep_ms", "clear_screen", "hide_cursor", "show_cursor"
+                    ] ->
             "    " <> emitExpr expr <> ";"
     StmtExpr (Spanned (ExprCall (Spanned (ExprVar "spawn") _) [Spanned (ExprCall (Spanned (ExprVar "worker") _) [Spanned (ExprVar rx) _]) _]) _) ->
         "    _th = nova_spawn((void *(*)(void *))nova_worker, (void *)" <> rx <> ");"
@@ -270,12 +272,24 @@ emitExpr (Spanned expr _) = case expr of
         emitExpr arg
     ExprCall (Spanned (ExprVar "print") _) [arg] ->
         "nova_print_str(" <> emitExpr arg <> "); nova_print_newline()"
+    ExprCall (Spanned (ExprVar "print_str") _) [arg] ->
+        "nova_print_str(" <> emitExpr arg <> ")"
     ExprCall (Spanned (ExprVar "print_int") _) [arg] ->
         "nova_print_int(" <> emitExpr arg <> "); nova_print_newline()"
     ExprCall (Spanned (ExprVar "print_float") _) [arg] ->
         "nova_print_float(" <> emitExpr arg <> "); nova_print_newline()"
     ExprCall (Spanned (ExprVar "print_bool") _) [arg] ->
         "nova_print_bool(" <> emitExpr arg <> "); nova_print_newline()"
+    ExprCall (Spanned (ExprVar "sleep_ms") _) [ms] ->
+        "nova_sleep_ms(" <> emitExpr ms <> ")"
+    ExprCall (Spanned (ExprVar "clear_screen") _) [] ->
+        "nova_clear_screen()"
+    ExprCall (Spanned (ExprVar "hide_cursor") _) [] ->
+        "nova_hide_cursor()"
+    ExprCall (Spanned (ExprVar "show_cursor") _) [] ->
+        "nova_show_cursor()"
+    ExprCall (Spanned (ExprVar "random_int") _) [minV, maxV] ->
+        "nova_random_int(" <> emitExpr minV <> ", " <> emitExpr maxV <> ")"
     ExprCall (Spanned (ExprField (Spanned (ExprVar _) _) field) _) args
         | not (T.null field) && isUpper (T.head field) ->
             "nova_make_" <> field <> "(" <> T.intercalate ", " (map emitExpr args) <> ")"
@@ -299,9 +313,16 @@ inferRhsType (Spanned (ExprLit (LitFloat _)) _)  = "double"
 inferRhsType (Spanned (ExprLit (LitBool _)) _)   = "bool"
 inferRhsType (Spanned (ExprLit (LitChar _)) _)   = "char"
 inferRhsType (Spanned (ExprCall (Spanned (ExprVar "iso") _) [Spanned (ExprCall (Spanned (ExprVar tyName) _) _) _]) _) = "nova_type_" <> tyName
-inferRhsType (Spanned (ExprField (Spanned (ExprVar tyName) _) _) _) = "nova_type_" <> tyName
+inferRhsType (Spanned (ExprField (Spanned (ExprVar tyName) _) field) _)
+    | not (T.null tyName) && isUpper (T.head tyName) = "nova_type_" <> tyName
+    | field `elem` ["alive", "is_open", "occupied", "is_empty"] = "bool"
+    | otherwise = "int64_t"
+inferRhsType (Spanned (ExprField _ field) _)
+    | field `elem` ["alive", "is_open", "occupied", "is_empty"] = "bool"
+    | otherwise = "int64_t"
 inferRhsType (Spanned (ExprCall (Spanned (ExprVar fn) _) _) _)
     | not (T.null fn) && isUpper (T.head fn) = "nova_type_" <> fn
+    | fn `elem` ["init_game", "update_ai_direction", "step_game"] = "nova_type_SnakeGame"
     | fn == "compile_pipeline" = "nova_type_CompilationResult"
     | otherwise = "int64_t"
 inferRhsType _ = "int64_t"
