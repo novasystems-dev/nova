@@ -382,6 +382,7 @@ operatorTable :: [[E.Operator P Expr]]
 operatorTable =
     [ [ E.Prefix ((\e -> ExprUnary OpNot (Spanned e emptySpan)) <$ symbol "not")
       , E.Prefix ((\e -> ExprUnary OpNeg (Spanned e emptySpan)) <$ symbol "-")
+      , E.Prefix ((\e -> ExprUnary OpBitNot (Spanned e emptySpan)) <$ symbol "~")
       ]
     , [ E.InfixL (binaryOp OpMul <$ symbol "*")
       , E.InfixL (binaryOp OpDiv <$ symbol "/")
@@ -390,6 +391,9 @@ operatorTable =
     , [ E.InfixL (binaryOp OpAdd <$ symbol "+")
       , E.InfixL (binaryOp OpSub <$ symbol "-")
       ]
+    , [ E.InfixL (binaryOp OpShl <$ symbol "<<")
+      , E.InfixL (binaryOp OpShr <$ symbol ">>")
+      ]
     , [ E.InfixN (binaryOp OpLtEq  <$ symbol "<=")
       , E.InfixN (binaryOp OpGtEq  <$ symbol ">=")
       , E.InfixN (binaryOp OpLt    <$ symbol "<")
@@ -397,6 +401,9 @@ operatorTable =
       , E.InfixN (binaryOp OpEq    <$ symbol "==")
       , E.InfixN (binaryOp OpNotEq <$ symbol "!=")
       ]
+    , [ E.InfixL (binaryOp OpBitAnd <$ symbol "&") ]
+    , [ E.InfixL (binaryOp OpBitXor <$ symbol "^") ]
+    , [ E.InfixL (binaryOp OpBitOr  <$ symbol "|") ]
     , [ E.InfixL (binaryOp OpAnd <$ symbol "and") ]
     , [ E.InfixL (binaryOp OpOr  <$ symbol "or")  ]
     ]

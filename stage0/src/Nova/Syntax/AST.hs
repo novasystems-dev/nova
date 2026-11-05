@@ -117,8 +117,9 @@ data BinOp
     = OpAdd | OpSub | OpMul | OpDiv | OpMod
     | OpEq | OpNotEq | OpLt | OpLtEq | OpGt | OpGtEq
     | OpAnd | OpOr
+    | OpBitAnd | OpBitOr | OpBitXor | OpShl | OpShr
     deriving stock (Eq, Show, Generic)
 
 data UnOp
-    = OpNeg | OpNot
+    = OpNeg | OpNot | OpBitNot
     deriving stock (Eq, Show, Generic)

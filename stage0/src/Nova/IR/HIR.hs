@@ -204,3 +204,8 @@ dumpHIR (HIRProgram items) = T.unlines (map dumpItem items)
     dumpBinOp OpGtEq = ">="
     dumpBinOp OpAnd = "and"
     dumpBinOp OpOr = "or"
+    dumpBinOp OpBitAnd = "&"
+    dumpBinOp OpBitOr = "|"
+    dumpBinOp OpBitXor = "^"
+    dumpBinOp OpShl = "<<"
+    dumpBinOp OpShr = ">>"

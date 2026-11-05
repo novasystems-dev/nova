@@ -68,6 +68,12 @@ void nova_hide_cursor(void);
 void nova_show_cursor(void);
 int64_t nova_random_int(int64_t min, int64_t max);
 
+// Low-level POSIX Socket Networking
+int64_t nova_tcp_listen(int64_t port);
+int64_t nova_tcp_accept(int64_t server_fd);
+int64_t nova_tcp_send_response(int64_t client_fd, const char *status_code, const char *body);
+void nova_tcp_close(int64_t fd);
+
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);
 

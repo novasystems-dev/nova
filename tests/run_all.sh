@@ -40,6 +40,7 @@ run_test "Check 02_refinements_z3.nova" "./bin/novac check examples/02_refinemen
 run_test "Check 03_perceus_tree.nova" "./bin/novac check examples/03_perceus_tree.nova"
 run_test "Check 04_concurrency_channels.nova" "./bin/novac check examples/04_concurrency_channels.nova"
 run_test "Check 06_snake_game.nova" "./bin/novac check examples/06_snake_game.nova"
+run_test "Check 07_network_http_server.nova" "./bin/novac check examples/07_network_http_server.nova"
 run_test "Check stage1/src/main.nova" "./bin/novac check stage1/src/main.nova"
 
 # 2. Standard Library checks

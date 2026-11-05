@@ -50,6 +50,10 @@ emptyTypeEnv = Map.fromList
     , ("hide_cursor", TyUnit)
     , ("show_cursor", TyUnit)
     , ("random_int", TyInt)
+    , ("tcp_listen", TyInt)
+    , ("tcp_accept", TyInt)
+    , ("tcp_send_response", TyInt)
+    , ("tcp_close", TyUnit)
     , ("true", TyBool)
     , ("false", TyBool)
     ]
@@ -156,7 +160,12 @@ inferExpr env (Spanned expr sp) = case expr of
             OpSub -> Right TyInt
             OpMul -> Right TyInt
             OpMod -> Right TyInt
-            _     -> Right TyBool
+            OpBitAnd -> Right TyInt
+            OpBitOr  -> Right TyInt
+            OpBitXor -> Right TyInt
+            OpShl    -> Right TyInt
+            OpShr    -> Right TyInt
+            _        -> Right TyBool
     ExprCall (Spanned (ExprVar "print") _) _ -> Right TyUnit
     ExprCall (Spanned (ExprVar fn) _) _ ->
         case Map.lookup fn env of
