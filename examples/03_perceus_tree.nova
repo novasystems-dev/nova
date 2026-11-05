@@ -1,11 +1,11 @@
-# 03_perceus_tree.nova - Cấu trúc Dữ liệu Cây Nhị Phân với Tối ưu hóa Bộ nhớ Perceus
+# 03_perceus_tree.nova - Binary Search Tree with Perceus In-Place Reuse
 
 type Tree = enum:
     Leaf
     Node(val: Int, left: Tree, right: Tree)
 
-# Nhờ cơ chế Perceus: Nếu cây t chỉ có 1 tham chiếu duy nhất (RC == 1),
-# hàm insert sẽ ghi đè trực tiếp lên ô nhớ của Node cũ mà không cần malloc/free!
+# Under Perceus analysis: If tree `t` has a reference count of 1,
+# insert mutates the existing node directly without malloc/free calls.
 pub fn insert(t: Tree, v: Int) -> Tree:
     match t:
         Leaf =>
@@ -20,4 +20,4 @@ pub fn main():
     let mut root = Tree.Leaf
     for i in [5, 2, 8, 1, 9]:
         root = insert(root, i)
-    print("Cây nhị phân đã khởi tạo thành công với chi phí cấp phát tối ưu!")
+    print("Binary search tree constructed with optimal allocation reuse.")

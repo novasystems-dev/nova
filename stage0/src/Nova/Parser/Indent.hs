@@ -14,6 +14,7 @@ layoutProcess :: [Int] -> [Token]
 layoutProcess = go (IndentState [0])
   where
     go :: IndentState -> [Int] -> [Token]
+    go (IndentState []) cols = go (IndentState [0]) cols
     go (IndentState stack) [] =
         -- Reached EOF: Emit DEDENT for every active indent level > 0
         replicate (length stack - 1) TokDedent ++ [TokEOF]

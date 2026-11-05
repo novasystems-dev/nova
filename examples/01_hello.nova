@@ -1,5 +1,5 @@
-# 01_hello.nova - Chương trình đầu tiên viết bằng Nova
+# 01_hello.nova - Flagship Hello World
 
 pub fn main():
-    let greeting = "Xin chào thế giới từ Nova!"
+    let greeting = "Hello, world from Nova!"
     print(greeting)

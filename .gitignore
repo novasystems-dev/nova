@@ -1,21 +1,24 @@
 # Nova .gitignore
 
-# Haskell build artifacts
-dist-newstyle/
-.ghc.environment.*
+# Build outputs
+*.out
 *.o
 *.hi
 *.dyn_o
 *.dyn_hi
+stage0/novac
 
-# Nova build artifacts
+# Haskell build artifacts
+dist-newstyle/
+.ghc.environment.*
+
+# Temporary artifacts
 build/
 target/
 *.c
 *.ll
 *.bc
 *.s
-*.out
 
 # Editors and IDEs
 .vscode/

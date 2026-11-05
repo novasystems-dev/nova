@@ -1,56 +1,51 @@
-# Mô Hình Bộ Nhớ Nova (Nova Memory Model: Region + Perceus)
+# Nova Memory Architecture: Regions + Perceus Reference Counting
 
-Nova loại bỏ hoàn toàn Trình thu gom rác (Garbage Collector - GC) và không bắt lập trình viên phải chú thích vòng đời biến (`'a`, `'b` lifetime) như Rust.
+Nova completely eliminates tracing garbage collection while liberating developers from manual borrow-checker lifetime annotations (`'a`, `'b`).
 
-Mô hình bộ nhớ Nova được xây dựng dựa trên 2 trụ cột toán học vững chắc:
-1. **Automatic Region Inference (Hệ thống suy luận vùng sống)**
-2. **Perceus Precise Reference Counting with In-Place Reuse (Tái sử dụng bộ nhớ tại chỗ)**
-
----
-
-## 1. Automatic Region Inference (Suy luận Vùng nhớ Tự động)
-
-### Nguyên lý hoạt động
-Mỗi giá trị được cấp phát trong Nova đều thuộc về một **Region (Vùng nhớ)**. Trình biên dịch phân tích đồ thị luồng điều khiển (Control Flow Graph - CFG) và đồ thị sống (Liveness Analysis) để xác định điểm đầu và điểm cuối của từng đối tượng:
-
-- **Stack Promotion**: Nếu một đối tượng không thoát khỏi phạm vi hàm (no escape), nó tự động được cấp phát trên Call Stack của CPU (chi phí cấp phát = 0).
-- **Region Bulk Deallocation**: Các đối tượng thuộc cùng một chu kỳ tính toán (ví dụ: một chu kỳ vòng lặp, một request mạng) được gom vào chung một Vùng (Arena). Khi phạm vi kết thúc, toàn bộ Vùng được giải phóng đồng loạt chỉ bằng một thao tác điều chỉnh con trỏ, triệt tiêu phân mảnh bộ nhớ.
-- **Typed Region Indices**: Để giải quyết bài toán Đồ thị (Graph) hoặc Danh sách liên kết hai chiều (Doubly Linked List), Nova cho phép định nghĩa các chỉ mục có kiểm tra kiểu trỏ vào Region an toàn 100% mà không sợ Use-After-Free hay Dangling Pointers.
+The memory model is rooted in two formal pillars:
+1. **Automatic Region Inference**
+2. **Perceus Reference Counting with In-Place Memory Reuse**
 
 ---
 
-## 2. Cơ chế Perceus (In-Place Memory Reuse)
+## 1. Automatic Region Inference
 
-Kế thừa công trình nghiên cứu đột phá của Microsoft Research (trên ngôn ngữ Koka), Nova triển khai **Perceus RC**:
+Every heap allocation in Nova is assigned to a discrete lexical or dynamic Region:
 
-### Tái sử dụng ô nhớ tại chỗ (In-Place Reuse)
-Khi một cấu trúc dữ liệu bị sửa đổi (ví dụ: cập nhật một nút trong cây nhị phân hoặc chèn phần tử vào mảng):
-1. Trình biên dịch kiểm tra tĩnh số lượng tham chiếu: nếu tại thời điểm đó đối tượng chỉ có duy nhất 1 tham chiếu (Uniquely Referenced - RC == 1).
-2. Thay vì cấp phát một nút mới và xóa nút cũ (tốn 2 lần gọi allocator `malloc`/`free`), Nova **ghi đè trực tiếp lên chính ô nhớ của nút cũ**.
-3. Hiệu năng đạt mức tương đương với code C thuần (In-place mutation) trong khi mã nguồn vẫn giữ được tính chất thuần khiết hàm (Functional Purity).
+- **Stack Promotion**: Values whose lifetimes are statically proven not to escape their calling frame are allocated directly on the CPU call stack (allocation cost = 0).
+- **Region Bulk Deallocation**: Objects tied to a common lifecycle (such as a single HTTP request or loop cycle) share a bump-allocated arena. When the arena scope exits, memory is reclaimed en masse in $O(1)$ without heap fragmentation.
+- **Typed Region Indices**: Graphs and doubly-linked structures utilize typed region indices, completely safe from dangling pointers and use-after-free bugs without requiring unsafe pointers.
 
 ---
 
-## 3. Phân cấp Quyền hạn Concurrency (Reference Capabilities)
+## 2. Perceus Precise Reference Counting with In-Place Reuse
 
-Để đảm bảo không bao giờ có **Data Race** giữa các luồng:
+Adopting Microsoft Research's Perceus design:
 
-- **`iso` (Isolated)**: Đối tượng chỉ có duy nhất một con trỏ trỏ tới trên toàn hệ thống. Có thể chuyển giao quyền sở hữu (Send) giữa các luồng mà không cần khóa (lock-free).
-- **`val` (Value / Globally Immutable)**: Đối tượng bất biến vĩnh viễn. Nhiều luồng có thể cùng đọc đồng thời mà không sợ xung đột.
-- **`ref` (Thread-Local Reference)**: Tham chiếu có thể đọc/ghi nhưng bị khóa chặt trong luồng cục bộ; trình biên dịch cấm chia sẻ `ref` sang luồng khác.
+1. **Uniqueness Analysis**: If an algebraic data type (e.g. tree node or list cell) has a reference count of 1 at an update point, it is guaranteed to be uniquely owned.
+2. **In-Place Mutation**: Instead of allocating a new node and deallocating the old one, Nova reuses the exact memory cell in-place.
+3. This achieves C-level performance while maintaining pure referential transparency in the surface language.
 
 ---
 
-## 4. Capability-Gated Unsafe (Kiểm soát Unsafe bằng Khóa phân quyền)
+## 3. Concurrency via Reference Capabilities
 
-Khác với Rust nơi bất kỳ lập trình viên nào cũng có thể gõ `unsafe { ... }` và có nguy cơ giấu mã độc/bug trong crate bên thứ ba, Nova áp dụng cơ chế:
+To mathematically prevent data races:
+
+- **`iso` (Isolated)**: Exactly one unique reference exists across the entire runtime. Can be sent across threads lock-free with zero copy.
+- **`val` (Value)**: Deeply immutable. Freely shared across multiple threads without locking.
+- **`ref` (Thread-Local Reference)**: Mutable reference strictly confined to the local thread. Passing across thread boundaries triggers a compile-time rejection.
+
+---
+
+## 4. Capability-Gated Unsafe
+
+Arbitrary `unsafe` blocks are rejected. Unsafe primitives require an explicit capability token passed down from `main`:
 
 ```nova
-# Hàm này KHÔNG THỂ được gọi nếu caller không có UnsafeHardwareCap
 fn write_raw_mmio(cap: UnsafeHardwareCap, addr: UInt64, val: UInt32):
     unsafe(cap):
-        # Truy cập phần cứng trực tiếp
+        # Raw hardware write
         ...
 ```
-
-Chỉ có hàm `main` được cấp quyền tối cao từ Runtime, và `main` phải truyền quyền này xuống một cách tường minh. Lệnh `orbit audit` sẽ quét và liệt kê chính xác các cây phân quyền unsafe trong toàn bộ dự án.
+Third-party libraries cannot execute unsafe code unless explicitly granted the capability token at call sites.

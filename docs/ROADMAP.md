@@ -1,105 +1,105 @@
 # Nova Programming Language: Master Roadmap (12 Stages, 60 Milestones)
 
-## 🌌 Triết lý thiết kế (Design Philosophy)
-- **Dễ viết như Python**: Indentation-sensitive, bidirectional type inference, không lifetime `'a`, cú pháp tối giản < 25 từ khóa.
-- **An toàn hơn Rust**: Refinement Types (Z3 SMT), Reference Capabilities + Session Types (không data race, không deadlock), Capability-gated Unsafe.
-- **Nhanh ngang C/C++**: Zero-GC, Perceus Reference Counting (tái sử dụng bộ nhớ tại chỗ), LLVM backend, Bounds-check elimination.
+## Design Philosophy
+- **Expressive like Python**: Indentation-sensitive layout, bidirectional type inference, zero lifetime annotations (`'a`), under 25 core keywords.
+- **Safer than Rust**: Refinement Types verified via SMT (Z3), Reference Capabilities + Session Types (zero data races, deadlock-free concurrency), Capability-gated `unsafe`.
+- **Performant as C/C++**: Zero tracing GC, Perceus reference counting with in-place reuse, LLVM -O3 backend, static bounds-check elimination.
 
 ---
 
-## 🧬 Ma trận Tiến hóa Trình biên dịch (Bootstrapping Matrix)
+## Compiler Evolution Matrix (Bootstrapping Matrix)
 
-| Đời (Stage) | Mã nguồn viết bằng | Biên dịch bởi | Đầu ra (Output) | Mục đích cốt lõi |
+| Stage | Implementation Language | Compiled By | Output Artifact | Core Objective |
 | :--- | :--- | :--- | :--- | :--- |
-| **Stage 0** | Haskell (GHC) | `ghc` | `novac-0` (Binary) | Trình biên dịch mồi khởi thủy (Genesis Compiler). |
-| **Stage 1** | Nova | `novac-0` | `novac-1` (Binary) | Trình biên dịch Nova đầu tiên tự viết bằng chính Nova. |
-| **Stage 2** | Nova | `novac-1` | `novac-2` (Binary) | Dùng bản dịch của Nova để tự biên dịch lại mã nguồn của nó. |
-| **Stage 3** | Nova | `novac-2` | `novac-3` (Binary) | Kiểm chứng điểm bất động: mã nhị phân `novac-2` và `novac-3` khớp 100% (SHA-256). |
+| **Stage 0** | Haskell (GHC) | `ghc` | `novac-0` (Binary) | Genesis bootstrap compiler. |
+| **Stage 1** | Nova | `novac-0` | `novac-1` (Binary) | First self-hosted Nova compiler written in Nova. |
+| **Stage 2** | Nova | `novac-1` | `novac-2` (Binary) | Self-compilation of Nova compiler source. |
+| **Stage 3** | Nova | `novac-2` | `novac-3` (Binary) | Fixed-point verification: `novac-2` and `novac-3` bit-for-bit identical (SHA-256). |
 
 ---
 
-## 🗺️ Lộ trình 12 Giai đoạn (60 Cột mốc)
+## 12-Stage Technical Roadmap (60 Milestones)
 
-### Giai đoạn 0: Đặc tả Hình thức & Kiến trúc Lõi (Formal Specification)
-- [ ] **M0.1 Định nghĩa ngữ pháp EBNF**: Chốt bộ quy tắc cú pháp không nhập nhằng (unambiguous grammar), ưu tiên thụt lề (indentation-sensitive) kết hợp từ khóa tự nhiên.
-- [ ] **M0.2 Thiết kế hệ thống từ khóa tối giản**: Chốt dưới 25 từ khóa cốt lõi (`fn`, `let`, `mut`, `type`, `match`, `where`, `unsafe`, `cap`, `region`, `pub`, `return`, ...).
-- [ ] **M0.3 Đặc tả mô hình bộ nhớ (Memory Model)**: Cơ chế lai giữa Region-based Memory Management và Perceus Reference Counting.
-- [ ] **M0.4 Đặc tả hệ thống kiểu (Type Rules)**: Viết quy tắc suy diễn kiểu theo ký hiệu toán học (Typing Judgments) trước khi code.
-- [ ] **M0.5 Quy hoạch hệ thống Báo lỗi (Diagnostic Spec)**: Thiết kế khung thông báo lỗi tiếng người: dòng, cột, nguyên nhân gốc, gợi ý sửa tự động.
+### Stage 0: Formal Specification & Core Architecture
+- [x] **M0.1 Unambiguous Grammar (EBNF)**: Indentation-sensitive surface syntax with Pratt operator precedence.
+- [x] **M0.2 Minimal Keyword Set**: Strictly fewer than 25 core keywords (`fn`, `let`, `mut`, `type`, `where`, etc.).
+- [x] **M0.3 Memory Model Specification**: Region-based allocation coupled with Perceus in-place reference counting.
+- [x] **M0.4 Typing Judgments Specification**: Bidirectional typing and refinement constraints.
+- [x] **M0.5 Human-Grade Diagnostics Specification**: Formatted error reports with precise spans and suggested fixes.
 
-### Giai đoạn 1: Frontend Stage 0 bằng Haskell (Lexing & Parsing)
-- [ ] **M1.1 Khởi tạo dự án Haskell**: Dựng cấu trúc bằng Cabal, module hóa: `Syntax`, `Parser`, `Typecheck`, `HIR`, `Codegen`.
-- [ ] **M1.2 Bộ đọc mã nguồn (Source Loader)**: Đọc UTF-8 hoàn chỉnh, đánh số `Span` / `SourceLoc` gắn vào từng ký tự.
-- [ ] **M1.3 Xây dựng Indentation Lexer**: Dùng Megaparsec chuyển khoảng trắng đầu dòng thành các token ảo `INDENT`, `DEDENT`, `NEWLINE`.
-- [ ] **M1.4 Định nghĩa Cây cú pháp Bề mặt (Surface AST)**: ADT của Haskell mô hình hóa toàn bộ biểu thức, câu lệnh và kiểu.
-- [ ] **M1.5 Xây dựng Parser**: Megaparsec kết hợp Pratt Parsing xử lý độ ưu tiên toán tử mượt mà $O(n)$.
-- [ ] **M1.6 Cơ chế Phục hồi Lỗi Cú pháp (Error Recovery)**: Gom toàn bộ lỗi cú pháp trong file báo một lần.
+### Stage 1: Stage 0 Frontend in Haskell (Lexing & Parsing)
+- [x] **M1.1 Haskell Project Infrastructure**: Structured Cabal build configuration.
+- [x] **M1.2 Source Loader & Span Tracker**: UTF-8 source mapping with line/column coordinates.
+- [x] **M1.3 Indentation Layout Lexer**: Virtual `INDENT`, `DEDENT`, and `NEWLINE` token generation.
+- [x] **M1.4 Surface AST Modeling**: Algebraic Data Types representing top-level declarations, statements, and expressions.
+- [ ] **M1.5 Pratt Parser Implementation**: Fast $O(n)$ precedence climbing for operators and expressions.
+- [ ] **M1.6 Error Recovery & Aggregation**: Continuous parsing with multi-error diagnostic accumulation.
 
-### Giai đoạn 2: Hạ cấp Cú pháp & Biểu diễn Trung gian Cao (AST → HIR)
-- [ ] **M2.1 Khử đường cú pháp (Desugaring)**: Chuyển cú pháp viết tắt (`for`, chuỗi nội suy, toán tử `?`) về cấu trúc nguyên thủy.
-- [ ] **M2.2 Phân giải Tên & Phạm vi (Name Resolution)**: Duyệt AST gắn tên biến/hàm với định danh duy nhất (`DefId`).
-- [ ] **M2.3 Kiểm tra Chu trình Module (Import Cycle Detection)**: Dùng thuật toán đồ thị Tarjan chặn import vòng tròn.
-- [ ] **M2.4 Sinh HIR (High-Level IR)**: Chuyển Surface AST thành cây HIR đã chuẩn hóa.
-- [ ] **M2.5 Hệ thống Macro Vệ sinh (Hygienic AST Macros)**: Mở rộng cú pháp an toàn lúc biên dịch.
+### Stage 2: Syntax Lowering & High-Level IR (AST -> HIR)
+- [ ] **M2.1 AST Desugaring**: Lowering syntax sugars (for-loops, string interpolation, `?` operator) into core primitives.
+- [ ] **M2.2 Name Resolution & DefId Assignment**: Lexical scope analysis and symbol resolution.
+- [ ] **M2.3 Import Cycle Detection**: Tarjan's strongly connected components algorithm preventing circular imports.
+- [ ] **M2.4 HIR Construction**: Well-formed High-Level Intermediate Representation.
+- [ ] **M2.5 Hygienic Macro System**: Compile-time syntax transformations without variable capture.
 
-### Giai đoạn 3: Hệ thống Kiểu Tĩnh Cốt lõi (Core Type Engine)
-- [ ] **M3.1 Suy luận kiểu hai chiều (Bidirectional Type Inference)**: Kết hợp Hindley-Milner với kiểm tra kiểu hai chiều.
-- [ ] **M3.2 Kiểu dữ liệu Đại số (Sum & Product Types)**: Hỗ trợ `struct` và `enum` mang dữ liệu, loại bỏ `null` (dùng `Option[T]`).
-- [ ] **M3.3 Kiểm tra Vét cạn Mẫu (Exhaustiveness Checking)**: Đảm bảo mọi khối `match` xử lý đủ 100% trường hợp dữ liệu.
-- [ ] **M3.4 Hệ thống Đa hình & Ràng buộc (Generics & Traits)**: Tự động đơn hình hóa (monomorphization) lúc dịch.
-- [ ] **M3.5 Xử lý lỗi bằng Giá trị (Value-based Error Handling)**: Tích hợp `Result[T, E]`, loại bỏ `try/catch`.
+### Stage 3: Static Type Engine
+- [ ] **M3.1 Bidirectional Type Inference**: Local type deduction combining Hindley-Milner with bidirectional checking.
+- [ ] **M3.2 Algebraic Sum & Product Types**: Structs and tagged enums without null pointers.
+- [ ] **M3.3 Pattern Match Exhaustiveness**: Static verification of 100% case coverage in match blocks.
+- [ ] **M3.4 Generics & Traits**: Polymorphic abstraction with compile-time monomorphization.
+- [ ] **M3.5 Value-based Error Handling**: Native `Result[T, E]` and `Option[T]` types.
 
-### Giai đoạn 4: Động cơ Chứng minh Logic — "An toàn hơn Rust" Tập 1 (Refinement Types)
-- [ ] **M4.1 Cú pháp Kiểu Tinh chỉnh (Refinement Syntax)**: Gắn mệnh đề logic trực tiếp vào kiểu (`type NonZero = x: Int where x != 0`).
-- [ ] **M4.2 Sinh Điều kiện Kiểm chứng (Verification Condition Generation - VCG)**: Biến ràng buộc thành công thức logic toán học.
-- [ ] **M4.3 Tích hợp Bộ giải SMT (Z3 Solver Binding)**: Kết nối trình biên dịch Haskell với Microsoft Z3.
-- [ ] **M4.4 Loại bỏ Lỗi Chia cho 0 & Tràn Mảng lúc Biên dịch**: Ép mẫu số `NonZero`, truy cập mảng $0 \le i < \text{len}(arr)$.
-- [ ] **M4.5 Kiểm chứng chống Tràn số học (Overflow Verification)**: Chứng minh phép tính không vượt giới hạn bit CPU.
+### Stage 4: Logical Proof Engine (Refinement Types via Z3)
+- [ ] **M4.1 Refinement Type Syntax**: Predicate-qualified types (`type NonZero = x: Int where x != 0`).
+- [ ] **M4.2 Verification Condition Generation (VCG)**: Translating code invariants into SMT formulas.
+- [ ] **M4.3 Z3 SMT Solver Integration**: Automatic theorem proving in sub-millisecond execution.
+- [ ] **M4.4 Static Elimination of Division-by-Zero & Buffer Overflows**: Mathematical proofs at compile time.
+- [ ] **M4.5 Arithmetic Overflow Verification**: Compile-time proof of CPU register boundary safety.
 
-### Giai đoạn 5: Quản lý Bộ nhớ Vùng & Khóa Phân quyền — "An toàn hơn Rust" Tập 2
-- [ ] **M5.1 Suy luận Vùng nhớ Tự động (Automatic Region Inference)**: Phân tích đồ thị sống, gom biến vào Regions/Arenas không cần `'a`.
-- [ ] **M5.2 Giải cứu Cấu trúc Tự tham chiếu (Safe Graphs & Doubly Linked Lists)**: Cho phép tạo đồ thị an toàn qua Typed Region Indices.
-- [ ] **M5.3 Cơ chế Perceus (Compile-time Reuse Analysis)**: Thu hồi và tái sử dụng ô nhớ tại chỗ, tốc độ ngang C thuần.
-- [ ] **M5.4 Thiết kế unsafe dựa trên Quyền hạn (Capability-gated Unsafe)**: Hàm unsafe phải nhận tham số `cap: UnsafeHardwareCap`.
-- [ ] **M5.5 Kiểm toán Khối unsafe (Unsafe Auditing)**: Xuất báo cáo dòng/thư viện nào đang giữ quyền unsafe.
+### Stage 5: Region & Capability-Gated Memory Safety
+- [ ] **M5.1 Automatic Region Inference**: Static liveness analysis allocating to scopes without lifetime annotations.
+- [ ] **M5.2 Safe Cyclic Data Structures**: Doubly-linked lists and graphs via typed region indices.
+- [ ] **M5.3 Perceus In-Place Reuse Analysis**: Static reuse of uniquely referenced memory cells.
+- [ ] **M5.4 Capability-Gated Unsafe**: Strict capability tokens required to activate unsafe blocks.
+- [ ] **M5.5 Unsafe Audit Reporting**: Static reports listing all capability dependencies.
 
-### Giai đoạn 6: Đa luồng Không Deadlock — "An toàn hơn Rust" Tập 3 (Concurrency)
-- [ ] **M6.1 Hệ thống Quyền Truy cập Dữ liệu (Reference Capabilities)**: Phân loại biến thành `iso`, `val`, `ref`.
-- [ ] **M6.2 Triệt tiêu Data Race từ Gốc**: Chặn 2 luồng cùng giữ quyền ghi ngay ở bước kiểm tra kiểu.
-- [ ] **M6.3 Tích hợp Session Types cho Kênh giao tiếp (Channels)**: Ràng buộc giao thức trạng thái trên kênh truyền.
-- [ ] **M6.4 Phát hiện Deadlock lúc Biên dịch (Lock-Order & Protocol Verification)**: Phân tích đồ thị chờ và thứ tự khóa, chặn circular wait.
+### Stage 6: Deadlock-Free Concurrency
+- [ ] **M6.1 Reference Capabilities (`iso`, `val`, `ref`)**: Compile-time data-race prevention.
+- [ ] **M6.2 Lock-Free Send Protocol**: Zero-copy transfer of isolated memory across threads.
+- [ ] **M6.3 Session Types for Channels**: Stateful protocol verification on communication channels.
+- [ ] **M6.4 Compile-Time Deadlock Detection**: Wait-for graph analysis rejecting circular waits.
 
-### Giai đoạn 7: Biểu diễn Trung gian Cấp thấp & Tối ưu hóa (HIR → MIR)
-- [ ] **M7.1 Chuyển đổi sang Đồ thị Luồng Điều khiển (Control Flow Graph - MIR)**: Đưa code về Basic Blocks & SSA form.
-- [ ] **M7.2 Phân tích Khởi tạo Biến (Definite Initialization Analysis)**: Đảm bảo không đọc biến trước khi gán.
-- [ ] **M7.3 Tối ưu hóa cấp độ MIR**: Constant Folding, Dead Code Elimination, Function Inlining.
-- [ ] **M7.4 Chèn lệnh Giải phóng Bộ nhớ Tĩnh (Drop Insertion)**: Tính toán vị trí chính xác trên CFG để thu hồi vùng nhớ.
-- [ ] **M7.5 Xóa bỏ Kiểm tra Dư thừa (Bounds Check Elimination)**: Gỡ bỏ kiểm tra runtime ở các vị trí Z3 đã chứng minh an toàn.
+### Stage 7: Low-Level IR & Optimization (HIR -> MIR)
+- [ ] **M7.1 Control Flow Graph & SSA Construction**: Basic blocks and Static Single Assignment form.
+- [ ] **M7.2 Definite Initialization Analysis**: Rejecting reads before initialization.
+- [ ] **M7.3 MIR Optimization Passes**: Constant folding, dead-code elimination, and inlining.
+- [ ] **M7.4 Drop Insertion**: Exact placement of region deallocations on CFG edges.
+- [ ] **M7.5 Bounds-Check Elimination**: Stripping runtime checks for Z3-proven invariants.
 
-### Giai đoạn 8: Backend Sinh Mã Máy & Tối ưu Phần cứng (MIR → LLVM / C)
-- [ ] **M8.1 Xây dựng C-Transpiler Backend**: Dịch MIR ra C99 chuẩn để biên dịch qua GCC/Clang.
-- [ ] **M8.2 Tích hợp LLVM Backend (llvm-hs)**: Dịch MIR sang LLVM IR để hưởng tối ưu hóa `-O3`.
-- [ ] **M8.3 Thiết lập ABI & Giao tiếp Ngoại ngữ (Zero-cost C FFI)**: Gọi trực tiếp thư viện C/C++.
-- [ ] **M8.4 Tối ưu hóa Vector hóa Tự động (SIMD Auto-Vectorization)**: Đánh dấu `noalias`, đẩy tính toán vào AVX-512/NEON.
-- [ ] **M8.5 Sinh Thông tin Gỡ lỗi (DWARF / PDB Debug Info)**: Nhúng metadata để debug bằng gdb/lldb.
+### Stage 8: Code Generation Backend (MIR -> C99 / LLVM)
+- [ ] **M8.1 C99 Transpiler Backend**: Portable C code generation for immediate bootstrapping.
+- [ ] **M8.2 LLVM IR Backend**: Direct native compilation leveraging LLVM -O3.
+- [ ] **M8.3 Zero-Cost C FFI**: Native C function call interface without runtime wrappers.
+- [ ] **M8.4 SIMD Auto-Vectorization**: Explicit `noalias` annotations driving AVX-512 / NEON execution.
+- [ ] **M8.5 Debug Information**: DWARF debug symbols for GDB and LLDB.
 
-### Giai đoạn 9: Hệ thống Thực thi & Thư viện Chuẩn (Runtime & Stdlib)
-- [ ] **M9.1 Viết nova-rt (Minimal Runtime)**: Lớp đệm mỏng (<2000 dòng) quản lý cấp phát bộ nhớ (mimalloc) và tiến trình.
-- [ ] **M9.2 Thư viện core**: Kiểu nguyên thủy, math, slice, string tĩnh, chạy được no_std/embedded.
-- [ ] **M9.3 Thư viện std**: `Vec`, `Map`, `Set`, `String` UTF-8, IO File, TCP/UDP.
-- [ ] **M9.4 Bộ lập lịch Đa luồng Nhẹ (M:N Work-Stealing Scheduler)**: Green Threads chạy hàng triệu tác vụ đồng thời.
+### Stage 9: Runtime & Standard Library (nova-rt & std)
+- [ ] **M9.1 Minimal Runtime (`nova-rt`)**: Lightweight bump/arena allocator (<2000 LOC).
+- [ ] **M9.2 Core Library (`core`)**: Zero-allocation primitives for embedded / bare-metal targets.
+- [ ] **M9.3 Standard Library (`std`)**: High-performance `Vec`, `Map`, `String`, IO, and Networking.
+- [ ] **M9.4 M:N Work-Stealing Scheduler**: Lightweight green threads for high concurrency.
 
-### Giai đoạn 10: Chiến dịch Tự Nuôi (Self-Hosting Bootstrap)
-- [ ] **M10.1 Viết lại Lexer & Parser bằng Nova**: Chuyển logic phân tích cú pháp sang mã nguồn Nova.
-- [ ] **M10.2 Viết lại Typechecker, SMT Bridge & MIR bằng Nova**.
-- [ ] **M10.3 Biên dịch Stage 1**: `novac-0` (Haskell) dịch mã Nova → `novac-1`.
-- [ ] **M10.4 Biên dịch Stage 2**: `novac-1` tự dịch lại mã Nova → `novac-2`.
-- [ ] **M10.5 Kiểm định Điểm Bất Động (Stage 3 Fixed-Point Test)**: `novac-2` dịch mã Nova → `novac-3`. So sánh SHA-256 (`novac-2` == `novac-3`).
+### Stage 10: Self-Hosting Bootstrap Campaign
+- [ ] **M10.1 Nova Lexer & Parser in Nova**: Translating front-end to native Nova syntax.
+- [ ] **M10.2 Typechecker, SMT Bridge & MIR in Nova**.
+- [ ] **M10.3 Stage 1 Bootstrap**: `novac-0` (Haskell) compiles Nova source to `novac-1`.
+- [ ] **M10.4 Stage 2 Bootstrap**: `novac-1` compiles Nova source to `novac-2`.
+- [ ] **M10.5 Stage 3 Fixed-Point Verification**: SHA-256 match between `novac-2` and `novac-3`. Retirement of Haskell genesis compiler.
 
-### Giai đoạn 11: Hệ sinh thái, Công cụ & Kiểm thử Cực hạn (Tooling & Hardening)
-- [ ] **M11.1 Trình quản lý Gói & Build (orbit)**: Quản lý dependency, audit quyền unsafe (`orbit audit`).
-- [ ] **M11.2 Language Server Protocol (nova-lsp)**: Autocomplete, go-to-definition, real-time diagnostics.
-- [ ] **M11.3 Công cụ Định dạng & Phân tích Tĩnh (nova-fmt & nova-lint)**.
-- [ ] **M11.4 Kiểm thử Đột biến & Fuzzing (Compiler Fuzzing)**.
-- [ ] **M11.5 Bộ Kiểm thử Chuẩn (Test Suite & Benchmarks)**: 10.000+ tests đối đầu C++, Rust, Go.
-- [ ] **M11.6 Đóng gói Phát hành (Nova 1.0 Toolchain)**.
+### Stage 11: Tooling & Release Hardening
+- [ ] **M11.1 Package Manager (`orbit`)**: Dependency resolution, package registry, and capability audit.
+- [ ] **M11.2 Language Server Protocol (`nova-lsp`)**: IDE integration for VS Code and Neovim.
+- [ ] **M11.3 Formatting & Linting (`nova-fmt`, `nova-lint`)**.
+- [ ] **M11.4 Compiler Fuzzing**: Grammar-based mutation fuzz testing.
+- [ ] **M11.5 Standard Test Suite & Benchmarks**: 10,000+ verification test cases.
+- [ ] **M11.6 Distribution Packaging**: Standalone installer toolchains for Linux, macOS, and Windows.

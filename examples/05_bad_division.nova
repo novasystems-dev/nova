@@ -1,0 +1,6 @@
+# 05_bad_division.nova - Static Rejection of Division by Zero
+
+pub fn broken():
+    let x = 100
+    let y = 0
+    let res = x / y

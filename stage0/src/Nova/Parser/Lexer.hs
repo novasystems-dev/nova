@@ -11,10 +11,11 @@ module Nova.Parser.Lexer
     , parseOperator
     ) where
 
+import Control.Monad (void)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Void (Void)
-import Text.Megaparsec
+import Text.Megaparsec hiding (Token)
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 import Nova.Syntax.Token
@@ -24,7 +25,7 @@ type Parser = Parsec Void Text
 -- | Space consumer (ignoring spaces and comments starting with #)
 sc :: Parser ()
 sc = L.space
-    (void $ some (char ' ' <|> char '\t'))
+    space1
     (L.skipLineComment "#")
     empty
 

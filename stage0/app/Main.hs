@@ -3,29 +3,36 @@
 module Main where
 
 import System.Environment (getArgs)
-import System.Exit (exitFailure)
+import System.Exit (exitFailure, exitSuccess)
+import System.FilePath (takeBaseName, (</>), replaceExtension)
+import System.Process (callCommand)
+import System.Directory (getCurrentDirectory, doesFileExist)
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 
+import Nova.Parser.Parser (parseNovaProgram)
+import Nova.Typecheck.Checker (typecheckProgram, TypeError(..))
+import Nova.Codegen.C99 (emitC99Program, compileAndLinkC99)
+
 banner :: Text
 banner = T.unlines
     [ "=========================================================="
-    , "  🌌 NOVAC - Trình biên dịch Khởi thủy (Genesis Stage 0)"
-    , "  Ngôn ngữ Lập trình Hệ thống Nova v0.1.0-alpha"
+    , "  NOVAC - Genesis Stage 0 Bootstrap Compiler"
+    , "  Nova Systems Programming Language v0.1.0-alpha"
     , "=========================================================="
     ]
 
 helpText :: Text
 helpText = T.unlines
-    [ "Sử dụng:"
-    , "  novac <lệnh> [tùy_chọn] <tập_tin.nova>"
+    [ "Usage:"
+    , "  novac <command> [options] <source.nova>"
     , ""
-    , "Các lệnh khả dụng:"
-    , "  check       Kiểm tra cú pháp và hệ thống kiểu tĩnh (Z3 SMT)"
-    , "  build       Biên dịch ra mã C99 / LLVM nhị phân"
-    , "  run         Biên dịch và thực thi ngay lập tức"
-    , "  version     Hiển thị phiên bản trình biên dịch"
+    , "Commands:"
+    , "  check <file>       Run lexer, parser, typechecker, and Z3 SMT verifier"
+    , "  build <file>       Transpile to C99 and compile to native executable"
+    , "  run   <file>       Compile and execute native binary immediately"
+    , "  version            Display compiler build and version info"
     ]
 
 main :: IO ()
@@ -35,21 +42,86 @@ main = do
         ["version"] -> do
             TIO.putStrLn banner
             TIO.putStrLn "novac version 0.1.0-alpha (Haskell Genesis Bootstrap)"
+            exitSuccess
+
+        ["help"] -> do
+            TIO.putStrLn helpText
+            exitSuccess
+
         ["check", file] -> do
             TIO.putStrLn banner
-            TIO.putStrLn $ "🔍 Đang kiểm tra mã nguồn: " <> T.pack file
-            content <- TIO.readFile file
-            TIO.putStrLn $ "✅ Đã nạp thành công (" <> T.pack (show (T.length content)) <> " ký tự)."
-            TIO.putStrLn "⚡ Bước 1: Lexing & Indentation... [OK]"
-            TIO.putStrLn "⚡ Bước 2: Parsing Surface AST... [OK]"
-            TIO.putStrLn "⚡ Bước 3: Bidirectional Typechecking... [OK]"
-            TIO.putStrLn "⚡ Bước 4: Refinement Proofs (Z3 SMT)... [OK]"
-            TIO.putStrLn "🎉 Mã nguồn hoàn toàn an toàn và sẵn sàng biên dịch!"
-        ["help"] -> TIO.putStrLn helpText
+            _ <- checkFile file
+            exitSuccess
+
+        ["build", file] -> do
+            TIO.putStrLn banner
+            outBin <- buildFile file
+            TIO.putStrLn $ "-> Compilation finished: " <> T.pack outBin
+            exitSuccess
+
+        ["run", file] -> do
+            TIO.putStrLn banner
+            outBin <- buildFile file
+            TIO.putStrLn $ "-> Executing binary: ./" <> T.pack outBin
+            TIO.putStrLn "----------------------------------------------------------"
+            callCommand ("./" <> outBin)
+            exitSuccess
+
         [] -> do
             TIO.putStrLn banner
             TIO.putStrLn helpText
             exitFailure
+
         _ -> do
-            TIO.putStrLn "❌ Tham số không hợp lệ. Gõ `novac help` để xem trợ giúp."
+            TIO.putStrLn "Error: Invalid command-line arguments. Run `novac help` for usage."
             exitFailure
+
+checkFile :: FilePath -> IO (Either String ())
+checkFile file = do
+    TIO.putStrLn $ "-> Checking source file: " <> T.pack file
+    exists <- doesFileExist file
+    if not exists
+        then do
+            TIO.putStrLn $ "Error: File not found: " <> T.pack file
+            exitFailure
+        else do
+            content <- TIO.readFile file
+            TIO.putStrLn $ "-> Loaded source (" <> T.pack (show (T.length content)) <> " bytes)."
+            case parseNovaProgram (T.pack file) content of
+                Left parseErr -> do
+                    TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+                    exitFailure
+                Right ast -> do
+                    TIO.putStrLn "   [1/3] Lexing & Indentation Layout... OK"
+                    TIO.putStrLn "   [2/3] Surface AST Parsing (Pratt)... OK"
+                    case typecheckProgram ast of
+                        Left (TypeError msg _ code) -> do
+                            TIO.putStrLn $ "Type/Proof Error [" <> code <> "]: " <> msg
+                            exitFailure
+                        Right () -> do
+                            TIO.putStrLn "   [3/3] Bidirectional Typing & Z3 SMT Verification... OK"
+                            TIO.putStrLn "-> All formal properties verified. Ready for code generation."
+                            return (Right ())
+
+buildFile :: FilePath -> IO FilePath
+buildFile file = do
+    content <- TIO.readFile file
+    case parseNovaProgram (T.pack file) content of
+        Left parseErr -> do
+            TIO.putStrLn $ "Parse Error:\n" <> T.pack (show parseErr)
+            exitFailure
+        Right ast -> do
+            case typecheckProgram ast of
+                Left (TypeError msg _ code) -> do
+                    TIO.putStrLn $ "Type/Proof Error [" <> code <> "]: " <> msg
+                    exitFailure
+                Right () -> do
+                    let cCode = emitC99Program ast
+                    let base = takeBaseName file
+                    let cFile = "/tmp/" <> base <> ".c"
+                    let outBin = base <> ".out"
+                    TIO.writeFile cFile cCode
+                    currDir <- getCurrentDirectory
+                    let runtimeDir = currDir </> "runtime"
+                    compileAndLinkC99 cFile runtimeDir outBin
+                    return outBin

@@ -76,6 +76,7 @@ data TypeExpr
     | TyGeneric !Text ![TypeExpr]
     | TyCapability !Capability !TypeExpr
     | TyTuple ![TypeExpr]
+    | TyList !TypeExpr
     | TyFn ![TypeExpr] !TypeExpr
     deriving stock (Eq, Show, Generic)
 
