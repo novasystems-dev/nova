@@ -29,7 +29,7 @@ newtype Program = Program
 data TopLevel
     = TopFn !(FnDecl)
     | TopType !(TypeDecl)
-    | TopImport !Text !(Maybe Text)
+    | TopImport ![Text] !(Maybe Text) ![Text]
     deriving stock (Eq, Show, Generic)
 
 data Capability

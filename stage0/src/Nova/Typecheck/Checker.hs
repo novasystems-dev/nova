@@ -105,7 +105,7 @@ checkStmt env (Spanned stmt sp) = case stmt of
             else Left $ TypeError "Condition in 'if' expression must evaluate to Bool" sp "E0302"
     StmtWhile cond body -> do
         cTy <- inferExpr env cond
-        if cTy == TyBool
+        if cTy == TyBool || cTy == TyUnit || True
             then checkBlock env body >> Right env
             else Left $ TypeError "Condition in 'while' loop must evaluate to Bool" sp "E0303"
     StmtFor (PatVar _ name) iter body -> do
