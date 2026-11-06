@@ -5,11 +5,26 @@ NOVA REPL: Interactive Read-Eval-Print Loop for the Nova Systems Programming Lan
 
 import sys
 import os
+import shutil
 import tempfile
 import subprocess
 import readline
 
-NOVAC_BIN = os.path.expanduser("~/Documents/Nova/bin/novac")
+def find_novac():
+    if "NOVAC_BIN" in os.environ and os.path.exists(os.environ["NOVAC_BIN"]):
+        return os.environ["NOVAC_BIN"]
+    which_novac = shutil.which("novac")
+    if which_novac and os.path.exists(which_novac):
+        return which_novac
+    rel_novac = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bin/novac"))
+    if os.path.exists(rel_novac):
+        return rel_novac
+    home_novac = os.path.expanduser("~/Documents/Nova/bin/novac")
+    if os.path.exists(home_novac):
+        return home_novac
+    return "novac"
+
+NOVAC_BIN = find_novac()
 
 BANNER = r"""
 ==========================================================
