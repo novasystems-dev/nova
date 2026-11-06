@@ -46,6 +46,7 @@ cp -L bin/nova-repl "$FULL_DIR/bin/"
 cp -L bin/nova-lsp "$FULL_DIR/bin/"
 cp -L bin/nova-fmt "$FULL_DIR/bin/"
 cp -L bin/nova-lint "$FULL_DIR/bin/"
+cp -L bin/nova-doc "$FULL_DIR/bin/" 2>/dev/null || true
 chmod +x "$FULL_DIR/bin/"*
 
 cp -r runtime "$FULL_DIR/"

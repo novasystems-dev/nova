@@ -52,6 +52,7 @@ run_test "Check stage1/src/lexer.nova" "./bin/novac check stage1/src/lexer.nova"
 run_test "Check stage1/src/parser.nova" "./bin/novac check stage1/src/parser.nova"
 run_test "Check stage1/src/checker.nova" "./bin/novac check stage1/src/checker.nova"
 run_test "Check stage1/src/codegen_c.nova" "./bin/novac check stage1/src/codegen_c.nova"
+run_test "Check stage1/src/optimizer.nova" "./bin/novac check stage1/src/optimizer.nova"
 run_test "Check stage1/src/main.nova" "./bin/novac check stage1/src/main.nova"
 
 # 2. Standard Library checks
@@ -69,6 +70,9 @@ run_test "Check std/time.nova" "./bin/novac check std/time.nova"
 run_test "Check std/crypto.nova" "./bin/novac check std/crypto.nova"
 run_test "Check std/http.nova" "./bin/novac check std/http.nova"
 run_test "Check std/collections.nova" "./bin/novac check std/collections.nova"
+run_test "Check std/collections_adv.nova" "./bin/novac check std/collections_adv.nova"
+run_test "Check std/crypto_adv.nova" "./bin/novac check std/crypto_adv.nova"
+run_test "Check std/storage.nova" "./bin/novac check std/storage.nova"
 run_test "Check std/db.nova" "./bin/novac check std/db.nova"
 run_test "Check std/encoding.nova" "./bin/novac check std/encoding.nova"
 
@@ -85,6 +89,7 @@ run_test "Execute 09_std_industrial.out" "./bin/novac run examples/09_std_indust
 run_test "Execute test_os_primitives.out" "./bin/novac run tests/test_os_primitives.nova"
 run_test "Execute test_super_libraries.out" "./bin/novac run tests/test_super_libraries.nova"
 run_test "Execute test_pure_nova_libraries.out" "./bin/novac run tests/test_pure_nova_libraries.nova"
+run_test "Execute test_colossus.out" "./bin/novac run tests/test_colossus.nova"
 
 # 5. Intermediate Representations & Codegen
 run_test "Dump HIR (--dump-hir)" "./bin/novac --dump-hir examples/01_hello.nova"
@@ -98,6 +103,7 @@ run_test "Orbit lockfile generation (orbit lock)" "./bin/orbit lock"
 run_test "Interactive REPL evaluation pipeline" "echo -e 'let x = 21\nx * 2\n:quit' | ./bin/nova-repl | grep -q '42'"
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
+run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
 
 # 7. Bootstrapping verification
 run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(sha256sum bin/novac-2 | awk '{print $1}') = $(sha256sum bin/novac-3 | awk '{print $1}') ]"

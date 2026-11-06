@@ -54,12 +54,14 @@ jobs:
           cabal build
           cp $(cabal list-bin novac) ../bin/novac
           cd ..
-          echo "=== Compiling Native Orbit Package Manager from pure Nova ==="
+          echo "=== Compiling Native Orbit & Nova-Doc from pure Nova ==="
           ./bin/novac build tools/orbit/main.nova
           mv main.out tools/orbit/orbit
+          ./bin/novac build tools/docgen/main.nova
+          mv main.out bin/nova-doc
           chmod +x tools/orbit/orbit bin/*
 
-      - name: Run Verification Test Suite (53 Tests)
+      - name: Run Verification Test Suite (59 Tests)
         run: |
           export PATH="$GITHUB_WORKSPACE/bin:$PATH"
           chmod +x tests/run_all.sh
