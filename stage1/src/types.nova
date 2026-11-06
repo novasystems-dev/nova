@@ -1,0 +1,80 @@
+# ============================================================================
+# NOVAC-1: Self-Hosted Compiler - Syntax & Type Definitions (stage1/src/types.nova)
+# ============================================================================
+
+type TokenKind = enum:
+    TokFn
+    TokPub
+    TokLet
+    TokMut
+    TokType
+    TokStruct
+    TokEnum
+    TokTrait
+    TokImpl
+    TokIf
+    TokElse
+    TokWhile
+    TokFor
+    TokIn
+    TokUnsafe
+    TokAsm
+    TokReturn
+    TokImport
+    TokAs
+    TokIdent(name: String)
+    TokIntLit(val: Int)
+    TokStrLit(val: String)
+    TokColon
+    TokEqual
+    TokArrow
+    TokLParen
+    TokRParen
+    TokLBracket
+    TokRBracket
+    TokLBrace
+    TokRBrace
+    TokComma
+    TokDot
+    TokOp(sym: String)
+    TokIndent(level: Int)
+    TokDedent
+    TokEOF
+
+type AstType = enum:
+    TyInt
+    TyFloat
+    TyBool
+    TyString
+    TyUnit
+    TyNamed(name: String)
+    TyRawPtr(is_mut: Bool, inner: String)
+
+type AstParam = struct:
+    name: String
+    param_type: String
+    is_mut: Bool
+
+type AstFn = struct:
+    is_pub: Bool
+    name: String
+    ret_type: String
+    body_count: Int
+
+type AstTopLevel = enum:
+    TopFunction(fn_decl: AstFn)
+    TopTypeDecl(name: String)
+    TopTraitDecl(name: String)
+    TopImplDecl(trait_name: String, for_type: String)
+
+type CompilationPass = enum:
+    PassLexing
+    PassParsing
+    PassTyping
+    PassZ3Proof
+    PassCodegen
+    PassComplete
+
+type Stage1Result = enum:
+    Ok(status: Int)
+    Err(pass: CompilationPass, msg: String)

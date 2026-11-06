@@ -15,7 +15,10 @@ dist-newstyle/
 # Temporary artifacts
 build/
 target/
+dist/
 *.c
+!runtime/nova_rt.c
+!bootstrap/novac_bootstrap.c
 *.ll
 *.bc
 *.s

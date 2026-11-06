@@ -1,0 +1,68 @@
+# ============================================================================
+# NOVAC-1: Self-Hosted Lexer & Indentation Scanner (stage1/src/lexer.nova)
+# ============================================================================
+
+type LexerState = struct:
+    cursor: Int
+    line: Int
+    col: Int
+    current_indent: Int
+
+fn lexer_new() -> LexerState:
+    LexerState(0, 1, 1, 0)
+
+fn lexer_is_identifier_start(c: Int) -> Bool:
+    # 'a'..'z' (97..122), 'A'..'Z' (65..90), '_' (95)
+    let is_lower = c >= 97 and c <= 122
+    let is_upper = c >= 65 and c <= 90
+    let is_under = c == 95
+    is_lower or is_upper or is_under
+
+fn lexer_is_digit(c: Int) -> Bool:
+    # '0'..'9' (48..57)
+    c >= 48 and c <= 57
+
+fn lexer_match_keyword(word: String) -> String:
+    if word == "fn":
+        "TokFn"
+    elif word == "pub":
+        "TokPub"
+    elif word == "let":
+        "TokLet"
+    elif word == "mut":
+        "TokMut"
+    elif word == "type":
+        "TokType"
+    elif word == "struct":
+        "TokStruct"
+    elif word == "enum":
+        "TokEnum"
+    elif word == "trait":
+        "TokTrait"
+    elif word == "impl":
+        "TokImpl"
+    elif word == "if":
+        "TokIf"
+    elif word == "else":
+        "TokElse"
+    elif word == "while":
+        "TokWhile"
+    elif word == "for":
+        "TokFor"
+    elif word == "unsafe":
+        "TokUnsafe"
+    elif word == "asm":
+        "TokAsm"
+    elif word == "return":
+        "TokReturn"
+    else:
+        "TokIdent"
+
+fn lexer_scan_source(source_len: Int) -> Int:
+    # Simulates lexical token stream generation
+    let mut tokens_emitted = 0
+    let mut cursor = 0
+    while cursor < source_len:
+        tokens_emitted = tokens_emitted + 1
+        cursor = cursor + 1
+    tokens_emitted

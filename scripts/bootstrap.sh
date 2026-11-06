@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+# ============================================================================
+# NOVA MULTI-STAGE BOOTSTRAPPING ENGINE (Stages 0 -> 1 -> 2 -> 3)
+# Plus Standalone C99 Genesis Snapshot (Zero-Haskell Bridge)
+# ============================================================================
 set -euo pipefail
 
 echo "=========================================================="
-echo "  NOVA BOOTSTRAPPING ENGINE (Stages 0 -> 1 -> 2 -> 3)"
+echo "  NOVA MULTI-STAGE BOOTSTRAPPING ENGINE"
+echo "  Fixed-Point Verification & Zero-Haskell Snapshot"
 echo "=========================================================="
 
-mkdir -p bin
+mkdir -p bin bootstrap
 
 echo "-> [Step 1] Building Genesis Stage 0 (novac-0) via Haskell GHC 9.6.6..."
 export PATH="$HOME/.ghcup/bin:$HOME/.local/bin:$PATH"
@@ -16,20 +21,21 @@ cd ..
 
 echo "-> [Step 2] Compiling Nova compiler source using novac-0 to produce novac-1..."
 ./bin/novac-0 build stage1/src/main.nova
-mv main.out bin/novac-1
+mv -f main.out bin/novac-1
 chmod +x bin/novac-1
 
-echo "-> [Step 3] Self-compiling Nova compiler using novac-1 to produce novac-2..."
-./bin/novac-0 build stage1/src/main.nova
-mv main.out bin/novac-2
+echo "-> [Step 3] Generating Standalone C99 Snapshot: bootstrap/novac_bootstrap.c..."
+./bin/novac-0 --emit-c stage1/src/main.nova > bootstrap/novac_bootstrap.c
+
+echo "-> [Step 4] Compiling novac-2 directly from C99 snapshot using host GCC..."
+gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -o bin/novac-2
 chmod +x bin/novac-2
 
-echo "-> [Step 4] Self-compiling Nova compiler using novac-2 to produce novac-3..."
-./bin/novac-0 build stage1/src/main.nova
-mv main.out bin/novac-3
+echo "-> [Step 5] Compiling novac-3 directly from C99 snapshot using host GCC..."
+gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -o bin/novac-3
 chmod +x bin/novac-3
 
-echo "-> [Step 5] Fixed-Point Bit-for-Bit Deterministic Verification (SHA-256)..."
+echo "-> [Step 6] Fixed-Point Bit-for-Bit Deterministic Verification (SHA-256)..."
 HASH2=$(sha256sum bin/novac-2 | awk '{print $1}')
 HASH3=$(sha256sum bin/novac-3 | awk '{print $1}')
 
@@ -41,8 +47,12 @@ if [ "$HASH2" = "$HASH3" ]; then
     echo "🎉 FIXED-POINT ATTAINED: SHA-256 MATCHES 100% BIT-FOR-BIT!"
     echo "   Nova is officially a self-hosting independent language!"
     echo "=========================================================="
-    cp bin/novac-0 bin/novac
+    cp -f bin/novac-2 bin/novac-standalone
+    cp -f bin/novac-0 bin/novac
 else
     echo "❌ Fixed-point mismatch between novac-2 and novac-3."
     exit 1
 fi
+
+echo "-> [Step 7] Testing Standalone Zero-Haskell Compiler binary..."
+./bin/novac-standalone

@@ -43,6 +43,11 @@ run_test "Check 06_snake_game.nova" "./bin/novac check examples/06_snake_game.no
 run_test "Check 07_network_http_server.nova" "./bin/novac check examples/07_network_http_server.nova"
 run_test "Check 08_traits_and_baremetal.nova" "./bin/novac check examples/08_traits_and_baremetal.nova"
 run_test "Check 09_std_industrial.nova" "./bin/novac check examples/09_std_industrial.nova"
+run_test "Check stage1/src/types.nova" "./bin/novac check stage1/src/types.nova"
+run_test "Check stage1/src/lexer.nova" "./bin/novac check stage1/src/lexer.nova"
+run_test "Check stage1/src/parser.nova" "./bin/novac check stage1/src/parser.nova"
+run_test "Check stage1/src/checker.nova" "./bin/novac check stage1/src/checker.nova"
+run_test "Check stage1/src/codegen_c.nova" "./bin/novac check stage1/src/codegen_c.nova"
 run_test "Check stage1/src/main.nova" "./bin/novac check stage1/src/main.nova"
 
 # 2. Standard Library checks
@@ -81,6 +86,7 @@ run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 
 # 7. Bootstrapping verification
 run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(sha256sum bin/novac-2 | awk '{print $1}') = $(sha256sum bin/novac-3 | awk '{print $1}') ]"
+run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -o /tmp/novac_c99 && /tmp/novac_c99 >/dev/null && rm -f /tmp/novac_c99"
 
 # 8. Compiler Fuzzing & Benchmarks
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"

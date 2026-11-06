@@ -15,6 +15,10 @@ echo "  NOVA TOOLCHAIN INSTALLER"
 echo "  Target Prefix: $PREFIX"
 echo "=========================================================="
 
+echo "-> Verifying system prerequisites..."
+command -v gcc >/dev/null 2>&1 || { echo "⚠️  Warning: 'gcc' not found. GCC or Clang is required for native compilation."; }
+command -v z3 >/dev/null 2>&1 || { echo "⚠️  Warning: 'z3' not found. Z3 SMT solver is recommended for refinement proofs."; }
+
 mkdir -p "$BIN_DIR" "$LIB_DIR/runtime" "$LIB_DIR/std"
 
 echo "-> Installing compiler binaries into $BIN_DIR..."
@@ -23,7 +27,8 @@ cp -f bin/orbit "$BIN_DIR/orbit"
 cp -f bin/nova-fmt "$BIN_DIR/nova-fmt"
 cp -f bin/nova-lsp "$BIN_DIR/nova-lsp"
 cp -f bin/nova-lint "$BIN_DIR/nova-lint"
-chmod +x "$BIN_DIR/novac" "$BIN_DIR/orbit" "$BIN_DIR/nova-fmt" "$BIN_DIR/nova-lsp" "$BIN_DIR/nova-lint"
+cp -f bin/nova-repl "$BIN_DIR/nova-repl"
+chmod +x "$BIN_DIR/novac" "$BIN_DIR/orbit" "$BIN_DIR/nova-fmt" "$BIN_DIR/nova-lsp" "$BIN_DIR/nova-lint" "$BIN_DIR/nova-repl"
 
 echo "-> Installing runtime headers into $LIB_DIR/runtime..."
 cp -f runtime/nova_rt.h "$LIB_DIR/runtime/nova_rt.h"
