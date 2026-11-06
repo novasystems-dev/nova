@@ -51,7 +51,13 @@ jobs:
         echo "=== Running Nova Test Suite ==="
         export PATH="$GITHUB_WORKSPACE/bin:$PATH"
         chmod +x tests/run_all.sh
-        ./tests/run_all.sh
+        ./tests/run_all.sh 2>&1 | tee /tmp/test_suite.log
+        EXIT_CODE=${PIPESTATUS[0]}
+        if [ $EXIT_CODE -ne 0 ]; then
+          ERR_MSG=$(tail -n 25 /tmp/test_suite.log | tr '\n' ' ')
+          echo "::error title=TestSuiteFailed::$ERR_MSG"
+          exit $EXIT_CODE
+        fi
 
     - name: Verify Package Manager & Deterministic Lockfile
       run: |
