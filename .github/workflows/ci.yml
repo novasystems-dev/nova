@@ -17,7 +17,8 @@ jobs:
     - name: Set up Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc make tree
+        sudo apt-get install -y gcc make tree libgmp-dev z3
+        chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/*
 
     - name: Test C99 Genesis Standalone Bootstrap
       run: |
