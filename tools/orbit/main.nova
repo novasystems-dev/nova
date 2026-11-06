@@ -38,8 +38,8 @@ fn orbit_new(name: String) -> Int:
     0
 
 fn orbit_build() -> Int:
-    if not fs_exists("Orbit.toml"):
-        print_str("Error: Orbit.toml not found in current directory.\n")
+    if not fs_exists("Orbit.toml") and not fs_exists("orbit.toml"):
+        print_str("Error: Could not find 'orbit.toml' in current directory.\n")
         return 1
 
     fs_mkdir_p("bin")
@@ -52,8 +52,8 @@ fn orbit_build() -> Int:
     code
 
 fn orbit_run() -> Int:
-    if not fs_exists("Orbit.toml"):
-        print_str("Error: Orbit.toml not found in current directory.\n")
+    if not fs_exists("Orbit.toml") and not fs_exists("orbit.toml"):
+        print_str("Error: Could not find 'orbit.toml' in current directory.\n")
         return 1
 
     print_str("     Running package (src/main.nova)...\n")
@@ -64,11 +64,14 @@ fn orbit_test() -> Int:
     process_run("if [ -f tests/run_all.sh ]; then ./tests/run_all.sh; else echo 'No test suite found'; fi")
 
 fn orbit_lock() -> Int:
-    if not fs_exists("Orbit.toml"):
-        print_str("Error: Orbit.toml not found in current directory.\n")
+    if not fs_exists("Orbit.toml") and not fs_exists("orbit.toml"):
+        print_str("Error: Could not find 'orbit.toml' in current directory.\n")
         return 1
 
-    let lock_hash = fs_sha256("src/main.nova")
+    let mut manifest = "Orbit.toml"
+    if fs_exists("orbit.toml"):
+        manifest = "orbit.toml"
+    let lock_hash = fs_sha256(manifest)
     let lock_content = str_concat3("# Orbit.lock (Pure Nova)\nversion = 1\nmanifest_hash = \"", lock_hash, "\"\n")
     fs_write_string("Orbit.lock", lock_content)
     print_str("    Generated Orbit.lock [sha256: ")
