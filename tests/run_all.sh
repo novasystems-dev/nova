@@ -12,11 +12,13 @@ run_test() {
     local name="$1"
     local cmd="$2"
     echo -n "-> Running: $name ... "
-    if eval "$cmd" > /dev/null 2>&1; then
+    local out
+    if out=$(eval "$cmd" 2>&1); then
         echo "PASSED"
         PASSED=$((PASSED + 1))
     else
         echo "FAILED"
+        echo "   [ERROR]: $out"
         FAILED=$((FAILED + 1))
     fi
 }
@@ -25,11 +27,13 @@ run_rejection_test() {
     local name="$1"
     local cmd="$2"
     echo -n "-> Running (negative check): $name ... "
-    if ! eval "$cmd" > /dev/null 2>&1; then
+    local out
+    if ! out=$(eval "$cmd" 2>&1); then
         echo "REJECTED AS EXPECTED (PASSED)"
         PASSED=$((PASSED + 1))
     else
         echo "FAILED (Unexpected success)"
+        echo "   [UNEXPECTED OUTPUT]: $out"
         FAILED=$((FAILED + 1))
     fi
 }

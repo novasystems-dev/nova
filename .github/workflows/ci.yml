@@ -27,6 +27,25 @@ jobs:
         file bin/novac-bootstrap-test
         ./bin/novac-bootstrap-test
 
+    - name: Set up Haskell Toolchain
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.6.6'
+        cabal-version: '3.10.3.0'
+
+    - name: Build Native Stage 0 novac & Native Orbit on Runner
+      run: |
+        echo "=== Building Stage 0 novac natively on Ubuntu Runner ==="
+        cd stage0
+        cabal update
+        cabal build
+        cp $(cabal list-bin novac) ../bin/novac
+        cd ..
+        echo "=== Compiling Native Orbit Package Manager from pure Nova ==="
+        ./bin/novac build tools/orbit/main.nova
+        mv main.out tools/orbit/orbit
+        chmod +x tools/orbit/orbit bin/*
+
     - name: Run Full Test Suite (44 Industrial Tests)
       run: |
         echo "=== Running Nova Test Suite ==="
