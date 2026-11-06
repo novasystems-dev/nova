@@ -46,7 +46,7 @@ jobs:
         mv main.out tools/orbit/orbit
         chmod +x tools/orbit/orbit bin/*
 
-    - name: Run Full Test Suite (49 Industrial Tests)
+    - name: Run Full Test Suite (53 Industrial Tests)
       run: |
         echo "=== Running Nova Test Suite ==="
         export PATH="$GITHUB_WORKSPACE/bin:$PATH"

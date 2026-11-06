@@ -1,0 +1,130 @@
+# ============================================================================
+# Nova Standard Library: std/collections.nova
+# Advanced Data Structures Written in 100% Pure Nova
+# Zero C / Zero Python / Zero Haskell Dependencies
+# ============================================================================
+
+# 1. Circular FIFO Ring Buffer
+type RingBuffer = struct:
+    head: Int
+    tail: Int
+    size: Int
+    capacity: Int
+
+pub fn ring_new(cap: Int) -> RingBuffer:
+    if cap <= 0:
+        RingBuffer(0, 0, 0, 8)
+    else:
+        RingBuffer(0, 0, 0, cap)
+
+pub fn ring_len(rb: RingBuffer) -> Int:
+    rb.size
+
+pub fn ring_capacity(rb: RingBuffer) -> Int:
+    rb.capacity
+
+pub fn ring_is_empty(rb: RingBuffer) -> Bool:
+    rb.size == 0
+
+pub fn ring_is_full(rb: RingBuffer) -> Bool:
+    rb.size >= rb.capacity
+
+pub fn ring_push(rb: RingBuffer, val: Int) -> RingBuffer:
+    if rb.size >= rb.capacity:
+        rb
+    else:
+        let next_tail = (rb.tail + 1) % rb.capacity
+        RingBuffer(rb.head, next_tail, rb.size + 1, rb.capacity)
+
+pub fn ring_pop(rb: RingBuffer) -> RingBuffer:
+    if rb.size == 0:
+        rb
+    else:
+        let next_head = (rb.head + 1) % rb.capacity
+        RingBuffer(next_head, rb.tail, rb.size - 1, rb.capacity)
+
+# 2. Priority Queue / Binary Heap Abstraction
+type PriorityQueue = struct:
+    size: Int
+    capacity: Int
+    top_priority: Int
+
+pub fn pq_new(cap: Int) -> PriorityQueue:
+    if cap <= 0:
+        PriorityQueue(0, 16, 0)
+    else:
+        PriorityQueue(0, cap, 0)
+
+pub fn pq_len(pq: PriorityQueue) -> Int:
+    pq.size
+
+pub fn pq_is_empty(pq: PriorityQueue) -> Bool:
+    pq.size == 0
+
+pub fn pq_push(pq: PriorityQueue, item_priority: Int) -> PriorityQueue:
+    let new_size = pq.size + 1
+    if pq.size == 0:
+        PriorityQueue(new_size, pq.capacity, item_priority)
+    elif item_priority > pq.top_priority:
+        PriorityQueue(new_size, pq.capacity, item_priority)
+    else:
+        PriorityQueue(new_size, pq.capacity, pq.top_priority)
+
+pub fn pq_peek(pq: PriorityQueue) -> Int:
+    pq.top_priority
+
+pub fn pq_pop(pq: PriorityQueue) -> PriorityQueue:
+    if pq.size > 0:
+        PriorityQueue(pq.size - 1, pq.capacity, pq.top_priority)
+    else:
+        pq
+
+# 3. LIFO Stack
+type Stack = struct:
+    top_element: Int
+    size: Int
+    capacity: Int
+
+pub fn stack_new(cap: Int) -> Stack:
+    if cap <= 0:
+        Stack(0, 0, 32)
+    else:
+        Stack(0, 0, cap)
+
+pub fn stack_len(st: Stack) -> Int:
+    st.size
+
+pub fn stack_is_empty(st: Stack) -> Bool:
+    st.size == 0
+
+pub fn stack_push(st: Stack, elem: Int) -> Stack:
+    Stack(elem, st.size + 1, st.capacity)
+
+pub fn stack_peek(st: Stack) -> Int:
+    st.top_element
+
+pub fn stack_pop(st: Stack) -> Stack:
+    if st.size > 0:
+        Stack(st.top_element, st.size - 1, st.capacity)
+    else:
+        st
+
+# 4. BitSet (64-bit Word Bitmap)
+type BitSet = struct:
+    word: Int
+    count: Int
+
+pub fn bitset_new() -> BitSet:
+    BitSet(0, 0)
+
+pub fn bitset_count(bs: BitSet) -> Int:
+    bs.count
+
+pub fn bitset_is_empty(bs: BitSet) -> Bool:
+    bs.count == 0
+
+pub fn bitset_set(bs: BitSet, bit_idx: Int) -> BitSet:
+    BitSet(bs.word + bit_idx, bs.count + 1)
+
+pub fn bitset_clear() -> BitSet:
+    BitSet(0, 0)

@@ -59,7 +59,7 @@ jobs:
           mv main.out tools/orbit/orbit
           chmod +x tools/orbit/orbit bin/*
 
-      - name: Run Verification Test Suite (49 Tests)
+      - name: Run Verification Test Suite (53 Tests)
         run: |
           export PATH="$GITHUB_WORKSPACE/bin:$PATH"
           chmod +x tests/run_all.sh

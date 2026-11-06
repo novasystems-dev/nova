@@ -68,6 +68,9 @@ run_test "Check std/math.nova" "./bin/novac check std/math.nova"
 run_test "Check std/time.nova" "./bin/novac check std/time.nova"
 run_test "Check std/crypto.nova" "./bin/novac check std/crypto.nova"
 run_test "Check std/http.nova" "./bin/novac check std/http.nova"
+run_test "Check std/collections.nova" "./bin/novac check std/collections.nova"
+run_test "Check std/db.nova" "./bin/novac check std/db.nova"
+run_test "Check std/encoding.nova" "./bin/novac check std/encoding.nova"
 
 # 3. Negative safety tests (Z3 SMT proof rejection)
 run_rejection_test "Reject division by unproven zero (05_bad_division.nova)" "./bin/novac check examples/05_bad_division.nova"
@@ -81,6 +84,7 @@ run_test "Execute 08_traits_and_baremetal.out" "./bin/novac run examples/08_trai
 run_test "Execute 09_std_industrial.out" "./bin/novac run examples/09_std_industrial.nova"
 run_test "Execute test_os_primitives.out" "./bin/novac run tests/test_os_primitives.nova"
 run_test "Execute test_super_libraries.out" "./bin/novac run tests/test_super_libraries.nova"
+run_test "Execute test_pure_nova_libraries.out" "./bin/novac run tests/test_pure_nova_libraries.nova"
 
 # 5. Intermediate Representations & Codegen
 run_test "Dump HIR (--dump-hir)" "./bin/novac --dump-hir examples/01_hello.nova"
