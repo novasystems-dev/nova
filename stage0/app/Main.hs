@@ -2,9 +2,9 @@
 
 module Main where
 
-import System.Environment (getArgs)
+import System.Environment (getArgs, getExecutablePath, lookupEnv)
 import System.Exit (exitFailure, exitSuccess)
-import System.FilePath (takeBaseName, (</>), replaceExtension)
+import System.FilePath (takeBaseName, takeDirectory, (</>))
 import System.Process (callCommand)
 import System.Directory (getCurrentDirectory, doesFileExist)
 import Data.Text (Text)
@@ -158,6 +158,25 @@ checkFile file = do
                             TIO.putStrLn "-> All formal properties verified. Ready for code generation."
                             return (Right ())
 
+findRuntimeDir :: IO FilePath
+findRuntimeDir = do
+    mEnv <- lookupEnv "NOVA_RUNTIME"
+    case mEnv of
+        Just p -> return p
+        Nothing -> do
+            currDir <- getCurrentDirectory
+            let currRt = currDir </> "runtime"
+            currExists <- doesFileExist (currRt </> "nova_rt.h")
+            if currExists
+                then return currRt
+                else do
+                    exePath <- getExecutablePath
+                    let parentRt = takeDirectory (takeDirectory exePath) </> "runtime"
+                    parentExists <- doesFileExist (parentRt </> "nova_rt.h")
+                    if parentExists
+                        then return parentRt
+                        else return currRt
+
 buildFile :: FilePath -> IO FilePath
 buildFile file = do
     content <- TIO.readFile file
@@ -176,7 +195,6 @@ buildFile file = do
                     let cFile = "/tmp/" <> base <> ".c"
                     let outBin = base <> ".out"
                     TIO.writeFile cFile cCode
-                    currDir <- getCurrentDirectory
-                    let runtimeDir = currDir </> "runtime"
+                    runtimeDir <- findRuntimeDir
                     compileAndLinkC99 cFile runtimeDir outBin
                     return outBin

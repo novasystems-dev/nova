@@ -93,6 +93,20 @@ bool nova_fs_write_string(const char *path, const char *content);
 bool nova_fs_exists(const char *path);
 int64_t nova_fs_file_size(const char *path);
 bool nova_fs_remove(const char *path);
+bool nova_fs_mkdir_p(const char *path);
+const char *nova_fs_sha256(const char *path);
+
+// OS & Process Operations (std/os)
+void nova_set_args(int argc, char **argv);
+int64_t nova_os_args_count(void);
+const char *nova_os_args_get(int64_t idx);
+int64_t nova_process_run(const char *cmd);
+const char *nova_os_getenv(const char *name);
+
+// String Utilities (std/string)
+bool nova_str_eq(const char *a, const char *b);
+const char *nova_str_concat(const char *a, const char *b);
+const char *nova_str_concat3(const char *a, const char *b, const char *c);
 
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);

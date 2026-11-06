@@ -333,7 +333,7 @@ parseAssignStmt = do
 parseReturnStmt :: P Stmt
 parseReturnStmt = do
     _ <- symbol "return"
-    val <- optional (spanned parseExpr)
+    val <- optional (try (spanned parseExpr))
     return $ StmtReturn val
 
 parseIfStmt :: Int -> P Stmt
@@ -427,7 +427,7 @@ parseExpr = E.makeExprParser parsePostfixExpr operatorTable
 
 operatorTable :: [[E.Operator P Expr]]
 operatorTable =
-    [ [ E.Prefix ((\e -> ExprUnary OpNot (Spanned e emptySpan)) <$ symbol "not")
+    [ [ E.Prefix ((\e -> ExprUnary OpNot (Spanned e emptySpan)) <$ lexeme (try (string "not" <* notFollowedBy (alphaNumChar <|> char '_'))))
       , E.Prefix ((\e -> ExprUnary OpNeg (Spanned e emptySpan)) <$ symbol "-")
       , E.Prefix ((\e -> ExprUnary OpBitNot (Spanned e emptySpan)) <$ symbol "~")
       , E.Prefix ((\e -> ExprUnary OpDeref (Spanned e emptySpan)) <$ symbol "*")
@@ -453,8 +453,8 @@ operatorTable =
     , [ E.InfixL (binaryOp OpBitAnd <$ symbol "&") ]
     , [ E.InfixL (binaryOp OpBitXor <$ symbol "^") ]
     , [ E.InfixL (binaryOp OpBitOr  <$ symbol "|") ]
-    , [ E.InfixL (binaryOp OpAnd <$ symbol "and") ]
-    , [ E.InfixL (binaryOp OpOr  <$ symbol "or")  ]
+    , [ E.InfixL (binaryOp OpAnd <$ lexeme (try (string "and" <* notFollowedBy (alphaNumChar <|> char '_')))) ]
+    , [ E.InfixL (binaryOp OpOr  <$ lexeme (try (string "or"  <* notFollowedBy (alphaNumChar <|> char '_')))) ]
     ]
   where
     binaryOp op lhs rhs =

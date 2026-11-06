@@ -1,0 +1,19 @@
+# Test: OS Primitives and Process Execution
+
+fn main():
+    let count = os_args_count()
+    print_str("OS Arg Count: ")
+    print_int(count)
+    print_newline()
+    let arg0 = os_args_get(0)
+    print_str("Arg 0: ")
+    print_str(arg0)
+    print_newline()
+    let created = fs_mkdir_p("/tmp/nova_test_dir/nested")
+    if created:
+        print_str("Directory creation verified\n")
+    let code = process_run("echo 'hello nova' > /tmp/nova_test_dir/nested/sample.txt")
+    let hash = fs_sha256("/tmp/nova_test_dir/nested/sample.txt")
+    print_str("Sample SHA256: ")
+    print_str(hash)
+    print_newline()

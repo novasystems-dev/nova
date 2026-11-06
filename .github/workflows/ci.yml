@@ -1,0 +1,45 @@
+name: Nova CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make tree
+
+    - name: Test C99 Genesis Standalone Bootstrap
+      run: |
+        echo "=== Compiling novac from Genesis Snapshot C99 (Zero Haskell/Cabal required) ==="
+        gcc -O2 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -o bin/novac-bootstrap-test
+        file bin/novac-bootstrap-test
+        ./bin/novac-bootstrap-test
+
+    - name: Run Full Test Suite (44 Industrial Tests)
+      run: |
+        echo "=== Running Nova Test Suite ==="
+        export PATH="$GITHUB_WORKSPACE/bin:$PATH"
+        chmod +x tests/run_all.sh
+        ./tests/run_all.sh
+
+    - name: Verify Package Manager & Deterministic Lockfile
+      run: |
+        echo "=== Testing Orbit Package Management ==="
+        export PATH="$GITHUB_WORKSPACE/bin:$PATH"
+        orbit new test_project
+        cd test_project
+        orbit run
+        orbit lock
+        test -f Orbit.lock
+        cat Orbit.lock

@@ -135,8 +135,11 @@ emitTopLevelFn fnTypes (Spanned (TopFn FnDecl{..}) _) =
             Just (TyNamed "Void") -> False
             Just _                -> True
             Nothing               -> False
-        bodyCode = T.unlines (map (emitStmt fnTypes inReturnFn) fnBody)
-        mainInit = if isMain then "    nova_rt_init();\n    pthread_t _th = 0;\n"
+        emitBodyStmts [] = []
+        emitBodyStmts [lastStmt] = [emitStmt fnTypes inReturnFn lastStmt]
+        emitBodyStmts (s:ss)     = emitStmt fnTypes False s : emitBodyStmts ss
+        bodyCode = T.unlines (emitBodyStmts fnBody)
+        mainInit = if isMain then "    nova_set_args(argc, argv);\n    nova_rt_init();\n    pthread_t _th = 0;\n"
                    else if isWorker then "    NovaChannel *rx = (NovaChannel *)_arg;\n"
                    else ""
         mainExit = if isMain then "    nova_rt_shutdown();\n    return 0;\n"

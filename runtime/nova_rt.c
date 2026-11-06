@@ -1,4 +1,5 @@
-#define _POSIX_C_SOURCE 199309L
+#define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
 #include "nova_rt.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,8 +10,17 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #define DEFAULT_ARENA_SIZE (1024 * 1024) // 1MB default region chunk
+
+static int g_nova_argc = 0;
+static char **g_nova_argv = NULL;
+
+void nova_set_args(int argc, char **argv) {
+    g_nova_argc = argc;
+    g_nova_argv = argv;
+}
 
 void nova_rt_init(void) {
     // Runtime initialization hooks
@@ -401,4 +411,93 @@ int64_t nova_fs_file_size(const char *path) {
 bool nova_fs_remove(const char *path) {
     if (!path) return false;
     return unlink(path) == 0;
+}
+
+bool nova_fs_mkdir_p(const char *path) {
+    if (!path || strlen(path) == 0) return false;
+    char tmp[1024];
+    snprintf(tmp, sizeof(tmp), "mkdir -p \"%s\" 2>/dev/null", path);
+    return system(tmp) == 0;
+}
+
+const char *nova_fs_sha256(const char *path) {
+    if (!path) return "0000000000000000000000000000000000000000000000000000000000000000";
+    char cmd[1024];
+    snprintf(cmd, sizeof(cmd), "sha256sum \"%s\" 2>/dev/null | awk '{print $1}'", path);
+    FILE *p = popen(cmd, "r");
+    if (!p) return "0000000000000000000000000000000000000000000000000000000000000000";
+    static char hash[65];
+    if (fgets(hash, sizeof(hash), p)) {
+        size_t len = strlen(hash);
+        if (len > 0 && hash[len - 1] == '\n') hash[len - 1] = '\0';
+        pclose(p);
+        return strdup(hash);
+    }
+    pclose(p);
+    return "0000000000000000000000000000000000000000000000000000000000000000";
+}
+
+// ============================================================================
+// OS & PROCESS OPERATIONS (std/os)
+// ============================================================================
+
+int64_t nova_os_args_count(void) {
+    return (int64_t)g_nova_argc;
+}
+
+const char *nova_os_args_get(int64_t idx) {
+    if (idx >= 0 && idx < g_nova_argc && g_nova_argv) {
+        return g_nova_argv[idx];
+    }
+    return "";
+}
+
+int64_t nova_process_run(const char *cmd) {
+    if (!cmd) return -1;
+    int res = system(cmd);
+    return (int64_t)WEXITSTATUS(res);
+}
+
+const char *nova_os_getenv(const char *name) {
+    if (!name) return "";
+    const char *val = getenv(name);
+    return val ? val : "";
+}
+
+// ============================================================================
+// STRING UTILITIES (std/string)
+// ============================================================================
+
+bool nova_str_eq(const char *a, const char *b) {
+    if (!a || !b) return a == b;
+    return strcmp(a, b) == 0;
+}
+
+const char *nova_str_concat(const char *a, const char *b) {
+    if (!a) a = "";
+    if (!b) b = "";
+    size_t la = strlen(a);
+    size_t lb = strlen(b);
+    char *res = (char *)malloc(la + lb + 1);
+    if (!res) return "";
+    memcpy(res, a, la);
+    memcpy(res + la, b, lb);
+    res[la + lb] = '\0';
+    return res;
+}
+
+const char *nova_str_concat3(const char *a, const char *b, const char *c) {
+    if (!a) a = "";
+    if (!b) b = "";
+    if (!c) c = "";
+    size_t la = strlen(a);
+    size_t lb = strlen(b);
+    size_t lc = strlen(c);
+    char *res = (char *)malloc(la + lb + lc + 1);
+    if (!res) return "";
+    memcpy(res, a, la);
+    memcpy(res + la, b, lb);
+    memcpy(res + la + lb, c, lc);
+    res[la + lb + lc] = '\0';
+    return res;
 }

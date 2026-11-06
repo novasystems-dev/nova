@@ -64,12 +64,17 @@ parseKeyword = lexeme $ choice
     , KwRef      <$ string "ref"
     ] <* notFollowedBy alphaNumChar
 
+keywords :: [Text]
+keywords = ["fn", "let", "type", "match", "if", "elif", "else", "for", "while", "return", "break", "continue", "pub", "import", "trait", "impl", "unsafe", "true", "false"]
+
 parseIdentifier :: Parser Text
 parseIdentifier = lexeme $ do
     c <- letterChar <|> char '_'
     cs <- many (alphaNumChar <|> char '_')
     let ident = T.pack (c:cs)
-    return ident
+    if ident `elem` keywords
+        then fail $ "unexpected keyword: " ++ T.unpack ident
+        else return ident
 
 parseLiteral :: Parser Literal
 parseLiteral = lexeme $ choice

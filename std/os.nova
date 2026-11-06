@@ -1,0 +1,20 @@
+# Nova Standard Library: std/os.nova
+# Operating System, Process Execution, CLI Arguments, and Environment Primitives
+
+fn os_args_count() -> Int:
+    nova_os_args_count()
+
+fn os_args_get(idx: Int) -> String:
+    nova_os_args_get(idx)
+
+fn os_exec(cmd: String) -> Int:
+    nova_process_run(cmd)
+
+fn os_getenv(name: String) -> String:
+    nova_os_getenv(name)
+
+fn os_mkdir_p(path: String) -> Bool:
+    nova_fs_mkdir_p(path)
+
+fn os_sha256(path: String) -> String:
+    nova_fs_sha256(path)
