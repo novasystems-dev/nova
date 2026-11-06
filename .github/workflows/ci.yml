@@ -23,7 +23,7 @@ jobs:
     - name: Test C99 Genesis Standalone Bootstrap
       run: |
         echo "=== Compiling novac from Genesis Snapshot C99 (Zero Haskell/Cabal required) ==="
-        gcc -O2 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -o bin/novac-bootstrap-test
+        gcc -O2 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm -o bin/novac-bootstrap-test
         file bin/novac-bootstrap-test
         ./bin/novac-bootstrap-test
 
@@ -46,7 +46,7 @@ jobs:
         mv main.out tools/orbit/orbit
         chmod +x tools/orbit/orbit bin/*
 
-    - name: Run Full Test Suite (44 Industrial Tests)
+    - name: Run Full Test Suite (49 Industrial Tests)
       run: |
         echo "=== Running Nova Test Suite ==="
         export PATH="$GITHUB_WORKSPACE/bin:$PATH"

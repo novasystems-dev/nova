@@ -1,0 +1,31 @@
+# Nova Standard Library: std/http.nova
+# Advanced HTTP Request Routing and Microservices Framework
+
+type HttpRequest = struct:
+    method: String
+    path: String
+    body: String
+
+type HttpHandlerResponse = struct:
+    status_code: String
+    content_type: String
+    body: String
+
+fn http_req(method: String, path: String, body: String) -> HttpRequest:
+    HttpRequest(method, path, body)
+
+fn http_ok(body: String) -> HttpHandlerResponse:
+    HttpHandlerResponse("200 OK", "text/plain", body)
+
+fn http_json(json_data: String) -> HttpHandlerResponse:
+    HttpHandlerResponse("200 OK", "application/json", json_data)
+
+fn http_not_found() -> HttpHandlerResponse:
+    HttpHandlerResponse("404 Not Found", "application/json", "{\"error\":\"Route Not Found\"}")
+
+fn http_bad_request(msg: String) -> HttpHandlerResponse:
+    let body = str_concat3("{\"error\":\"", msg, "\"}")
+    HttpHandlerResponse("400 Bad Request", "application/json", body)
+
+fn http_match_path(req_path: String, pattern: String) -> Bool:
+    str_eq(req_path, pattern)

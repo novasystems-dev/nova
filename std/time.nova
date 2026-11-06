@@ -1,0 +1,25 @@
+# Nova Standard Library: std/time.nova
+# High-precision monotonic timer, benchmarking, and real-time clocks
+
+type Timer = struct:
+    start_ns: Int
+
+fn time_now_ms() -> Int:
+    nova_time_now_ms()
+
+fn time_now_ns() -> Int:
+    nova_time_now_ns()
+
+fn time_sleep_ms(ms: Int):
+    nova_time_sleep_ms(ms)
+
+fn timer_start() -> Timer:
+    Timer(nova_time_now_ns())
+
+fn timer_elapsed_ms(t: Timer) -> Int:
+    let now = nova_time_now_ns()
+    (now - t.start_ns) / 1000000
+
+fn timer_elapsed_us(t: Timer) -> Int:
+    let now = nova_time_now_ns()
+    (now - t.start_ns) / 1000

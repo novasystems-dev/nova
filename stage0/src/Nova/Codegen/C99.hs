@@ -438,5 +438,5 @@ emitUnOp OpAddrOf = "&"
 compileAndLinkC99 :: FilePath -> FilePath -> FilePath -> IO ()
 compileAndLinkC99 cSource runtimeDir outBinary = do
     let runtimeC = runtimeDir </> "nova_rt.c"
-    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -lpthread -o " <> outBinary
+    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -lpthread -lm -o " <> outBinary
     callCommand cmd

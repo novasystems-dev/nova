@@ -1,0 +1,12 @@
+# Nova Standard Library: std/crypto.nova
+# High-performance cryptographic hashing (SHA-256) and digest verification
+
+fn crypto_sha256(data: String) -> String:
+    nova_crypto_sha256(data)
+
+fn crypto_sha256_file(path: String) -> String:
+    nova_crypto_sha256_file(path)
+
+fn crypto_verify_hash(data: String, expected_hash: String) -> Bool:
+    let computed = nova_crypto_sha256(data)
+    str_eq(computed, expected_hash)

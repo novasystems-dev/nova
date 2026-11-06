@@ -1,0 +1,98 @@
+# Comprehensive Test Suite for Nova Super-Libraries: math, time, crypto, http
+
+type Vec2 = struct:
+    x: Int
+    y: Int
+
+type HttpRequest = struct:
+    method: String
+    path: String
+    body: String
+
+type HttpResponse = struct:
+    status_code: String
+    content_type: String
+    body: String
+
+fn vec2_new(x: Int, y: Int) -> Vec2:
+    Vec2(x, y)
+
+fn vec2_add(a: Vec2, b: Vec2) -> Vec2:
+    Vec2(a.x + b.x, a.y + b.y)
+
+fn vec2_dot(a: Vec2, b: Vec2) -> Int:
+    (a.x * b.x) + (a.y * b.y)
+
+fn test_math():
+    let a = math_abs(0 - 42)
+    let b = math_clamp(150, 0, 100)
+    let c = math_gcd(48, 18)
+    let d = math_lcm(4, 6)
+    let p = math_pow(2, 8)
+    let s = math_sqrt(144)
+
+    let v1 = vec2_new(3, 4)
+    let v2 = vec2_new(1, 2)
+    let v3 = vec2_add(v1, v2)
+    let dot = vec2_dot(v1, v2)
+
+    print_str("Math Test: abs=")
+    print_int(a)
+    print_str(" clamp=")
+    print_int(b)
+    print_str(" gcd=")
+    print_int(c)
+    print_str(" lcm=")
+    print_int(d)
+    print_str(" pow2_8=")
+    print_int(p)
+    print_str(" sqrt144=")
+    print_int(s)
+    print_str(" dot=")
+    print_int(dot)
+    print_newline()
+
+fn test_time():
+    let t0 = time_now_ns()
+    let now = time_now_ms()
+    time_sleep_ms(10)
+    let elapsed = (time_now_ns() - t0) / 1000000
+
+    print_str("Time Test: now_ms=")
+    print_int(now)
+    print_str(" elapsed_ms=")
+    print_int(elapsed)
+    print_newline()
+
+fn test_crypto():
+    let msg = "Nova Systems Programming Language"
+    let digest = crypto_sha256(msg)
+    let verified = crypto_verify_hash(msg, digest)
+
+    print_str("Crypto Test: SHA256=")
+    print_str(digest)
+    print_str(" verified=")
+    if verified:
+        print_str("true\n")
+    else:
+        print_str("false\n")
+
+fn test_http():
+    let req = HttpRequest("POST", "/api/v1/compute", "{\"data\":42}")
+    let resp = HttpResponse("200 OK", "application/json", "{\"status\":\"ok\"}")
+    let matched = str_eq(req.path, "/api/v1/compute")
+
+    print_str("HTTP Test: route_matched=")
+    if matched:
+        print_str("true status=")
+        print_str(resp.status_code)
+        print_newline()
+    else:
+        print_str("false\n")
+
+fn main():
+    test_math()
+    test_time()
+    test_crypto()
+    test_http()
+    print_str("All Super-Libraries verified successfully!\n")

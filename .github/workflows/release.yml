@@ -1,0 +1,121 @@
+name: Nova Release & Multi-Platform Packaging
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag Name (e.g. v0.1.1)'
+        required: true
+        default: 'v0.1.1'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-package:
+    name: Build & Package (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64
+            archive_ext: tar.gz
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Environment (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make tree libgmp-dev z3
+          chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/* tools/*.sh
+
+      - name: Set up Haskell Toolchain
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6.6'
+          cabal-version: '3.10.3.0'
+
+      - name: Build Native Stage 0 novac & Orbit on Runner
+        run: |
+          echo "=== Building Stage 0 novac on Runner ==="
+          cd stage0
+          cabal update
+          cabal build
+          cp $(cabal list-bin novac) ../bin/novac
+          cd ..
+          echo "=== Compiling Native Orbit Package Manager from pure Nova ==="
+          ./bin/novac build tools/orbit/main.nova
+          mv main.out tools/orbit/orbit
+          chmod +x tools/orbit/orbit bin/*
+
+      - name: Run Verification Test Suite (49 Tests)
+        run: |
+          export PATH="$GITHUB_WORKSPACE/bin:$PATH"
+          chmod +x tests/run_all.sh
+          ./tests/run_all.sh
+
+      - name: Package Runtime & Full-Dev Distributions
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "master" ]; then
+            VERSION="${{ github.event.inputs.tag_name || 'v0.1.1' }}"
+          fi
+          ./tools/package.sh "$VERSION" "${{ matrix.target }}"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nova-${{ matrix.target }}
+          path: dist/*.*
+
+  create-github-release:
+    name: Publish GitHub Release & Update Floating 'latest' Tag
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Packaged Distribution Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Display Downloaded Artifacts & Checksums
+        run: |
+          echo "=== Release Artifacts ==="
+          ls -la release-assets/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name || github.event.inputs.tag_name }}
+          name: Nova Systems Language ${{ github.ref_name || github.event.inputs.tag_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Floating 'latest' Tag
+        run: |
+          echo "=== Updating floating tag 'latest' to point to current release commit ==="
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -fa latest -m "Release: Latest Stable Version"
+          git push origin latest --force

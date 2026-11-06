@@ -108,6 +108,26 @@ bool nova_str_eq(const char *a, const char *b);
 const char *nova_str_concat(const char *a, const char *b);
 const char *nova_str_concat3(const char *a, const char *b, const char *c);
 
+// High-Precision Time Operations (std/time)
+int64_t nova_time_now_ms(void);
+int64_t nova_time_now_ns(void);
+void nova_time_sleep_ms(int64_t ms);
+
+// Mathematical Operations (std/math)
+int64_t nova_math_abs(int64_t x);
+int64_t nova_math_min(int64_t a, int64_t b);
+int64_t nova_math_max(int64_t a, int64_t b);
+int64_t nova_math_clamp(int64_t v, int64_t low, int64_t high);
+int64_t nova_math_sqrt(int64_t x);
+int64_t nova_math_pow(int64_t base, int64_t exp);
+int64_t nova_math_gcd(int64_t a, int64_t b);
+int64_t nova_math_lcm(int64_t a, int64_t b);
+
+// Cryptographic Operations (std/crypto)
+const char *nova_crypto_sha256(const char *input);
+const char *nova_crypto_sha256_file(const char *path);
+bool nova_crypto_verify_hash(const char *data, const char *expected_hash);
+
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);
 
