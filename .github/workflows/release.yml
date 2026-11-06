@@ -19,13 +19,21 @@ jobs:
   build-and-package:
     name: Build & Package (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             target: linux-x86_64
-            archive_ext: tar.gz
+          - os: macos-latest
+            target: macos-aarch64
+          - os: macos-13
+            target: macos-x86_64
+          - os: windows-latest
+            target: windows-x86_64
 
     steps:
       - name: Checkout Code
@@ -33,12 +41,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Environment (Ubuntu)
+      - name: Set up Environment (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc make tree libgmp-dev z3
           chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/* tools/*.sh
+
+      - name: Set up Environment (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install z3
+          chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/* tools/*.sh
+
+      - name: Set up Environment (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install z3 -y
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
@@ -52,14 +71,18 @@ jobs:
           cd stage0
           cabal update
           cabal build
-          cp $(cabal list-bin novac) ../bin/novac
+          NOVAC_BIN=$(cabal list-bin novac)
+          cp "$NOVAC_BIN" ../bin/novac 2>/dev/null || true
+          cp "$NOVAC_BIN" ../bin/novac.exe 2>/dev/null || true
           cd ..
           echo "=== Compiling Native Orbit & Nova-Doc from pure Nova ==="
-          ./bin/novac build tools/orbit/main.nova
-          mv main.out tools/orbit/orbit
-          ./bin/novac build tools/docgen/main.nova
-          mv main.out bin/nova-doc
-          chmod +x tools/orbit/orbit bin/*
+          NOVAC="./bin/novac"
+          if [ -f "bin/novac.exe" ]; then NOVAC="./bin/novac.exe"; fi
+          $NOVAC build tools/orbit/main.nova
+          mv main.out tools/orbit/orbit 2>/dev/null || mv main.out.exe tools/orbit/orbit.exe 2>/dev/null || true
+          $NOVAC build tools/docgen/main.nova
+          mv main.out bin/nova-doc 2>/dev/null || mv main.out.exe bin/nova-doc.exe 2>/dev/null || true
+          chmod +x tools/orbit/orbit* bin/* 2>/dev/null || true
 
       - name: Run Verification Test Suite (59 Tests)
         run: |

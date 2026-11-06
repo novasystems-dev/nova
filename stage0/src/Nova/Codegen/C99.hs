@@ -12,6 +12,7 @@ import qualified Data.Map.Strict as Map
 import System.Process (callCommand)
 import System.FilePath ((</>))
 import Data.Char (isUpper)
+import qualified System.Info as Info
 
 import Nova.Syntax.Span
 import Nova.Syntax.Token
@@ -438,5 +439,6 @@ emitUnOp OpAddrOf = "&"
 compileAndLinkC99 :: FilePath -> FilePath -> FilePath -> IO ()
 compileAndLinkC99 cSource runtimeDir outBinary = do
     let runtimeC = runtimeDir </> "nova_rt.c"
-    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -lpthread -lm -o " <> outBinary
+    let winLibs = if Info.os == "mingw32" then " -lws2_32" else ""
+    let cmd = "gcc -O3 -std=c99 -I" <> runtimeDir <> " " <> cSource <> " " <> runtimeC <> " -lpthread -lm" <> winLibs <> " -o " <> outBinary
     callCommand cmd

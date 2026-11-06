@@ -4,14 +4,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
 #include <math.h>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <io.h>
+#include <process.h>
+#define F_OK 0
+#define access _access
+#define unlink _unlink
+#define NOVA_CLOSE_SOCKET(s) closesocket((SOCKET)(s))
+#else
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#define NOVA_CLOSE_SOCKET(s) close((int)(s))
+#endif
 
 #define DEFAULT_ARENA_SIZE (1024 * 1024) // 1MB default region chunk
 
@@ -24,11 +38,16 @@ void nova_set_args(int argc, char **argv) {
 }
 
 void nova_rt_init(void) {
-    // Runtime initialization hooks
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
 }
 
 void nova_rt_shutdown(void) {
-    // Teardown
+#ifdef _WIN32
+    WSACleanup();
+#endif
 }
 
 NovaArena *nova_arena_create(size_t capacity) {
@@ -268,7 +287,7 @@ int64_t nova_tcp_listen(int64_t port) {
     }
     
     if (listen(server_fd, 128) < 0) {
-        close(server_fd);
+        NOVA_CLOSE_SOCKET(server_fd);
         return -3;
     }
     
@@ -295,18 +314,26 @@ int64_t nova_tcp_send_response(int64_t client_fd, const char *status_code, const
         status_code ? status_code : "200 OK",
         body_len);
     
+#ifdef _WIN32
+    int w1 = send((SOCKET)client_fd, header, header_len, 0);
+    int w2 = 0;
+    if (body_len > 0) {
+        w2 = send((SOCKET)client_fd, body, (int)body_len, 0);
+    }
+#else
     ssize_t w1 = write((int)client_fd, header, (size_t)header_len);
     ssize_t w2 = 0;
     if (body_len > 0) {
         w2 = write((int)client_fd, body, body_len);
     }
-    close((int)client_fd);
+#endif
+    NOVA_CLOSE_SOCKET(client_fd);
     return (int64_t)(w1 + w2);
 }
 
 void nova_tcp_close(int64_t fd) {
     if (fd >= 0) {
-        close((int)fd);
+        NOVA_CLOSE_SOCKET(fd);
     }
 }
 
@@ -417,7 +444,11 @@ bool nova_fs_remove(const char *path) {
 bool nova_fs_mkdir_p(const char *path) {
     if (!path || strlen(path) == 0) return false;
     char tmp[1024];
+#ifdef _WIN32
+    snprintf(tmp, sizeof(tmp), "mkdir \"%s\" 2>nul", path);
+#else
     snprintf(tmp, sizeof(tmp), "mkdir -p \"%s\" 2>/dev/null", path);
+#endif
     return system(tmp) == 0;
 }
 
@@ -521,10 +552,14 @@ int64_t nova_time_now_ns(void) {
 
 void nova_time_sleep_ms(int64_t ms) {
     if (ms <= 0) return;
+#ifdef _WIN32
+    Sleep((DWORD)ms);
+#else
     struct timespec req;
     req.tv_sec = ms / 1000;
     req.tv_nsec = (ms % 1000) * 1000000L;
     nanosleep(&req, NULL);
+#endif
 }
 
 // ============================================================================

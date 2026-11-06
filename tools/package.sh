@@ -40,14 +40,17 @@ mkdir -p "$FULL_DIR"
 echo "-> Creating Full Developer package: ${FULL_PKG_NAME}..."
 mkdir -p "$FULL_DIR/bin"
 # Copy binaries dereferencing symlinks so archives are self-contained
-cp -L bin/novac "$FULL_DIR/bin/"
-cp -L bin/orbit "$FULL_DIR/bin/"
-cp -L bin/nova-repl "$FULL_DIR/bin/"
-cp -L bin/nova-lsp "$FULL_DIR/bin/"
-cp -L bin/nova-fmt "$FULL_DIR/bin/"
-cp -L bin/nova-lint "$FULL_DIR/bin/"
+cp -L bin/novac "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/novac.exe "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/orbit "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/orbit.exe "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-repl "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-lsp "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-fmt "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-lint "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-doc "$FULL_DIR/bin/" 2>/dev/null || true
-chmod +x "$FULL_DIR/bin/"*
+cp -L bin/nova-doc.exe "$FULL_DIR/bin/" 2>/dev/null || true
+chmod +x "$FULL_DIR/bin/"* 2>/dev/null || true
 
 cp -r runtime "$FULL_DIR/"
 cp -r std "$FULL_DIR/"
@@ -64,9 +67,22 @@ rm -rf "$FULL_DIR"
 # 3. Generate SHA-256 Checksums
 echo "-> Computing cryptographic SHA-256 integrity checksums..."
 cd "$DIST_DIR"
-sha256sum "nova-runtime-${VERSION}-${TARGET}.tar.gz" > "nova-runtime-${VERSION}-${TARGET}.tar.gz.sha256"
-sha256sum "nova-dev-full-${VERSION}-${TARGET}.tar.gz" > "nova-dev-full-${VERSION}-${TARGET}.tar.gz.sha256"
-sha256sum "nova-runtime-${VERSION}-${TARGET}.tar.gz" "nova-dev-full-${VERSION}-${TARGET}.tar.gz" >> "SHA256SUMS.txt"
+
+compute_sha256() {
+    local file="$1"
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$file"
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$file"
+    else
+        openssl dgst -sha256 "$file" | awk '{print $NF, "'"$file"'"}'
+    fi
+}
+
+compute_sha256 "nova-runtime-${VERSION}-${TARGET}.tar.gz" > "nova-runtime-${VERSION}-${TARGET}.tar.gz.sha256"
+compute_sha256 "nova-dev-full-${VERSION}-${TARGET}.tar.gz" > "nova-dev-full-${VERSION}-${TARGET}.tar.gz.sha256"
+cat "nova-runtime-${VERSION}-${TARGET}.tar.gz.sha256" >> "SHA256SUMS.txt"
+cat "nova-dev-full-${VERSION}-${TARGET}.tar.gz.sha256" >> "SHA256SUMS.txt"
 cd ..
 
 echo "=========================================================="
