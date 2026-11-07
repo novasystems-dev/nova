@@ -19,17 +19,25 @@ except ImportError:
     pass
 
 def find_novac():
-    if "NOVAC_BIN" in os.environ and os.path.exists(os.environ["NOVAC_BIN"]):
-        return os.environ["NOVAC_BIN"]
+    if "NOVAC_BIN" in os.environ:
+        nb = os.environ["NOVAC_BIN"]
+        if os.path.exists(nb):
+            return nb
+        if os.path.exists(nb + ".exe"):
+            return nb + ".exe"
     which_novac = shutil.which("novac")
     if which_novac and os.path.exists(which_novac):
         return which_novac
     rel_novac = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bin/novac"))
     if os.path.exists(rel_novac):
         return rel_novac
+    if os.path.exists(rel_novac + ".exe"):
+        return rel_novac + ".exe"
     home_novac = os.path.expanduser("~/Documents/Nova/bin/novac")
     if os.path.exists(home_novac):
         return home_novac
+    if os.path.exists(home_novac + ".exe"):
+        return home_novac + ".exe"
     return "novac"
 
 NOVAC_BIN = find_novac()

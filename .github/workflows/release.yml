@@ -91,11 +91,38 @@ jobs:
           cd stage0
           cabal update
           cabal build
-          NOVAC_BIN=$(cabal list-bin novac)
+          RAW_BIN=$(cabal -v0 list-bin novac)
           cd ..
-          cp "$NOVAC_BIN" bin/novac 2>/dev/null || true
-          cp "$NOVAC_BIN" bin/novac.exe 2>/dev/null || true
+
+          if command -v cygpath >/dev/null 2>&1; then
+            NOVAC_BIN=$(cygpath -u "$RAW_BIN" 2>/dev/null || echo "$RAW_BIN" | tr '\\' '/')
+          else
+            NOVAC_BIN=$(echo "$RAW_BIN" | tr '\\' '/')
+          fi
+
+          echo "cabal list-bin output: '$RAW_BIN' -> normalized: '$NOVAC_BIN'"
+          if [ ! -f "$NOVAC_BIN" ]; then
+            echo "Searching fallback in stage0/dist-newstyle..."
+            FALLBACK_BIN=$(find stage0/dist-newstyle -type f \( -name "novac" -o -name "novac.exe" \) | head -n 1)
+            echo "Fallback found: '$FALLBACK_BIN'"
+            if [ -n "$FALLBACK_BIN" ] && [ -f "$FALLBACK_BIN" ]; then
+              NOVAC_BIN="$FALLBACK_BIN"
+            fi
+          fi
+
+          echo "Using novac binary: '$NOVAC_BIN'"
+          if [ ! -f "$NOVAC_BIN" ]; then
+            echo "::error title=Compiler Not Found::Stage 0 novac binary could not be found"
+            exit 1
+          fi
+
+          # Remove pre-existing repository bin/novac (Linux ELF) so it is not run on Windows/macOS
+          rm -f bin/novac bin/novac.exe
+          cp -f "$NOVAC_BIN" bin/novac
+          cp -f "$NOVAC_BIN" bin/novac.exe 2>/dev/null || true
           chmod +x bin/novac* 2>/dev/null || true
+          echo "=== Installed novac binary ==="
+          ls -la bin/novac*
 
           echo "=== Resolving tool script permissions & links ==="
           for tool in bin/nova-fmt bin/nova-lint bin/nova-repl bin/nova-lsp; do
@@ -114,25 +141,27 @@ jobs:
 
           $NOVAC build tools/orbit/main.nova || { echo "::error title=Orbit Build Failed::Failed to compile tools/orbit/main.nova with novac"; exit 1; }
           if [ -f "main.out" ]; then
-            cp main.out tools/orbit/orbit
-            cp main.out bin/orbit
-          elif [ -f "main.out.exe" ]; then
-            cp main.out.exe tools/orbit/orbit.exe
-            cp main.out.exe tools/orbit/orbit
-            cp main.out.exe bin/orbit.exe
-            cp main.out.exe bin/orbit
+            cp -f main.out tools/orbit/orbit
+            cp -f main.out bin/orbit
+          fi
+          if [ -f "main.out.exe" ]; then
+            cp -f main.out.exe tools/orbit/orbit.exe
+            cp -f main.out.exe tools/orbit/orbit 2>/dev/null || true
+            cp -f main.out.exe bin/orbit.exe
+            cp -f main.out.exe bin/orbit 2>/dev/null || true
           fi
           rm -f main.out main.out.exe
 
           $NOVAC build tools/docgen/main.nova || { echo "::error title=DocGen Build Failed::Failed to compile tools/docgen/main.nova with novac"; exit 1; }
           if [ -f "main.out" ]; then
-            cp main.out tools/docgen/nova_doc
-            cp main.out bin/nova-doc
-          elif [ -f "main.out.exe" ]; then
-            cp main.out.exe tools/docgen/nova_doc.exe
-            cp main.out.exe tools/docgen/nova_doc
-            cp main.out.exe bin/nova-doc.exe
-            cp main.out.exe bin/nova-doc
+            cp -f main.out tools/docgen/nova_doc
+            cp -f main.out bin/nova-doc
+          fi
+          if [ -f "main.out.exe" ]; then
+            cp -f main.out.exe tools/docgen/nova_doc.exe
+            cp -f main.out.exe tools/docgen/nova_doc 2>/dev/null || true
+            cp -f main.out.exe bin/nova-doc.exe
+            cp -f main.out.exe bin/nova-doc 2>/dev/null || true
           fi
           rm -f main.out main.out.exe
 
