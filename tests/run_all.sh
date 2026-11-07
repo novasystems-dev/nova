@@ -196,6 +196,16 @@ run_test "Check std/async_runtime.nova" "./bin/novac check std/async_runtime.nov
 run_test "Check std/colossus_web.nova" "./bin/novac check std/colossus_web.nova"
 run_test "Check std/titan_db.nova" "./bin/novac check std/titan_db.nova"
 run_test "Check std/aether_gfx.nova" "./bin/novac check std/aether_gfx.nova"
+run_test "Check std/ml_tensor.nova" "./bin/novac check std/ml_tensor.nova"
+run_test "Check std/crypto_postquantum.nova" "./bin/novac check std/crypto_postquantum.nova"
+run_test "Check std/distributed_cluster.nova" "./bin/novac check std/distributed_cluster.nova"
+run_test "Check std/tls13.nova" "./bin/novac check std/tls13.nova"
+run_test "Check std/grpc_pure.nova" "./bin/novac check std/grpc_pure.nova"
+run_test "Check std/columnar_store.nova" "./bin/novac check std/columnar_store.nova"
+run_test "Check std/sql_query_engine.nova" "./bin/novac check std/sql_query_engine.nova"
+run_test "Check std/linear_algebra.nova" "./bin/novac check std/linear_algebra.nova"
+run_test "Check std/lockfree_queue.nova" "./bin/novac check std/lockfree_queue.nova"
+run_test "Check std/bytecode_vm.nova" "./bin/novac check std/bytecode_vm.nova"
 
 # 3. Negative safety tests (Z3 SMT proof rejection)
 run_rejection_test "Reject division by unproven zero (05_bad_division.nova)" "./bin/novac check examples/05_bad_division.nova"
@@ -238,6 +248,7 @@ run_test "Execute test_http2_framing.out" "./bin/novac run tests/test_http2_fram
 run_test "Execute test_sha3_keccak.out" "./bin/novac run tests/test_sha3_keccak.nova"
 run_test "Execute test_wav_audio.out" "./bin/novac run tests/test_wav_audio.nova"
 run_test "Execute test_spatial_geometry.out" "./bin/novac run tests/test_spatial_geometry.nova"
+run_test "Execute test_million_scale_ecosystem.out" "./bin/novac run tests/test_million_scale_ecosystem.nova"
 
 # 5. Intermediate Representations & Codegen
 run_test "Dump HIR (--dump-hir)" "./bin/novac --dump-hir examples/01_hello.nova"

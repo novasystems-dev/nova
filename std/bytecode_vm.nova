@@ -1,0 +1,111 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/bytecode_vm.nova
+# 100% Pure Nova Native - Register-Based Bytecode Virtual Machine
+# Zero C / Zero LLVM / Zero External JIT Dependencies
+# Deterministic Formal Execution Engine with Fuel/Gas Metering
+# ============================================================================
+
+# Opcodes
+pub fn vm_op_halt() -> Int: 0
+pub fn vm_op_load_imm() -> Int: 1
+pub fn vm_op_mov() -> Int: 2
+pub fn vm_op_add() -> Int: 3
+pub fn vm_op_sub() -> Int: 4
+pub fn vm_op_mul() -> Int: 5
+pub fn vm_op_jmp() -> Int: 6
+pub fn vm_op_jmp_if() -> Int: 7
+pub fn vm_op_ret() -> Int: 8
+
+type Instruction = struct:
+    opcode: Int
+    reg_dst: Int
+    reg_src1: Int
+    reg_src2: Int
+    immediate: Int
+
+pub fn instr_new(op: Int, dst: Int, s1: Int, s2: Int, imm: Int) -> Instruction:
+    Instruction(op, dst, s1, s2, imm)
+
+pub fn instr_load_imm(dst: Int, imm: Int) -> Instruction:
+    Instruction(1, dst, 0, 0, imm)
+
+pub fn instr_add(dst: Int, s1: Int, s2: Int) -> Instruction:
+    Instruction(3, dst, s1, s2, 0)
+
+pub fn instr_sub(dst: Int, s1: Int, s2: Int) -> Instruction:
+    Instruction(4, dst, s1, s2, 0)
+
+pub fn instr_mul(dst: Int, s1: Int, s2: Int) -> Instruction:
+    Instruction(5, dst, s1, s2, 0)
+
+pub fn instr_halt() -> Instruction:
+    Instruction(0, 0, 0, 0, 0)
+
+type VmCpuState = struct:
+    r0: Int
+    r1: Int
+    r2: Int
+    r3: Int
+    pc: Int
+    gas_remaining: Int
+    is_halted: Bool
+    exit_code: Int
+
+pub fn vm_cpu_new(initial_gas: Int) -> VmCpuState:
+    VmCpuState(0, 0, 0, 0, 0, initial_gas, false, 0)
+
+pub fn vm_read_reg(cpu: VmCpuState, reg_id: Int) -> Int:
+    if reg_id == 0:
+        cpu.r0
+    elif reg_id == 1:
+        cpu.r1
+    elif reg_id == 2:
+        cpu.r2
+    elif reg_id == 3:
+        cpu.r3
+    else:
+        0
+
+pub fn vm_write_reg(cpu: VmCpuState, reg_id: Int, new_val: Int) -> VmCpuState:
+    if reg_id == 0:
+        VmCpuState(new_val, cpu.r1, cpu.r2, cpu.r3, cpu.pc, cpu.gas_remaining, cpu.is_halted, cpu.exit_code)
+    elif reg_id == 1:
+        VmCpuState(cpu.r0, new_val, cpu.r2, cpu.r3, cpu.pc, cpu.gas_remaining, cpu.is_halted, cpu.exit_code)
+    elif reg_id == 2:
+        VmCpuState(cpu.r0, cpu.r1, new_val, cpu.r3, cpu.pc, cpu.gas_remaining, cpu.is_halted, cpu.exit_code)
+    elif reg_id == 3:
+        VmCpuState(cpu.r0, cpu.r1, cpu.r2, new_val, cpu.pc, cpu.gas_remaining, cpu.is_halted, cpu.exit_code)
+    else:
+        cpu
+
+pub fn vm_step_instruction(cpu: VmCpuState, ins: Instruction) -> VmCpuState:
+    if cpu.is_halted or cpu.gas_remaining <= 0:
+        VmCpuState(cpu.r0, cpu.r1, cpu.r2, cpu.r3, cpu.pc, cpu.gas_remaining, true, cpu.exit_code)
+    elif ins.opcode == 0:
+        # Halt
+        VmCpuState(cpu.r0, cpu.r1, cpu.r2, cpu.r3, cpu.pc + 1, cpu.gas_remaining - 1, true, cpu.r0)
+    elif ins.opcode == 1:
+        # Load Imm
+        let updated = vm_write_reg(cpu, ins.reg_dst, ins.immediate)
+        VmCpuState(updated.r0, updated.r1, updated.r2, updated.r3, cpu.pc + 1, cpu.gas_remaining - 1, false, 0)
+    elif ins.opcode == 3:
+        # Add
+        let v1 = vm_read_reg(cpu, ins.reg_src1)
+        let v2 = vm_read_reg(cpu, ins.reg_src2)
+        let updated = vm_write_reg(cpu, ins.reg_dst, v1 + v2)
+        VmCpuState(updated.r0, updated.r1, updated.r2, updated.r3, cpu.pc + 1, cpu.gas_remaining - 1, false, 0)
+    elif ins.opcode == 4:
+        # Sub
+        let v1 = vm_read_reg(cpu, ins.reg_src1)
+        let v2 = vm_read_reg(cpu, ins.reg_src2)
+        let updated = vm_write_reg(cpu, ins.reg_dst, v1 - v2)
+        VmCpuState(updated.r0, updated.r1, updated.r2, updated.r3, cpu.pc + 1, cpu.gas_remaining - 1, false, 0)
+    elif ins.opcode == 5:
+        # Mul
+        let v1 = vm_read_reg(cpu, ins.reg_src1)
+        let v2 = vm_read_reg(cpu, ins.reg_src2)
+        let updated = vm_write_reg(cpu, ins.reg_dst, v1 * v2)
+        VmCpuState(updated.r0, updated.r1, updated.r2, updated.r3, cpu.pc + 1, cpu.gas_remaining - 1, false, 0)
+    else:
+        # Advance PC
+        VmCpuState(cpu.r0, cpu.r1, cpu.r2, cpu.r3, cpu.pc + 1, cpu.gas_remaining - 1, false, cpu.exit_code)

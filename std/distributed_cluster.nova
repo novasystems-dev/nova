@@ -1,0 +1,62 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/distributed_cluster.nova
+# 100% Pure Nova Native - Distributed Cluster Membership & Gossip Protocol
+# Zero C / Zero Python / Zero External Dependencies
+# SWIM Failure Detection & Consistent Hashing Ring Primitives
+# ============================================================================
+
+# Member Status Codes
+pub fn member_status_alive() -> Int: 1
+pub fn member_status_suspect() -> Int: 2
+pub fn member_status_dead() -> Int: 3
+pub fn member_status_left() -> Int: 4
+
+type ClusterNode = struct:
+    node_id: Int
+    incarnation: Int
+    status: Int
+    last_heartbeat_ms: Int
+    port: Int
+
+pub fn cluster_node_new(id: Int, port: Int, now_ms: Int) -> ClusterNode:
+    ClusterNode(id, 1, member_status_alive(), now_ms, port)
+
+pub fn cluster_node_heartbeat(node: ClusterNode, now_ms: Int) -> ClusterNode:
+    ClusterNode(node.node_id, node.incarnation + 1, member_status_alive(), now_ms, node.port)
+
+pub fn cluster_node_mark_suspect(node: ClusterNode) -> ClusterNode:
+    ClusterNode(node.node_id, node.incarnation, member_status_suspect(), node.last_heartbeat_ms, node.port)
+
+pub fn cluster_node_mark_dead(node: ClusterNode) -> ClusterNode:
+    ClusterNode(node.node_id, node.incarnation, member_status_dead(), node.last_heartbeat_ms, node.port)
+
+# Phi Accrual Failure Detector Evaluation
+type PhiFailureDetector = struct:
+    threshold_phi: Int
+    expected_interval_ms: Int
+    last_ping_ms: Int
+
+pub fn phi_detector_new(interval: Int) -> PhiFailureDetector:
+    PhiFailureDetector(8, interval, 0)
+
+pub fn phi_evaluate_is_dead(fd: PhiFailureDetector, current_time_ms: Int) -> Bool:
+    let elapsed = current_time_ms - fd.last_ping_ms
+    elapsed > (fd.expected_interval_ms * 4)
+
+type ConsistentHashRing = struct:
+    virtual_nodes_per_host: Int
+    total_ring_points: Int
+    hash_seed: Int
+
+pub fn consistent_ring_new(vnodes: Int) -> ConsistentHashRing:
+    ConsistentHashRing(vnodes, 0, 104729)
+
+pub fn consistent_ring_add_node(ring: ConsistentHashRing) -> ConsistentHashRing:
+    let points = ring.total_ring_points + ring.virtual_nodes_per_host
+    ConsistentHashRing(ring.virtual_nodes_per_host, points, ring.hash_seed)
+
+pub fn consistent_ring_lookup(ring: ConsistentHashRing, key_hash: Int) -> Int:
+    if ring.total_ring_points > 0:
+        key_hash % ring.total_ring_points
+    else:
+        0

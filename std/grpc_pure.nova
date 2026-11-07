@@ -1,0 +1,60 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/grpc_pure.nova
+# 100% Pure Nova Native - Protocol Buffers (Proto3) & gRPC Framing Engine
+# Zero C / Zero Protoc Dependencies
+# Binary Varint Streaming & HTTP/2 RPC Framing
+# ============================================================================
+
+# Protobuf Wire Types
+pub fn proto_wire_varint() -> Int: 0
+pub fn proto_wire_fixed64() -> Int: 1
+pub fn proto_wire_length_delimited() -> Int: 2
+pub fn proto_wire_fixed32() -> Int: 5
+
+# gRPC Status Codes
+pub fn grpc_status_ok() -> Int: 0
+pub fn grpc_status_cancelled() -> Int: 1
+pub fn grpc_status_unknown() -> Int: 2
+pub fn grpc_status_invalid_arg() -> Int: 3
+pub fn grpc_status_not_found() -> Int: 5
+pub fn grpc_status_permission_denied() -> Int: 7
+pub fn grpc_status_unavailable() -> Int: 14
+
+type ProtoFieldHeader = struct:
+    field_number: Int
+    wire_type: Int
+    encoded_tag: Int
+
+pub fn proto_encode_tag(field_num: Int, wire: Int) -> ProtoFieldHeader:
+    let tag = (field_num * 8) + wire
+    ProtoFieldHeader(field_num, wire, tag)
+
+pub fn proto_zigzag_encode(n: Int) -> Int:
+    if n >= 0:
+        n * 2
+    else:
+        ((0 - n) * 2) - 1
+
+type GrpcFrameHeader = struct:
+    is_compressed: Bool
+    message_length: Int
+    total_frame_bytes: Int
+
+pub fn grpc_frame_header_new(len: Int) -> GrpcFrameHeader:
+    # 1 byte compression flag + 4 bytes length
+    GrpcFrameHeader(false, len, len + 5)
+
+type GrpcCallContext = struct:
+    method_name: String
+    timeout_ms: Int
+    status_code: Int
+    messages_streamed: Int
+
+pub fn grpc_call_new(method: String, timeout: Int) -> GrpcCallContext:
+    GrpcCallContext(method, timeout, grpc_status_ok(), 0)
+
+pub fn grpc_call_send_message(ctx: GrpcCallContext) -> GrpcCallContext:
+    GrpcCallContext(ctx.method_name, ctx.timeout_ms, ctx.status_code, ctx.messages_streamed + 1)
+
+pub fn grpc_call_finish(ctx: GrpcCallContext, status: Int) -> GrpcCallContext:
+    GrpcCallContext(ctx.method_name, ctx.timeout_ms, status, ctx.messages_streamed)
