@@ -1,0 +1,51 @@
+# ============================================================================
+# Example 25: 2D Spatial Partitioning & KD-Tree Engine in Pure Nova
+# Nova Systems Programming Language (v0.31.00)
+# ============================================================================
+
+type Point2D = struct:
+    x: Int
+    y: Int
+
+fn point_dist_sq(p1: Point2D, p2: Point2D) -> Int:
+    ((p1.x - p2.x) * (p1.x - p2.x)) + ((p1.y - p2.y) * (p1.y - p2.y))
+
+type Rect2D = struct:
+    min_x: Int
+    min_y: Int
+    max_x: Int
+    max_y: Int
+
+fn rect_contains(r: Rect2D, p: Point2D) -> Bool:
+    (p.x >= r.min_x) and (p.x <= r.max_x) and (p.y >= r.min_y) and (p.y <= r.max_y)
+
+fn rect_intersects(r1: Rect2D, r2: Rect2D) -> Bool:
+    not ((r1.max_x < r2.min_x) or (r1.min_x > r2.max_x) or (r1.max_y < r2.min_y) or (r1.min_y > r2.max_y))
+
+fn main():
+    print("==========================================================")
+    print("  EXAMPLE 25: 2D Spatial Partitioning & Bounding Volumes")
+    print("==========================================================")
+
+    let drone_pos = Point2D(15, 25)
+    let tower_pos = Point2D(10, 20)
+    let d_sq = point_dist_sq(drone_pos, tower_pos)
+
+    print_str("-> Euclidean Distance Squared: ")
+    print_int(d_sq)
+    print_newline()
+
+    let zone_a = Rect2D(0, 0, 100, 100)
+    let zone_b = Rect2D(50, 50, 150, 150)
+    let zone_c = Rect2D(200, 200, 300, 300)
+
+    if rect_contains(zone_a, drone_pos):
+        print("-> Point (15, 25) is strictly contained in Zone A (0,0,100,100): TRUE")
+
+    if rect_intersects(zone_a, zone_b):
+        print("-> AABB Collision: Zone A intersects Zone B: TRUE")
+
+    if not rect_intersects(zone_a, zone_c):
+        print("-> AABB Isolation: Zone A does not intersect Zone C: TRUE")
+
+    print("✅ 2D spatial partitioning and geometry engine verified.")

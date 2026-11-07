@@ -1,0 +1,68 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: DNS Wire Protocol Engine (std/dns.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type DnsHeader = struct:
+    id: Int
+    is_response: Bool
+    opcode: Int
+    is_authoritative: Bool
+    is_truncated: Bool
+    recursion_desired: Bool
+    rcode: Int
+    question_count: Int
+    answer_count: Int
+
+pub fn dns_header_query(id: Int, questions: Int) -> DnsHeader:
+    DnsHeader(id, false, 0, false, false, true, 0, questions, 0)
+
+pub fn dns_header_response(id: Int, answers: Int) -> DnsHeader:
+    DnsHeader(id, true, 0, false, false, true, 0, 1, answers)
+
+type DnsRecordType = struct:
+    type_code: Int
+    name: String
+
+pub fn dns_type_a() -> DnsRecordType:
+    DnsRecordType(1, "A")
+
+pub fn dns_type_ns() -> DnsRecordType:
+    DnsRecordType(2, "NS")
+
+pub fn dns_type_cname() -> DnsRecordType:
+    DnsRecordType(5, "CNAME")
+
+pub fn dns_type_soa() -> DnsRecordType:
+    DnsRecordType(6, "SOA")
+
+pub fn dns_type_mx() -> DnsRecordType:
+    DnsRecordType(15, "MX")
+
+pub fn dns_type_txt() -> DnsRecordType:
+    DnsRecordType(16, "TXT")
+
+pub fn dns_type_aaaa() -> DnsRecordType:
+    DnsRecordType(28, "AAAA")
+
+pub fn dns_type_srv() -> DnsRecordType:
+    DnsRecordType(33, "SRV")
+
+pub fn dns_rcode_name(rcode: Int) -> String:
+    if rcode == 0:
+        "NoError"
+    elif rcode == 1:
+        "FormErr"
+    elif rcode == 2:
+        "ServFail"
+    elif rcode == 3:
+        "NXDomain"
+    elif rcode == 4:
+        "NotImp"
+    elif rcode == 5:
+        "Refused"
+    else:
+        "Unknown"
+
+pub fn dns_is_valid_header(h: DnsHeader) -> Bool:
+    (h.id >= 0) and (h.question_count >= 0)

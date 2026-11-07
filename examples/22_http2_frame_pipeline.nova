@@ -1,0 +1,69 @@
+# ============================================================================
+# Example 22: HTTP/2 Binary Framing & Multiplexing Engine in Pure Nova
+# Nova Systems Programming Language (v0.31.00)
+# ============================================================================
+
+type Http2Frame = struct:
+    length: Int
+    frame_type: Int
+    flags: Int
+    stream_id: Int
+    payload_desc: String
+
+fn http2_frame_data(stream_id: Int, len_bytes: Int, desc: String) -> Http2Frame:
+    Http2Frame(len_bytes, 0, 1, stream_id, desc)
+
+fn http2_frame_headers(stream_id: Int, len_bytes: Int, desc: String) -> Http2Frame:
+    Http2Frame(len_bytes, 1, 4, stream_id, desc)
+
+fn http2_frame_settings() -> Http2Frame:
+    Http2Frame(0, 4, 1, 0, "SETTINGS_INITIAL")
+
+fn http2_type_name(t: Int) -> String:
+    if t == 0:
+        "DATA"
+    elif t == 1:
+        "HEADERS"
+    elif t == 4:
+        "SETTINGS"
+    elif t == 6:
+        "PING"
+    elif t == 7:
+        "GOAWAY"
+    else:
+        "UNKNOWN"
+
+fn main():
+    print("==========================================================")
+    print("  EXAMPLE 22: HTTP/2 Binary Multiplexed Frame Pipeline")
+    print("==========================================================")
+
+    let f_settings = http2_frame_settings()
+    let f_headers = http2_frame_headers(1, 48, ":path=/api/v1/telemetry :status=200")
+    let f_data = http2_frame_data(1, 1024, "Perceus serialized memory buffer (1024 bytes)")
+
+    print("-> [Frame 1] Handshake Preface:")
+    print_str("   Type: ")
+    print_str(http2_type_name(f_settings.frame_type))
+    print_str(" | Stream: ")
+    print_int(f_settings.stream_id)
+    print_newline()
+
+    print("-> [Frame 2] Synchronous Stream Multiplexing:")
+    print_str("   Type: ")
+    print_str(http2_type_name(f_headers.frame_type))
+    print_str(" | Stream ID: ")
+    print_int(f_headers.stream_id)
+    print_newline()
+    print_str("   Payload: ")
+    print(f_headers.payload_desc)
+
+    print("-> [Frame 3] High-Throughput Binary Payload:")
+    print_str("   Type: ")
+    print_str(http2_type_name(f_data.frame_type))
+    print_str(" | Length: ")
+    print_int(f_data.length)
+    print_str(" bytes | Stream ID: ")
+    print_int(f_data.stream_id)
+    print_newline()
+    print("✅ HTTP/2 binary frame pipeline verified.")

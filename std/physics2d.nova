@@ -1,0 +1,37 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: 2D Rigid Body Physics Engine (std/physics2d.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type Particle2D = struct:
+    pos_x: Int
+    pos_y: Int
+    old_x: Int
+    old_y: Int
+    mass: Int
+    is_static: Bool
+
+pub fn particle_new(x: Int, y: Int, mass: Int) -> Particle2D:
+    Particle2D(x, y, x, y, mass, false)
+
+pub fn particle_static(x: Int, y: Int) -> Particle2D:
+    Particle2D(x, y, x, y, 0, true)
+
+pub fn particle_step_verlet(p: Particle2D, gravity_y: Int) -> Particle2D:
+    if p.is_static:
+        p
+    else:
+        Particle2D(
+            p.pos_x + (p.pos_x - p.old_x),
+            p.pos_y + (p.pos_y - p.old_y) + gravity_y,
+            p.pos_x,
+            p.pos_y,
+            p.mass,
+            false
+        )
+
+pub fn particle_dist_sq(p1: Particle2D, p2: Particle2D) -> Int:
+    ((p1.pos_x - p2.pos_x) * (p1.pos_x - p2.pos_x)) + ((p1.pos_y - p2.pos_y) * (p1.pos_y - p2.pos_y))
+
+pub fn particle_is_valid(p: Particle2D) -> Bool:
+    p.mass >= 0

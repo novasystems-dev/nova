@@ -107,11 +107,11 @@ fn orbit_update() -> Int:
     orbit_lock()
 
 fn orbit_tree() -> Int:
-    print_str("nova-project v0.1.0\n")
-    print_str("├── std v0.3.0 (built-in)\n")
-    print_str("│   ├── std::perceus v0.3.0\n")
-    print_str("│   └── std::z3_smt v0.3.0\n")
-    print_str("└── runtime v0.3.0 (c99/llvm bare-metal)\n")
+    print_str("nova-project v0.31.00\n")
+    print_str("├── std v0.31.00 (built-in)\n")
+    print_str("│   ├── std::perceus v0.31.00\n")
+    print_str("│   └── std::z3_smt v0.31.00\n")
+    print_str("└── runtime v0.31.00 (c99/llvm bare-metal)\n")
     0
 
 fn orbit_vendor() -> Int:
@@ -153,7 +153,7 @@ fn main():
     elif str_eq(cmd, "audit"):
         print_str("    Auditing dependencies and capabilities... 0 vulnerabilities, 100% verified.\n")
     elif str_eq(cmd, "version"):
-        print_str("orbit 0.2.0 (pure-nova-native x86_64-linux)\n")
+        print_str("orbit 0.31.00 (pure-nova-native x86_64-linux)\n")
     else:
         print_usage()
     0

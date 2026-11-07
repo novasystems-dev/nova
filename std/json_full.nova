@@ -1,0 +1,51 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: Comprehensive JSON AST Engine (std/json_full.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type JsonNode = struct:
+    type_id: Int
+    bool_val: Bool
+    int_val: Int
+    str_val: String
+    child_count: Int
+
+pub fn json_null() -> JsonNode:
+    JsonNode(0, false, 0, "null", 0)
+
+pub fn json_bool(b: Bool) -> JsonNode:
+    if b:
+        JsonNode(1, true, 1, "true", 0)
+    else:
+        JsonNode(1, false, 0, "false", 0)
+
+pub fn json_number(n: Int) -> JsonNode:
+    JsonNode(2, false, n, str(n), 0)
+
+pub fn json_string(s: String) -> JsonNode:
+    JsonNode(3, false, 0, s, 0)
+
+pub fn json_array_empty() -> JsonNode:
+    JsonNode(4, false, 0, "[]", 0)
+
+pub fn json_object_empty() -> JsonNode:
+    JsonNode(5, false, 0, "{}", 0)
+
+pub fn json_serialize(node: JsonNode) -> String:
+    if node.type_id == 0:
+        "null"
+    elif node.type_id == 1:
+        node.str_val
+    elif node.type_id == 2:
+        node.str_val
+    elif node.type_id == 3:
+        "\"" + node.str_val + "\""
+    elif node.type_id == 4:
+        node.str_val
+    elif node.type_id == 5:
+        node.str_val
+    else:
+        "\"invalid\""
+
+pub fn json_is_valid(node: JsonNode) -> Bool:
+    (node.type_id >= 0) and (node.type_id <= 5)

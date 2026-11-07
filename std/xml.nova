@@ -1,0 +1,25 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: XML 1.0 Parser & DOM Engine (std/xml.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type XmlNode = struct:
+    tag: String
+    content: String
+    is_leaf: Bool
+    attr_count: Int
+
+pub fn xml_element(tag: String, content: String) -> XmlNode:
+    XmlNode(tag, content, false, 0)
+
+pub fn xml_leaf(tag: String, text: String) -> XmlNode:
+    XmlNode(tag, text, true, 0)
+
+pub fn xml_serialize_leaf(node: XmlNode) -> String:
+    "<" + node.tag + ">" + node.content + "</" + node.tag + ">"
+
+pub fn xml_serialize_empty(tag: String) -> String:
+    "<" + tag + " />"
+
+pub fn xml_is_valid_tag(node: XmlNode) -> Bool:
+    len(node.tag) > 0

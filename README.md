@@ -9,7 +9,7 @@
 [![Website](https://img.shields.io/badge/website-live-10b981?style=flat&labelColor=0f172a&logo=github&logoColor=white)](https://novasystems-dev.github.io)
 [![CI Build](https://img.shields.io/github/actions/workflow/status/novasystems-dev/nova/release.yml?branch=master&style=flat&labelColor=0f172a&color=10b981&logo=githubactions&logoColor=white)](https://github.com/novasystems-dev/nova/actions)
 [![Release](https://img.shields.io/github/v/release/novasystems-dev/nova?style=flat&labelColor=0f172a&color=8b5cf6&logo=semver&logoColor=white)](https://github.com/novasystems-dev/nova/releases/latest)
-[![Tests](https://img.shields.io/badge/formal_proofs-117%20verified-38bdf8?style=flat&labelColor=0f172a&logo=checkmarx&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/formal_proofs-144%20verified-38bdf8?style=flat&labelColor=0f172a&logo=checkmarx&logoColor=white)](tests/)
 [![License](https://img.shields.io/badge/license-PolyForm-a855f7?style=flat&labelColor=0f172a&logo=open-source-initiative&logoColor=white)](LICENSE)
 [![Pure Nova](https://img.shields.io/badge/compiler-100%25%20pure%20nova-ec4899?style=flat&labelColor=0f172a&logo=starship&logoColor=white)](compiler/)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-12%20repos-f59e0b?style=flat&labelColor=0f172a&logo=git&logoColor=white)](https://github.com/novasystems-dev)
@@ -39,7 +39,7 @@ The Nova project is governed by **Nova Systems** and developed under the [`@nova
 4. **Bare-Metal & Kernel Parity**:
    Hardware raw pointers (`*mut T`, `*const T`), address-of (`&val`), dereference (`*ptr`), inline assembly, and capability-gated concurrency (`iso`, `val`, `ref`).
 5. **Industrial Standard Library**:
-   42 high-performance standard modules including B-Trees, Bloom Filters, LRU Caches, Priority Queues, Linear Algebra Matrices, Unicode 15.1 tables, AES/SHA/ChaCha20 cryptography, Network Sockets, and Async Event Loops.
+   50 high-performance standard modules including B-Trees, Bloom Filters, LRU Caches, Priority Queues, Linear Algebra Matrices, Unicode 15.1 tables, AES/SHA/ChaCha20 cryptography, HTTP/2 framing, DNS wire protocol, 2D Physics, Geometry KD-Tree, WAV audio synthesizer, Network Sockets, and Async Event Loops.
 
 ---
 

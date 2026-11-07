@@ -1,0 +1,31 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: WAV Audio PCM Synthesizer (std/sound_wav.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type WavHeader = struct:
+    channels: Int
+    sample_rate: Int
+    bits_per_sample: Int
+    byte_rate: Int
+    block_align: Int
+    data_size: Int
+
+pub fn wav_header_cd_quality(total_samples: Int) -> WavHeader:
+    let ch = 2
+    let rate = 44100
+    let bits = 16
+    let align = 4
+    let byte_rate = 176400
+    let size = total_samples * align
+    WavHeader(ch, rate, bits, byte_rate, align, size)
+
+pub fn wav_synth_sine_sample(sample_idx: Int, freq_hz: Int) -> Int:
+    let phase = (sample_idx * freq_hz) % 44100
+    if phase < 22050:
+        16000
+    else:
+        0 - 16000
+
+pub fn wav_is_valid_header(h: WavHeader) -> Bool:
+    (h.channels > 0) and (h.sample_rate > 0) and (h.bits_per_sample == 16)

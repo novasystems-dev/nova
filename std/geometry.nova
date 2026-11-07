@@ -1,0 +1,44 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: Computational Geometry Engine (std/geometry.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type Point2D = struct:
+    x: Int
+    y: Int
+
+pub fn point2d_new(x: Int, y: Int) -> Point2D:
+    Point2D(x, y)
+
+pub fn point2d_dist_sq(p1: Point2D, p2: Point2D) -> Int:
+    ((p1.x - p2.x) * (p1.x - p2.x)) + ((p1.y - p2.y) * (p1.y - p2.y))
+
+pub fn point2d_dot(p1: Point2D, p2: Point2D) -> Int:
+    (p1.x * p2.x) + (p1.y * p2.y)
+
+type Rect2D = struct:
+    min_x: Int
+    min_y: Int
+    max_x: Int
+    max_y: Int
+
+pub fn rect2d_new(x1: Int, y1: Int, x2: Int, y2: Int) -> Rect2D:
+    Rect2D(x1, y1, x2, y2)
+
+pub fn rect2d_contains(r: Rect2D, p: Point2D) -> Bool:
+    (p.x >= r.min_x) and (p.x <= r.max_x) and (p.y >= r.min_y) and (p.y <= r.max_y)
+
+pub fn rect2d_intersects(r1: Rect2D, r2: Rect2D) -> Bool:
+    not ((r1.max_x < r2.min_x) or (r1.min_x > r2.max_x) or (r1.max_y < r2.min_y) or (r1.min_y > r2.max_y))
+
+type KdNode2D = struct:
+    point: Point2D
+    axis: Int
+    left_id: Int
+    right_id: Int
+
+pub fn kd_node_new(p: Point2D, axis: Int) -> KdNode2D:
+    KdNode2D(p, axis, 0 - 1, 0 - 1)
+
+pub fn kd_is_valid(n: KdNode2D) -> Bool:
+    (n.axis == 0) or (n.axis == 1)

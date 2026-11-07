@@ -1,0 +1,79 @@
+# ============================================================================
+# NOVA SYSTEMS COMPILER: RISC-V (RV64GC) Specification Tables (compiler/riscv_tables.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type RiscvReg = struct:
+    num: Int
+    abi_name: String
+    is_saved: Bool
+
+pub fn riscv_zero() -> RiscvReg:
+    RiscvReg(0, "zero", false)
+
+pub fn riscv_ra() -> RiscvReg:
+    RiscvReg(1, "ra", false)
+
+pub fn riscv_sp() -> RiscvReg:
+    RiscvReg(2, "sp", true)
+
+pub fn riscv_gp() -> RiscvReg:
+    RiscvReg(3, "gp", false)
+
+pub fn riscv_tp() -> RiscvReg:
+    RiscvReg(4, "tp", false)
+
+pub fn riscv_t0() -> RiscvReg:
+    RiscvReg(5, "t0", false)
+
+pub fn riscv_s0() -> RiscvReg:
+    RiscvReg(8, "s0", true)
+
+pub fn riscv_a0() -> RiscvReg:
+    RiscvReg(10, "a0", false)
+
+pub fn riscv_a1() -> RiscvReg:
+    RiscvReg(11, "a1", false)
+
+pub fn riscv_inst_format(op: Int) -> String:
+    if op == 0:
+        "R-type"
+    elif op == 1:
+        "I-type"
+    elif op == 2:
+        "S-type"
+    elif op == 3:
+        "B-type"
+    elif op == 4:
+        "U-type"
+    elif op == 5:
+        "J-type"
+    else:
+        "unknown"
+
+pub fn riscv_opcode_mnemonic(op: Int) -> String:
+    if op == 0:
+        "add"
+    elif op == 1:
+        "sub"
+    elif op == 2:
+        "addi"
+    elif op == 3:
+        "ld"
+    elif op == 4:
+        "sd"
+    elif op == 5:
+        "beq"
+    elif op == 6:
+        "bne"
+    elif op == 7:
+        "jal"
+    elif op == 8:
+        "jalr"
+    elif op == 9:
+        "ecall"
+    else:
+        "unknown"
+
+pub fn riscv_is_valid_reg(r: RiscvReg) -> Bool:
+    (r.num >= 0) and (r.num <= 31)

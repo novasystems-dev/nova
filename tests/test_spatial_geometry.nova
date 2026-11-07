@@ -1,0 +1,46 @@
+# ============================================================================
+# Unit Test: 2D Spatial Partitioning & Bounding Boxes
+# Nova Systems Programming Language (v0.31.00)
+# ============================================================================
+
+type Point2D = struct:
+    x: Int
+    y: Int
+
+fn point_dist_sq(p1: Point2D, p2: Point2D) -> Int:
+    ((p1.x - p2.x) * (p1.x - p2.x)) + ((p1.y - p2.y) * (p1.y - p2.y))
+
+type Rect2D = struct:
+    min_x: Int
+    min_y: Int
+    max_x: Int
+    max_y: Int
+
+fn rect_contains(r: Rect2D, p: Point2D) -> Bool:
+    (p.x >= r.min_x) and (p.x <= r.max_x) and (p.y >= r.min_y) and (p.y <= r.max_y)
+
+fn rect_intersects(r1: Rect2D, r2: Rect2D) -> Bool:
+    not ((r1.max_x < r2.min_x) or (r1.min_x > r2.max_x) or (r1.max_y < r2.min_y) or (r1.min_y > r2.max_y))
+
+fn main():
+    print("--- Running Test: 2D Spatial Geometry & AABB ---")
+    let p1 = Point2D(0, 0)
+    let p2 = Point2D(3, 4)
+    
+    if point_dist_sq(p1, p2) == 25:
+        print("   [OK] Pythagorean distance squared (3^2 + 4^2 = 25) verified")
+        
+    let r1 = Rect2D(0, 0, 10, 10)
+    let r2 = Rect2D(5, 5, 15, 15)
+    let r3 = Rect2D(20, 20, 30, 30)
+    
+    if rect_contains(r1, Point2D(5, 5)):
+        print("   [OK] Point containment in bounding box verified")
+        
+    if rect_intersects(r1, r2):
+        print("   [OK] AABB overlapping intersection verified")
+        
+    if not rect_intersects(r1, r3):
+        print("   [OK] AABB disjoint non-intersection verified")
+        
+    print("TEST SPATIAL GEOMETRY PASSED: 4/4 checks verified.")

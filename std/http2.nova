@@ -1,0 +1,56 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: HTTP/2 Binary Framing Protocol Engine (std/http2.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type Http2Frame = struct:
+    length: Int
+    frame_type: Int
+    flags: Int
+    stream_id: Int
+    payload_summary: String
+
+pub fn http2_frame_data(stream_id: Int, payload: String) -> Http2Frame:
+    Http2Frame(len(payload), 0, 1, stream_id, payload)
+
+pub fn http2_frame_headers(stream_id: Int, headers_summary: String) -> Http2Frame:
+    Http2Frame(len(headers_summary), 1, 4, stream_id, headers_summary)
+
+pub fn http2_frame_settings_ack() -> Http2Frame:
+    Http2Frame(0, 4, 1, 0, "SETTINGS_ACK")
+
+pub fn http2_frame_ping(opaque_data: String) -> Http2Frame:
+    Http2Frame(8, 6, 0, 0, opaque_data)
+
+pub fn http2_frame_goaway(last_stream: Int, error_code: Int) -> Http2Frame:
+    Http2Frame(8, 7, 0, 0, "GOAWAY_LAST_STREAM")
+
+pub fn http2_type_name(frame_type: Int) -> String:
+    if frame_type == 0:
+        "DATA"
+    elif frame_type == 1:
+        "HEADERS"
+    elif frame_type == 2:
+        "PRIORITY"
+    elif frame_type == 3:
+        "RST_STREAM"
+    elif frame_type == 4:
+        "SETTINGS"
+    elif frame_type == 5:
+        "PUSH_PROMISE"
+    elif frame_type == 6:
+        "PING"
+    elif frame_type == 7:
+        "GOAWAY"
+    elif frame_type == 8:
+        "WINDOW_UPDATE"
+    elif frame_type == 9:
+        "CONTINUATION"
+    else:
+        "UNKNOWN"
+
+pub fn http2_connection_preface() -> String:
+    "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
+
+pub fn http2_is_valid_frame(f: Http2Frame) -> Bool:
+    (f.length >= 0) and (f.stream_id >= 0)

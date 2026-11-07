@@ -17,8 +17,8 @@ type CompilationResult = enum:
 
 pub fn report_banner():
     print("==========================================================")
-    print("  NOVAC-1: Self-Hosted Nova Systems Compiler (Pure Nova)")
-    print("  Bootstrapped via Haskell Genesis | Target: Native C99")
+    print("  NOVAC-1: Self-Hosted Nova Systems Compiler (v0.31.00)")
+    print("  Bootstrapped via Haskell Genesis | Target: Native C99 & LLVM")
     print("==========================================================")
 
 pub fn compile_pipeline(source_path: String) -> CompilationResult:
@@ -44,7 +44,7 @@ pub fn run_compiler_cli(cmd: String, target: String) -> Int:
         print("✅ Native compilation finished successfully.")
         0
     elif cmd == "version":
-        print("novac-1 version 0.1.0-alpha (Self-Hosted Pure Nova)")
+        print("novac-1 version 0.31.00 (Self-Hosted Pure Nova)")
         0
     else:
         let res = compile_pipeline(target)

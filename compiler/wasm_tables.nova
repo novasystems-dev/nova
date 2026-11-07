@@ -1,0 +1,137 @@
+# ============================================================================
+# NOVA SYSTEMS COMPILER: WebAssembly Specification Tables (compiler/wasm_tables.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type WasmValType = struct:
+    tag: Int
+    name: String
+
+pub fn wasm_type_i32() -> WasmValType:
+    WasmValType(127, "i32")
+
+pub fn wasm_type_i64() -> WasmValType:
+    WasmValType(126, "i64")
+
+pub fn wasm_type_f32() -> WasmValType:
+    WasmValType(125, "f32")
+
+pub fn wasm_type_f64() -> WasmValType:
+    WasmValType(124, "f64")
+
+pub fn wasm_type_v128() -> WasmValType:
+    WasmValType(123, "v128")
+
+pub fn wasm_type_funcref() -> WasmValType:
+    WasmValType(112, "funcref")
+
+pub fn wasm_type_externref() -> WasmValType:
+    WasmValType(111, "externref")
+
+type WasmSection = struct:
+    sec_id: Int
+    name: String
+
+pub fn wasm_sec_custom() -> WasmSection:
+    WasmSection(0, "custom")
+
+pub fn wasm_sec_type() -> WasmSection:
+    WasmSection(1, "type")
+
+pub fn wasm_sec_import() -> WasmSection:
+    WasmSection(2, "import")
+
+pub fn wasm_sec_function() -> WasmSection:
+    WasmSection(3, "function")
+
+pub fn wasm_sec_table() -> WasmSection:
+    WasmSection(4, "table")
+
+pub fn wasm_sec_memory() -> WasmSection:
+    WasmSection(5, "memory")
+
+pub fn wasm_sec_global() -> WasmSection:
+    WasmSection(6, "global")
+
+pub fn wasm_sec_export() -> WasmSection:
+    WasmSection(7, "export")
+
+pub fn wasm_sec_code() -> WasmSection:
+    WasmSection(10, "code")
+
+pub fn wasm_sec_data() -> WasmSection:
+    WasmSection(11, "data")
+
+pub fn wasm_opcode_name(op: Int) -> String:
+    if op == 0:
+        "unreachable"
+    elif op == 1:
+        "nop"
+    elif op == 2:
+        "block"
+    elif op == 3:
+        "loop"
+    elif op == 4:
+        "if"
+    elif op == 5:
+        "else"
+    elif op == 11:
+        "end"
+    elif op == 12:
+        "br"
+    elif op == 13:
+        "br_if"
+    elif op == 15:
+        "return"
+    elif op == 16:
+        "call"
+    elif op == 32:
+        "local.get"
+    elif op == 33:
+        "local.set"
+    elif op == 34:
+        "local.tee"
+    elif op == 40:
+        "i32.load"
+    elif op == 41:
+        "i64.load"
+    elif op == 54:
+        "i32.store"
+    elif op == 55:
+        "i64.store"
+    elif op == 65:
+        "i32.const"
+    elif op == 66:
+        "i64.const"
+    elif op == 69:
+        "i32.eqz"
+    elif op == 70:
+        "i32.eq"
+    elif op == 106:
+        "i32.add"
+    elif op == 107:
+        "i32.sub"
+    elif op == 108:
+        "i32.mul"
+    elif op == 109:
+        "i32.div_s"
+    elif op == 113:
+        "i32.and"
+    elif op == 114:
+        "i32.or"
+    elif op == 115:
+        "i32.xor"
+    elif op == 124:
+        "i64.add"
+    elif op == 125:
+        "i64.sub"
+    elif op == 126:
+        "i64.mul"
+    else:
+        "unknown_opcode"
+
+pub fn wasm_magic_header() -> String:
+    "(module"
+
+pub fn wasm_is_valid_type(t: WasmValType) -> Bool:
+    t.tag > 0

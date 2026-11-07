@@ -1,0 +1,83 @@
+# ============================================================================
+# NOVA SYSTEMS COMPILER: AArch64 (ARM64) Specification Tables (compiler/arm64_tables.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type Arm64Reg = struct:
+    reg_id: Int
+    name_64: String
+    name_32: String
+    is_callee_saved: Bool
+
+pub fn arm64_reg_x0() -> Arm64Reg:
+    Arm64Reg(0, "x0", "w0", false)
+
+pub fn arm64_reg_x1() -> Arm64Reg:
+    Arm64Reg(1, "x1", "w1", false)
+
+pub fn arm64_reg_x2() -> Arm64Reg:
+    Arm64Reg(2, "x2", "w2", false)
+
+pub fn arm64_reg_x3() -> Arm64Reg:
+    Arm64Reg(3, "x3", "w3", false)
+
+pub fn arm64_reg_x19() -> Arm64Reg:
+    Arm64Reg(19, "x19", "w19", true)
+
+pub fn arm64_reg_x20() -> Arm64Reg:
+    Arm64Reg(20, "x20", "w20", true)
+
+pub fn arm64_reg_x29() -> Arm64Reg:
+    Arm64Reg(29, "fp", "w29", true)
+
+pub fn arm64_reg_x30() -> Arm64Reg:
+    Arm64Reg(30, "lr", "w30", false)
+
+pub fn arm64_reg_sp() -> Arm64Reg:
+    Arm64Reg(31, "sp", "wsp", true)
+
+type Arm64Cond = struct:
+    code: Int
+    mnemonic: String
+
+pub fn arm64_cond_eq() -> Arm64Cond:
+    Arm64Cond(0, "eq")
+
+pub fn arm64_cond_ne() -> Arm64Cond:
+    Arm64Cond(1, "ne")
+
+pub fn arm64_cond_lt() -> Arm64Cond:
+    Arm64Cond(11, "lt")
+
+pub fn arm64_cond_ge() -> Arm64Cond:
+    Arm64Cond(10, "ge")
+
+pub fn arm64_cond_al() -> Arm64Cond:
+    Arm64Cond(14, "al")
+
+pub fn arm64_inst_name(op: Int) -> String:
+    if op == 0:
+        "add"
+    elif op == 1:
+        "sub"
+    elif op == 2:
+        "mul"
+    elif op == 3:
+        "sdiv"
+    elif op == 4:
+        "ldr"
+    elif op == 5:
+        "str"
+    elif op == 6:
+        "mov"
+    elif op == 7:
+        "b"
+    elif op == 8:
+        "bl"
+    elif op == 9:
+        "ret"
+    else:
+        "unknown"
+
+pub fn arm64_is_valid_reg(r: Arm64Reg) -> Bool:
+    (r.reg_id >= 0) and (r.reg_id <= 31)

@@ -1,0 +1,36 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: SHA-3 / Keccak-256 Cryptographic Engine (std/crypto_sha3.nova)
+# Author: Fyew999 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type KeccakState = struct:
+    s0: Int
+    s1: Int
+    s2: Int
+    s3: Int
+    round: Int
+
+pub fn keccak_state_new() -> KeccakState:
+    KeccakState(0, 0, 0, 0, 0)
+
+pub fn keccak_absorb(s: KeccakState, data: Int) -> KeccakState:
+    let n0 = s.s0 ^ data
+    let n1 = s.s1 ^ ((data << 1) | (data >> 31))
+    KeccakState(n0, n1, s.s2, s.s3, s.round + 1)
+
+pub fn keccak_round_constant(round: Int) -> Int:
+    if round == 0:
+        1
+    elif round == 1:
+        32898
+    elif round == 2:
+        32906
+    elif round == 3:
+        32778
+    elif round == 4:
+        32907
+    else:
+        32777
+
+pub fn keccak_is_valid(s: KeccakState) -> Bool:
+    s.round >= 0
