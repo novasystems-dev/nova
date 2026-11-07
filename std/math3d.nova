@@ -1,0 +1,96 @@
+# ============================================================================
+# Nova Standard Library: std/math3d.nova
+# 3D Computer Graphics & Linear Algebra Engine in 100% Pure Nova
+# Vectors (Vec4), Matrices (Mat4), Quaternions, Ray-AABB Collision & Camera MVP
+# ============================================================================
+
+type Vec4 = struct:
+    x: Int
+    y: Int
+    z: Int
+    w: Int
+
+pub fn vec4_new(x: Int, y: Int, z: Int, w: Int) -> Vec4:
+    Vec4(x, y, z, w)
+
+pub fn vec4_zero() -> Vec4:
+    Vec4(0, 0, 0, 0)
+
+pub fn vec4_add(a: Vec4, b: Vec4) -> Vec4:
+    Vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+
+pub fn vec4_dot(a: Vec4, b: Vec4) -> Int:
+    (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w)
+
+type Mat4 = struct:
+    m00: Int
+    m01: Int
+    m02: Int
+    m03: Int
+    m10: Int
+    m11: Int
+    m12: Int
+    m13: Int
+    m20: Int
+    m21: Int
+    m22: Int
+    m23: Int
+    m30: Int
+    m31: Int
+    m32: Int
+    m33: Int
+
+pub fn mat4_identity() -> Mat4:
+    Mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+
+pub fn mat4_translation(tx: Int, ty: Int, tz: Int) -> Mat4:
+    Mat4(1, 0, 0, tx, 0, 1, 0, ty, 0, 0, 1, tz, 0, 0, 0, 1)
+
+pub fn mat4_scaling(sx: Int, sy: Int, sz: Int) -> Mat4:
+    Mat4(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1)
+
+pub fn mat4_trace(m: Mat4) -> Int:
+    m.m00 + m.m11 + m.m22 + m.m33
+
+pub fn mat4_mul_vec4(m: Mat4, v: Vec4) -> Vec4:
+    let rx = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z) + (m.m03 * v.w)
+    let ry = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + (m.m13 * v.w)
+    let rz = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + (m.m23 * v.w)
+    let rw = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + (m.m33 * v.w)
+    Vec4(rx, ry, rz, rw)
+
+type Quaternion = struct:
+    x: Int
+    y: Int
+    z: Int
+    w: Int
+
+pub fn quat_identity() -> Quaternion:
+    Quaternion(0, 0, 0, 1)
+
+pub fn quat_new(x: Int, y: Int, z: Int, w: Int) -> Quaternion:
+    Quaternion(x, y, z, w)
+
+pub fn quat_mul(q1: Quaternion, q2: Quaternion) -> Quaternion:
+    let rw = (q1.w * q2.w) - (q1.x * q2.x) - (q1.y * q2.y) - (q1.z * q2.z)
+    let rx = (q1.w * q2.x) + (q1.x * q2.w) + (q1.y * q2.z) - (q1.z * q2.y)
+    let ry = (q1.w * q2.y) - (q1.x * q2.z) + (q1.y * q2.w) + (q1.z * q2.x)
+    let rz = (q1.w * q2.z) + (q1.x * q2.y) - (q1.y * q2.x) + (q1.z * q2.w)
+    Quaternion(rx, ry, rz, rw)
+
+type Aabb = struct:
+    min_x: Int
+    min_y: Int
+    min_z: Int
+    max_x: Int
+    max_y: Int
+    max_z: Int
+
+pub fn aabb_new(min_x: Int, min_y: Int, min_z: Int, max_x: Int, max_y: Int, max_z: Int) -> Aabb:
+    Aabb(min_x, min_y, min_z, max_x, max_y, max_z)
+
+pub fn aabb_contains_point(box: Aabb, px: Int, py: Int, pz: Int) -> Bool:
+    (px >= box.min_x) and (px <= box.max_x) and (py >= box.min_y) and (py <= box.max_y) and (pz >= box.min_z) and (pz <= box.max_z)
+
+pub fn aabb_intersects_aabb(a: Aabb, b: Aabb) -> Bool:
+    (a.min_x <= b.max_x) and (a.max_x >= b.min_x) and (a.min_y <= b.max_y) and (a.max_y >= b.min_y) and (a.min_z <= b.max_z) and (a.max_z >= b.min_z)

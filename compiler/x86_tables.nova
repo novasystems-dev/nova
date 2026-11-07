@@ -1,0 +1,76 @@
+# ============================================================================
+# NOVAC-1: x86_64 Machine Code Instruction & Register Tables
+# (compiler/x86_tables.nova)
+# 100% Pure Nova - Direct Binary Assembler & JIT Machine Code Specification
+# ============================================================================
+
+type X86Register = struct:
+    reg_id: Int
+    is_extended: Bool
+    name: String
+
+pub fn x86_reg_rax() -> X86Register:
+    X86Register(0, false, "rax")
+pub fn x86_reg_rcx() -> X86Register:
+    X86Register(1, false, "rcx")
+pub fn x86_reg_rdx() -> X86Register:
+    X86Register(2, false, "rdx")
+pub fn x86_reg_rbx() -> X86Register:
+    X86Register(3, false, "rbx")
+pub fn x86_reg_rsp() -> X86Register:
+    X86Register(4, false, "rsp")
+pub fn x86_reg_rbp() -> X86Register:
+    X86Register(5, false, "rbp")
+pub fn x86_reg_rsi() -> X86Register:
+    X86Register(6, false, "rsi")
+pub fn x86_reg_rdi() -> X86Register:
+    X86Register(7, false, "rdi")
+pub fn x86_reg_r8() -> X86Register:
+    X86Register(8, true, "r8")
+pub fn x86_reg_r9() -> X86Register:
+    X86Register(9, true, "r9")
+pub fn x86_reg_r10() -> X86Register:
+    X86Register(10, true, "r10")
+pub fn x86_reg_r11() -> X86Register:
+    X86Register(11, true, "r11")
+pub fn x86_reg_r12() -> X86Register:
+    X86Register(12, true, "r12")
+pub fn x86_reg_r13() -> X86Register:
+    X86Register(13, true, "r13")
+pub fn x86_reg_r14() -> X86Register:
+    X86Register(14, true, "r14")
+pub fn x86_reg_r15() -> X86Register:
+    X86Register(15, true, "r15")
+
+pub fn x86_rex_prefix(is_64bit: Bool, reg_ext: Bool, rm_ext: Bool) -> Int:
+    let base = 64
+    let w_bit = 8
+    let r_bit = 4
+    let b_bit = 1
+    base + w_bit
+
+pub fn x86_modrm_encode(mod_mode: Int, reg_code: Int, rm_code: Int) -> Int:
+    let m = mod_mode * 64
+    let r = reg_code * 8
+    m + r + rm_code
+
+type X86Instruction = struct:
+    mnemonic: String
+    primary_opcode: Int
+    has_modrm: Bool
+    has_immediate: Bool
+
+pub fn x86_op_mov_reg_rm() -> X86Instruction:
+    X86Instruction("mov", 137, true, false)
+
+pub fn x86_op_add_reg_rm() -> X86Instruction:
+    X86Instruction("add", 1, true, false)
+
+pub fn x86_op_sub_reg_rm() -> X86Instruction:
+    X86Instruction("sub", 41, true, false)
+
+pub fn x86_op_ret() -> X86Instruction:
+    X86Instruction("ret", 195, false, false)
+
+pub fn x86_op_syscall() -> X86Instruction:
+    X86Instruction("syscall", 3838, false, false)

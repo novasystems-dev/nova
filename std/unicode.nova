@@ -1,0 +1,359 @@
+# ============================================================================
+# Nova Standard Library: std/unicode.nova
+# Unicode 15.1 International Character Property & Category Tables
+# 100% Pure Nova - Zero external C/Python/ICU dependencies
+# ============================================================================
+
+type UnicodeCategory = struct:
+    category_id: Int
+    name: String
+
+pub fn unicode_cat_letter_upper() -> UnicodeCategory:
+    UnicodeCategory(1, "Lu")
+
+pub fn unicode_cat_letter_lower() -> UnicodeCategory:
+    UnicodeCategory(2, "Ll")
+
+pub fn unicode_cat_decimal_digit() -> UnicodeCategory:
+    UnicodeCategory(3, "Nd")
+
+pub fn unicode_cat_whitespace() -> UnicodeCategory:
+    UnicodeCategory(4, "Zs")
+
+pub fn unicode_cat_punctuation() -> UnicodeCategory:
+    UnicodeCategory(5, "Po")
+
+pub fn unicode_cat_math_symbol() -> UnicodeCategory:
+    UnicodeCategory(6, "Sm")
+
+pub fn unicode_is_ascii(cp: Int) -> Bool:
+    (cp >= 0) and (cp <= 127)
+
+pub fn unicode_is_ascii_digit(cp: Int) -> Bool:
+    (cp >= 48) and (cp <= 57)
+
+pub fn unicode_is_ascii_upper(cp: Int) -> Bool:
+    (cp >= 65) and (cp <= 90)
+
+pub fn unicode_is_ascii_lower(cp: Int) -> Bool:
+    (cp >= 97) and (cp <= 122)
+
+pub fn unicode_is_ascii_alpha(cp: Int) -> Bool:
+    unicode_is_ascii_upper(cp) or unicode_is_ascii_lower(cp)
+
+pub fn unicode_is_ascii_alphanumeric(cp: Int) -> Bool:
+    unicode_is_ascii_alpha(cp) or unicode_is_ascii_digit(cp)
+
+pub fn unicode_is_ascii_whitespace(cp: Int) -> Bool:
+    (cp == 32) or (cp == 9) or (cp == 10) or (cp == 13)
+
+pub fn unicode_to_ascii_lower(cp: Int) -> Int:
+    if unicode_is_ascii_upper(cp):
+        cp + 32
+    else:
+        cp
+
+pub fn unicode_to_ascii_upper(cp: Int) -> Int:
+    if unicode_is_ascii_lower(cp):
+        cp - 32
+    else:
+        cp
+
+pub fn unicode_utf8_char_len(lead_byte: Int) -> Int:
+    if lead_byte < 128:
+        1
+    elif lead_byte < 224:
+        2
+    elif lead_byte < 240:
+        3
+    else:
+        4
+
+pub fn unicode_is_basic_latin(cp: Int) -> Bool:
+    (cp >= 0) and (cp <= 127)
+
+pub fn unicode_is_latin_1_supp(cp: Int) -> Bool:
+    (cp >= 128) and (cp <= 255)
+
+pub fn unicode_is_latin_ext_a(cp: Int) -> Bool:
+    (cp >= 256) and (cp <= 383)
+
+pub fn unicode_is_latin_ext_b(cp: Int) -> Bool:
+    (cp >= 384) and (cp <= 591)
+
+pub fn unicode_is_ipa_extensions(cp: Int) -> Bool:
+    (cp >= 592) and (cp <= 687)
+
+pub fn unicode_is_spacing_modifiers(cp: Int) -> Bool:
+    (cp >= 688) and (cp <= 767)
+
+pub fn unicode_is_combining_diacritics(cp: Int) -> Bool:
+    (cp >= 768) and (cp <= 879)
+
+pub fn unicode_is_greek_and_coptic(cp: Int) -> Bool:
+    (cp >= 880) and (cp <= 1023)
+
+pub fn unicode_is_cyrillic(cp: Int) -> Bool:
+    (cp >= 1024) and (cp <= 1279)
+
+pub fn unicode_is_cyrillic_supp(cp: Int) -> Bool:
+    (cp >= 1280) and (cp <= 1327)
+
+pub fn unicode_is_armenian(cp: Int) -> Bool:
+    (cp >= 1328) and (cp <= 1423)
+
+pub fn unicode_is_hebrew(cp: Int) -> Bool:
+    (cp >= 1424) and (cp <= 1535)
+
+pub fn unicode_is_arabic(cp: Int) -> Bool:
+    (cp >= 1536) and (cp <= 1791)
+
+pub fn unicode_is_syriac(cp: Int) -> Bool:
+    (cp >= 1792) and (cp <= 1871)
+
+pub fn unicode_is_thaana(cp: Int) -> Bool:
+    (cp >= 1920) and (cp <= 1983)
+
+pub fn unicode_is_devanagari(cp: Int) -> Bool:
+    (cp >= 2304) and (cp <= 2431)
+
+pub fn unicode_is_bengali(cp: Int) -> Bool:
+    (cp >= 2432) and (cp <= 2559)
+
+pub fn unicode_is_gurmukhi(cp: Int) -> Bool:
+    (cp >= 2560) and (cp <= 2687)
+
+pub fn unicode_is_gujarati(cp: Int) -> Bool:
+    (cp >= 2688) and (cp <= 2815)
+
+pub fn unicode_is_oriya(cp: Int) -> Bool:
+    (cp >= 2816) and (cp <= 2943)
+
+pub fn unicode_is_tamil(cp: Int) -> Bool:
+    (cp >= 2944) and (cp <= 3071)
+
+pub fn unicode_is_telugu(cp: Int) -> Bool:
+    (cp >= 3072) and (cp <= 3199)
+
+pub fn unicode_is_kannada(cp: Int) -> Bool:
+    (cp >= 3200) and (cp <= 3327)
+
+pub fn unicode_is_malayalam(cp: Int) -> Bool:
+    (cp >= 3328) and (cp <= 3455)
+
+pub fn unicode_is_sinhala(cp: Int) -> Bool:
+    (cp >= 3456) and (cp <= 3583)
+
+pub fn unicode_is_thai(cp: Int) -> Bool:
+    (cp >= 3584) and (cp <= 3711)
+
+pub fn unicode_is_lao(cp: Int) -> Bool:
+    (cp >= 3712) and (cp <= 3839)
+
+pub fn unicode_is_tibetan(cp: Int) -> Bool:
+    (cp >= 3840) and (cp <= 4095)
+
+pub fn unicode_is_myanmar(cp: Int) -> Bool:
+    (cp >= 4096) and (cp <= 4255)
+
+pub fn unicode_is_georgian(cp: Int) -> Bool:
+    (cp >= 4256) and (cp <= 4351)
+
+pub fn unicode_is_hangul_jamo(cp: Int) -> Bool:
+    (cp >= 4352) and (cp <= 4607)
+
+pub fn unicode_is_ethiopic(cp: Int) -> Bool:
+    (cp >= 4608) and (cp <= 4991)
+
+pub fn unicode_is_cherokee(cp: Int) -> Bool:
+    (cp >= 5024) and (cp <= 5119)
+
+pub fn unicode_is_ogham(cp: Int) -> Bool:
+    (cp >= 5760) and (cp <= 5791)
+
+pub fn unicode_is_runic(cp: Int) -> Bool:
+    (cp >= 5792) and (cp <= 5887)
+
+pub fn unicode_is_khmer(cp: Int) -> Bool:
+    (cp >= 6016) and (cp <= 6143)
+
+pub fn unicode_is_mongolian(cp: Int) -> Bool:
+    (cp >= 6144) and (cp <= 6319)
+
+pub fn unicode_is_general_punctuation(cp: Int) -> Bool:
+    (cp >= 8192) and (cp <= 8303)
+
+pub fn unicode_is_superscripts_subscripts(cp: Int) -> Bool:
+    (cp >= 8304) and (cp <= 8351)
+
+pub fn unicode_is_currency_symbols(cp: Int) -> Bool:
+    (cp >= 8352) and (cp <= 8399)
+
+pub fn unicode_is_letterlike_symbols(cp: Int) -> Bool:
+    (cp >= 8448) and (cp <= 8527)
+
+pub fn unicode_is_number_forms(cp: Int) -> Bool:
+    (cp >= 8528) and (cp <= 8591)
+
+pub fn unicode_is_arrows(cp: Int) -> Bool:
+    (cp >= 8592) and (cp <= 8703)
+
+pub fn unicode_is_mathematical_operators(cp: Int) -> Bool:
+    (cp >= 8704) and (cp <= 8959)
+
+pub fn unicode_is_miscellaneous_technical(cp: Int) -> Bool:
+    (cp >= 8960) and (cp <= 9215)
+
+pub fn unicode_is_box_drawing(cp: Int) -> Bool:
+    (cp >= 9472) and (cp <= 9599)
+
+pub fn unicode_is_block_elements(cp: Int) -> Bool:
+    (cp >= 9600) and (cp <= 9631)
+
+pub fn unicode_is_geometric_shapes(cp: Int) -> Bool:
+    (cp >= 9632) and (cp <= 9727)
+
+pub fn unicode_is_miscellaneous_symbols(cp: Int) -> Bool:
+    (cp >= 9728) and (cp <= 9983)
+
+pub fn unicode_is_dingbats(cp: Int) -> Bool:
+    (cp >= 9984) and (cp <= 10175)
+
+pub fn unicode_is_cjk_symbols_punct(cp: Int) -> Bool:
+    (cp >= 12288) and (cp <= 12351)
+
+pub fn unicode_is_hiragana(cp: Int) -> Bool:
+    (cp >= 12352) and (cp <= 12447)
+
+pub fn unicode_is_katakana(cp: Int) -> Bool:
+    (cp >= 12448) and (cp <= 12543)
+
+pub fn unicode_is_cjk_unified_ideographs(cp: Int) -> Bool:
+    (cp >= 19968) and (cp <= 40959)
+
+pub fn unicode_is_hangul_syllables(cp: Int) -> Bool:
+    (cp >= 44032) and (cp <= 55215)
+
+pub fn unicode_is_miscellaneous_symbols_pictographs(cp: Int) -> Bool:
+    (cp >= 127744) and (cp <= 128511)
+
+pub fn unicode_is_emoticons(cp: Int) -> Bool:
+    (cp >= 128512) and (cp <= 128591)
+
+pub fn unicode_block_name(cp: Int) -> String:
+    if (cp >= 0) and (cp <= 127):
+        "Basic Latin"
+    elif (cp >= 128) and (cp <= 255):
+        "Latin-1 Supplement"
+    elif (cp >= 256) and (cp <= 383):
+        "Latin Extended-A"
+    elif (cp >= 384) and (cp <= 591):
+        "Latin Extended-B"
+    elif (cp >= 592) and (cp <= 687):
+        "IPA Extensions"
+    elif (cp >= 688) and (cp <= 767):
+        "Spacing Modifier Letters"
+    elif (cp >= 768) and (cp <= 879):
+        "Combining Diacritical Marks"
+    elif (cp >= 880) and (cp <= 1023):
+        "Greek and Coptic"
+    elif (cp >= 1024) and (cp <= 1279):
+        "Cyrillic"
+    elif (cp >= 1280) and (cp <= 1327):
+        "Cyrillic Supplement"
+    elif (cp >= 1328) and (cp <= 1423):
+        "Armenian"
+    elif (cp >= 1424) and (cp <= 1535):
+        "Hebrew"
+    elif (cp >= 1536) and (cp <= 1791):
+        "Arabic"
+    elif (cp >= 1792) and (cp <= 1871):
+        "Syriac"
+    elif (cp >= 1920) and (cp <= 1983):
+        "Thaana"
+    elif (cp >= 2304) and (cp <= 2431):
+        "Devanagari"
+    elif (cp >= 2432) and (cp <= 2559):
+        "Bengali"
+    elif (cp >= 2560) and (cp <= 2687):
+        "Gurmukhi"
+    elif (cp >= 2688) and (cp <= 2815):
+        "Gujarati"
+    elif (cp >= 2816) and (cp <= 2943):
+        "Oriya"
+    elif (cp >= 2944) and (cp <= 3071):
+        "Tamil"
+    elif (cp >= 3072) and (cp <= 3199):
+        "Telugu"
+    elif (cp >= 3200) and (cp <= 3327):
+        "Kannada"
+    elif (cp >= 3328) and (cp <= 3455):
+        "Malayalam"
+    elif (cp >= 3456) and (cp <= 3583):
+        "Sinhala"
+    elif (cp >= 3584) and (cp <= 3711):
+        "Thai"
+    elif (cp >= 3712) and (cp <= 3839):
+        "Lao"
+    elif (cp >= 3840) and (cp <= 4095):
+        "Tibetan"
+    elif (cp >= 4096) and (cp <= 4255):
+        "Myanmar"
+    elif (cp >= 4256) and (cp <= 4351):
+        "Georgian"
+    elif (cp >= 4352) and (cp <= 4607):
+        "Hangul Jamo"
+    elif (cp >= 4608) and (cp <= 4991):
+        "Ethiopic"
+    elif (cp >= 5024) and (cp <= 5119):
+        "Cherokee"
+    elif (cp >= 5760) and (cp <= 5791):
+        "Ogham"
+    elif (cp >= 5792) and (cp <= 5887):
+        "Runic"
+    elif (cp >= 6016) and (cp <= 6143):
+        "Khmer"
+    elif (cp >= 6144) and (cp <= 6319):
+        "Mongolian"
+    elif (cp >= 8192) and (cp <= 8303):
+        "General Punctuation"
+    elif (cp >= 8304) and (cp <= 8351):
+        "Superscripts and Subscripts"
+    elif (cp >= 8352) and (cp <= 8399):
+        "Currency Symbols"
+    elif (cp >= 8448) and (cp <= 8527):
+        "Letterlike Symbols"
+    elif (cp >= 8528) and (cp <= 8591):
+        "Number Forms"
+    elif (cp >= 8592) and (cp <= 8703):
+        "Arrows"
+    elif (cp >= 8704) and (cp <= 8959):
+        "Mathematical Operators"
+    elif (cp >= 8960) and (cp <= 9215):
+        "Miscellaneous Technical"
+    elif (cp >= 9472) and (cp <= 9599):
+        "Box Drawing"
+    elif (cp >= 9600) and (cp <= 9631):
+        "Block Elements"
+    elif (cp >= 9632) and (cp <= 9727):
+        "Geometric Shapes"
+    elif (cp >= 9728) and (cp <= 9983):
+        "Miscellaneous Symbols"
+    elif (cp >= 9984) and (cp <= 10175):
+        "Dingbats"
+    elif (cp >= 12288) and (cp <= 12351):
+        "CJK Symbols and Punctuation"
+    elif (cp >= 12352) and (cp <= 12447):
+        "Hiragana"
+    elif (cp >= 12448) and (cp <= 12543):
+        "Katakana"
+    elif (cp >= 19968) and (cp <= 40959):
+        "CJK Unified Ideographs"
+    elif (cp >= 44032) and (cp <= 55215):
+        "Hangul Syllables"
+    elif (cp >= 127744) and (cp <= 128511):
+        "Miscellaneous Symbols and Pictographs"
+    elif (cp >= 128512) and (cp <= 128591):
+        "Emoticons"
+    else:
+        "Other Unicode Block"

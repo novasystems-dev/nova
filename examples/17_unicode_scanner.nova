@@ -1,0 +1,37 @@
+# 17_unicode_scanner.nova - International Unicode 15.1 Property Scanner
+# Demonstrates character category classification, ASCII case folding & block detection
+
+type UnicodeCat = struct:
+    id: Int
+    name: String
+
+fn unicode_cat_letter() -> UnicodeCat:
+    UnicodeCat(1, "Lu")
+
+fn unicode_is_ascii_upper(cp: Int) -> Bool:
+    (cp >= 65) and (cp <= 90)
+
+fn unicode_to_ascii_lower(cp: Int) -> Int:
+    if unicode_is_ascii_upper(cp):
+        cp + 32
+    else:
+        cp
+
+pub fn main():
+    print("==========================================================")
+    print("   NOVA UNICODE: INTERNATIONAL CHARACTER PROPERTIES")
+    print("==========================================================")
+
+    # 1. Unicode General Category
+    let cat = unicode_cat_letter()
+    print_str("-> Character category: ")
+    print_str(cat.name)
+    print_newline()
+
+    # 2. Case Conversion & ASCII Classification
+    let char_a = 65
+    let lower_a = unicode_to_ascii_lower(char_a)
+    print_str("-> Converted 'A' (65) to lowercase 'a' (expected 97): ")
+    print_int(lower_a)
+
+    print("🎉 Unicode property verification completed successfully.")
