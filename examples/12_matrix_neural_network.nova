@@ -1,0 +1,67 @@
+# 12_matrix_neural_network.nova - Linear Algebra & Vector Transformation
+# Demonstrates 2D/3D Vector arithmetic and Matrix transformation
+
+type Vec3 = struct:
+    x: Int
+    y: Int
+    z: Int
+
+fn vec3_new(x: Int, y: Int, z: Int) -> Vec3:
+    Vec3(x, y, z)
+
+fn vec3_add(a: Vec3, b: Vec3) -> Vec3:
+    Vec3(a.x + b.x, a.y + b.y, a.z + b.z)
+
+fn vec3_dot(a: Vec3, b: Vec3) -> Int:
+    (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+
+type Mat2 = struct:
+    m00: Int
+    m01: Int
+    m10: Int
+    m11: Int
+
+fn mat2_new(m00: Int, m01: Int, m10: Int, m11: Int) -> Mat2:
+    Mat2(m00, m01, m10, m11)
+
+fn mat2_identity() -> Mat2:
+    Mat2(1, 0, 0, 1)
+
+fn mat2_det(m: Mat2) -> Int:
+    (m.m00 * m.m11) - (m.m01 * m.m10)
+
+fn mat2_mul(a: Mat2, b: Mat2) -> Mat2:
+    let r00 = (a.m00 * b.m00) + (a.m01 * b.m10)
+    let r01 = (a.m00 * b.m01) + (a.m01 * b.m11)
+    let r10 = (a.m10 * b.m00) + (a.m11 * b.m10)
+    let r11 = (a.m10 * b.m01) + (a.m11 * b.m11)
+    Mat2(r00, r01, r10, r11)
+
+pub fn main():
+    print("==========================================================")
+    print("   NOVA SCIENTIFIC: LINEAR ALGEBRA & VECTOR ARITHMETIC")
+    print("==========================================================")
+
+    # 1. 3D Vector Operations
+    let v1 = vec3_new(10, 20, 30)
+    let v2 = vec3_new(1, 2, 3)
+    let v_sum = vec3_add(v1, v2)
+    print_str("-> Vector sum X: ")
+    print_int(v_sum.x)
+
+    let dot_prod = vec3_dot(v1, v2)
+    print_str("-> Vector dot product (10*1 + 20*2 + 30*3 = 140): ")
+    print_int(dot_prod)
+
+    # 2. 2x2 Matrix Determinant & Multiplication
+    let m = mat2_new(4, 2, 1, 3)
+    let det = mat2_det(m)
+    print_str("-> Matrix determinant (4*3 - 2*1 = 10): ")
+    print_int(det)
+
+    let m_id = mat2_identity()
+    let m_res = mat2_mul(m, m_id)
+    print_str("-> Identity multiplication result element [0,0]: ")
+    print_int(m_res.m00)
+
+    print("🎉 Linear algebra operations verified successfully.")

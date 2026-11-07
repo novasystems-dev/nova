@@ -1,0 +1,54 @@
+# 13_compression_pipeline.nova - Lossless Compression & Z3 Refinement Verification
+# Demonstrates RLE block compression and provably safe compression ratio calculations
+
+type RleBlock = struct:
+    run_byte: Int
+    run_length: Int
+
+fn rle_block_new(byte_val: Int, count: Int) -> RleBlock:
+    RleBlock(byte_val, count)
+
+type CompressionStats = struct:
+    uncompressed_bytes: Int
+    compressed_bytes: Int
+    saved_bytes: Int
+    ratio_percent: Int
+
+type NonZero = n: Int where n != 0
+
+fn compress_calc_stats(orig_size: NonZero, comp_size: Int) -> CompressionStats:
+    let saved = orig_size - comp_size
+    let ratio = (comp_size * 100) / orig_size
+    CompressionStats(orig_size, comp_size, saved, ratio)
+
+fn compress_is_effective(stats: CompressionStats) -> Bool:
+    stats.compressed_bytes < stats.uncompressed_bytes
+
+pub fn main():
+    print("==========================================================")
+    print("   NOVA DATA PIPELINE: LOSSLESS COMPRESSION & RATIOS")
+    print("==========================================================")
+
+    # 1. RLE Compression Block
+    let block = rle_block_new(65, 120)
+    print_str("-> Compressed byte character code: ")
+    print_int(block.run_byte)
+    print_str("-> Run length repeat count: ")
+    print_int(block.run_length)
+
+    # 2. Provably safe compression stats (NonZero denominator verified by Z3)
+    let stats = compress_calc_stats(1000, 350)
+    print_str("-> Original size in bytes: ")
+    print_int(stats.uncompressed_bytes)
+    print_str("-> Compressed size in bytes: ")
+    print_int(stats.compressed_bytes)
+    print_str("-> Bytes saved: ")
+    print_int(stats.saved_bytes)
+    print_str("-> Compression ratio percentage (35%): ")
+    print_int(stats.ratio_percent)
+
+    let effective = compress_is_effective(stats)
+    print_str("-> Compression is effective: ")
+    print_bool(effective)
+
+    print("🎉 Lossless compression pipeline verified with zero errors.")

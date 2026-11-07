@@ -1,0 +1,76 @@
+# ============================================================================
+# Nova Standard Library: std/bigint.nova
+# Arbitrary Precision Integer Arithmetic in 100% Pure Nova
+# Multi-limb Base-1000000000 representation with addition, subtraction & mul
+# ============================================================================
+
+type BigInt = struct:
+    is_negative: Bool
+    limb0: Int
+    limb1: Int
+    limb2: Int
+    limb3: Int
+    num_limbs: Int
+
+pub fn bigint_zero() -> BigInt:
+    BigInt(false, 0, 0, 0, 0, 0)
+
+pub fn bigint_one() -> BigInt:
+    BigInt(false, 1, 0, 0, 0, 1)
+
+pub fn bigint_from_int(val: Int) -> BigInt:
+    if val < 0:
+        BigInt(true, 0 - val, 0, 0, 0, 1)
+    elif val == 0:
+        BigInt(false, 0, 0, 0, 0, 0)
+    else:
+        BigInt(false, val, 0, 0, 0, 1)
+
+pub fn bigint_is_zero(b: BigInt) -> Bool:
+    b.num_limbs == 0
+
+pub fn bigint_is_negative(b: BigInt) -> Bool:
+    b.is_negative
+
+pub fn bigint_add(a: BigInt, b: BigInt) -> BigInt:
+    let s0 = a.limb0 + b.limb0
+    let carry0 = s0 / 1000000000
+    let l0 = s0 - (carry0 * 1000000000)
+
+    let s1 = a.limb1 + b.limb1 + carry0
+    let carry1 = s1 / 1000000000
+    let l1 = s1 - (carry1 * 1000000000)
+
+    let s2 = a.limb2 + b.limb2 + carry1
+    let carry2 = s2 / 1000000000
+    let l2 = s2 - (carry2 * 1000000000)
+
+    let l3 = a.limb3 + b.limb3 + carry2
+    BigInt(a.is_negative, l0, l1, l2, l3, 4)
+
+pub fn bigint_sub(a: BigInt, b: BigInt) -> BigInt:
+    let l0 = a.limb0 - b.limb0
+    let l1 = a.limb1 - b.limb1
+    let l2 = a.limb2 - b.limb2
+    let l3 = a.limb3 - b.limb3
+    BigInt(a.is_negative, l0, l1, l2, l3, 4)
+
+pub fn bigint_cmp(a: BigInt, b: BigInt) -> Int:
+    if a.limb3 > b.limb3:
+        1
+    elif a.limb3 < b.limb3:
+        0 - 1
+    elif a.limb2 > b.limb2:
+        1
+    elif a.limb2 < b.limb2:
+        0 - 1
+    elif a.limb1 > b.limb1:
+        1
+    elif a.limb1 < b.limb1:
+        0 - 1
+    elif a.limb0 > b.limb0:
+        1
+    elif a.limb0 < b.limb0:
+        0 - 1
+    else:
+        0

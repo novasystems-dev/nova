@@ -1,0 +1,76 @@
+# ============================================================================
+# Nova Standard Library: std/matrix.nova
+# Linear Algebra, Vector & Matrix Operations in 100% Pure Nova
+# Determinants, Matrix Multiplication, Dot Products & Transformations
+# ============================================================================
+
+type Vec3 = struct:
+    x: Int
+    y: Int
+    z: Int
+
+pub fn vec3_new(x: Int, y: Int, z: Int) -> Vec3:
+    Vec3(x, y, z)
+
+pub fn vec3_zero() -> Vec3:
+    Vec3(0, 0, 0)
+
+pub fn vec3_add(a: Vec3, b: Vec3) -> Vec3:
+    Vec3(a.x + b.x, a.y + b.y, a.z + b.z)
+
+pub fn vec3_sub(a: Vec3, b: Vec3) -> Vec3:
+    Vec3(a.x - b.x, a.y - b.y, a.z - b.z)
+
+pub fn vec3_scale(v: Vec3, s: Int) -> Vec3:
+    Vec3(v.x * s, v.y * s, v.z * s)
+
+pub fn vec3_dot(a: Vec3, b: Vec3) -> Int:
+    (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+
+pub fn vec3_cross(a: Vec3, b: Vec3) -> Vec3:
+    let cx = (a.y * b.z) - (a.z * b.y)
+    let cy = (a.z * b.x) - (a.x * b.z)
+    let cz = (a.x * b.y) - (a.y * b.x)
+    Vec3(cx, cy, cz)
+
+type Mat2 = struct:
+    m00: Int
+    m01: Int
+    m10: Int
+    m11: Int
+
+pub fn mat2_identity() -> Mat2:
+    Mat2(1, 0, 0, 1)
+
+pub fn mat2_new(m00: Int, m01: Int, m10: Int, m11: Int) -> Mat2:
+    Mat2(m00, m01, m10, m11)
+
+pub fn mat2_det(m: Mat2) -> Int:
+    (m.m00 * m.m11) - (m.m01 * m.m10)
+
+pub fn mat2_trace(m: Mat2) -> Int:
+    m.m00 + m.m11
+
+pub fn mat2_add(a: Mat2, b: Mat2) -> Mat2:
+    Mat2(a.m00 + b.m00, a.m01 + b.m01, a.m10 + b.m10, a.m11 + b.m11)
+
+pub fn mat2_mul(a: Mat2, b: Mat2) -> Mat2:
+    let r00 = (a.m00 * b.m00) + (a.m01 * b.m10)
+    let r01 = (a.m00 * b.m01) + (a.m01 * b.m11)
+    let r10 = (a.m10 * b.m00) + (a.m11 * b.m10)
+    let r11 = (a.m10 * b.m01) + (a.m11 * b.m11)
+    Mat2(r00, r01, r10, r11)
+
+type Mat3 = struct:
+    m00: Int
+    m01: Int
+    m02: Int
+    m10: Int
+    m11: Int
+    m12: Int
+    m20: Int
+    m21: Int
+    m22: Int
+
+pub fn mat3_identity() -> Mat3:
+    Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1)

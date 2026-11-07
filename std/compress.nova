@@ -1,0 +1,40 @@
+# ============================================================================
+# Nova Standard Library: std/compress.nova
+# Lossless Data Compression Primitives in 100% Pure Nova
+# Run-Length Encoding (RLE) & LZ77 Sliding Window Matcher
+# ============================================================================
+
+type RleBlock = struct:
+    run_byte: Int
+    run_length: Int
+
+pub fn rle_block_new(byte_val: Int, count: Int) -> RleBlock:
+    RleBlock(byte_val, count)
+
+type Lz77Match = struct:
+    offset: Int
+    length: Int
+    literal: Int
+    is_match: Bool
+
+pub fn lz77_match_new(offset: Int, length: Int, lit: Int) -> Lz77Match:
+    Lz77Match(offset, length, lit, true)
+
+pub fn lz77_literal_only(lit: Int) -> Lz77Match:
+    Lz77Match(0, 0, lit, false)
+
+type CompressionStats = struct:
+    uncompressed_bytes: Int
+    compressed_bytes: Int
+    saved_bytes: Int
+    ratio_percent: Int
+
+type NonZero = n: Int where n != 0
+
+pub fn compress_calc_stats(orig_size: NonZero, comp_size: Int) -> CompressionStats:
+    let saved = orig_size - comp_size
+    let ratio = (comp_size * 100) / orig_size
+    CompressionStats(orig_size, comp_size, saved, ratio)
+
+pub fn compress_is_effective(stats: CompressionStats) -> Bool:
+    stats.compressed_bytes < stats.uncompressed_bytes

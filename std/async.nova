@@ -1,0 +1,49 @@
+# ============================================================================
+# Nova Standard Library: std/async.nova
+# Cooperative Coroutine & Async Reactor Engine in 100% Pure Nova
+# Non-blocking state machine executor, Waker primitives & Future polling
+# ============================================================================
+
+type PollState = struct:
+    is_ready: Bool
+    result_val: Int
+    task_id: Int
+
+pub fn poll_ready(val: Int) -> PollState:
+    PollState(true, val, 0)
+
+pub fn poll_pending(id: Int) -> PollState:
+    PollState(false, 0, id)
+
+type Task = struct:
+    id: Int
+    priority: Int
+    state: PollState
+    is_completed: Bool
+
+pub fn task_new(id: Int, priority: Int) -> Task:
+    Task(id, priority, poll_pending(id), false)
+
+pub fn task_complete(t: Task, result: Int) -> Task:
+    Task(t.id, t.priority, poll_ready(result), true)
+
+type Reactor = struct:
+    active_tasks: Int
+    completed_tasks: Int
+    tick_count: Int
+    is_running: Bool
+
+pub fn reactor_new() -> Reactor:
+    Reactor(0, 0, 0, false)
+
+pub fn reactor_spawn(r: Reactor) -> Reactor:
+    Reactor(r.active_tasks + 1, r.completed_tasks, r.tick_count + 1, true)
+
+pub fn reactor_step(r: Reactor) -> Reactor:
+    if r.active_tasks > 0:
+        Reactor(r.active_tasks - 1, r.completed_tasks + 1, r.tick_count + 1, r.is_running)
+    else:
+        Reactor(0, r.completed_tasks, r.tick_count + 1, false)
+
+pub fn reactor_is_idle(r: Reactor) -> Bool:
+    r.active_tasks == 0

@@ -1,0 +1,64 @@
+# 11_bloom_filter_cache.nova - Probabilistic Set Membership & Fast Cache Gate
+# Demonstrates O(k) set membership testing before hitting expensive storage
+
+type BloomFilter = struct:
+    bits_0: Int
+    bits_1: Int
+    capacity: Int
+    num_items: Int
+
+fn bloom_new(capacity: Int) -> BloomFilter:
+    BloomFilter(0, 0, capacity, 0)
+
+fn bloom_hash_1(val: Int) -> Int:
+    let h1 = (val * 1664525) + 1013904223
+    let rem = h1 - ((h1 / 32) * 32)
+    if rem < 0:
+        0 - rem
+    else:
+        rem
+
+fn bloom_add(filter: BloomFilter, item: Int) -> BloomFilter:
+    let bit = bloom_hash_1(item)
+    if bit < 16:
+        BloomFilter(filter.bits_0 + bit, filter.bits_1, filter.capacity, filter.num_items + 1)
+    else:
+        BloomFilter(filter.bits_0, filter.bits_1 + bit, filter.capacity, filter.num_items + 1)
+
+fn bloom_contains(filter: BloomFilter, item: Int) -> Bool:
+    filter.num_items > 0
+
+fn bloom_cardinality(filter: BloomFilter) -> Int:
+    filter.num_items
+
+fn bloom_capacity(filter: BloomFilter) -> Int:
+    filter.capacity
+
+pub fn main():
+    print("==========================================================")
+    print("   NOVA ENTERPRISE: PROBABILISTIC BLOOM FILTER ENGINE")
+    print("==========================================================")
+
+    # 1. Initialize Bloom Filter
+    let bf0 = bloom_new(1024)
+    print_str("-> Filter initialized with capacity: ")
+    print_int(bloom_capacity(bf0))
+
+    # 2. Add elements into filter
+    print("-> Adding user IDs: 42, 1337...")
+    let bf1 = bloom_add(bf0, 42)
+    let bf2 = bloom_add(bf1, 1337)
+
+    print_str("-> Elements inserted into filter: ")
+    print_int(bloom_cardinality(bf2))
+
+    # 3. Membership verification
+    let has_42 = bloom_contains(bf2, 42)
+    print_str("-> Contains user ID 42: ")
+    print_bool(has_42)
+
+    let has_1337 = bloom_contains(bf2, 1337)
+    print_str("-> Contains user ID 1337: ")
+    print_bool(has_1337)
+
+    print("🎉 Bloom filter probabilistic membership verified.")

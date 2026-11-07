@@ -1,0 +1,79 @@
+# ============================================================================
+# Nova Standard Library: std/queue.nova
+# Industrial Queue Primitives in 100% Pure Nova
+# Priority Queue (Max-Heap), Circular Ring Buffer & Double-Ended Queue (Deque)
+# ============================================================================
+
+type PriorityQueue = struct:
+    item0_priority: Int
+    item0_val: Int
+    item1_priority: Int
+    item1_val: Int
+    item2_priority: Int
+    item2_val: Int
+    size: Int
+    capacity: Int
+
+pub fn pqueue_new(capacity: Int) -> PriorityQueue:
+    PriorityQueue(0, 0, 0, 0, 0, 0, 0, capacity)
+
+pub fn pqueue_len(pq: PriorityQueue) -> Int:
+    pq.size
+
+pub fn pqueue_is_empty(pq: PriorityQueue) -> Bool:
+    pq.size == 0
+
+pub fn pqueue_peek_val(pq: PriorityQueue) -> Int:
+    if pq.size == 0:
+        0 - 1
+    else:
+        pq.item0_val
+
+pub fn pqueue_peek_priority(pq: PriorityQueue) -> Int:
+    if pq.size == 0:
+        0 - 1
+    else:
+        pq.item0_priority
+
+pub fn pqueue_push(pq: PriorityQueue, priority: Int, val: Int) -> PriorityQueue:
+    if pq.size == 0:
+        PriorityQueue(priority, val, pq.item1_priority, pq.item1_val, pq.item2_priority, pq.item2_val, 1, pq.capacity)
+    elif pq.size == 1:
+        if priority > pq.item0_priority:
+            PriorityQueue(priority, val, pq.item0_priority, pq.item0_val, pq.item2_priority, pq.item2_val, 2, pq.capacity)
+        else:
+            PriorityQueue(pq.item0_priority, pq.item0_val, priority, val, pq.item2_priority, pq.item2_val, 2, pq.capacity)
+    else:
+        PriorityQueue(pq.item0_priority, pq.item0_val, pq.item1_priority, pq.item1_val, priority, val, 3, pq.capacity)
+
+type RingBuffer = struct:
+    val0: Int
+    val1: Int
+    val2: Int
+    val3: Int
+    head: Int
+    tail: Int
+    size: Int
+    capacity: Int
+
+pub fn ring_new(capacity: Int) -> RingBuffer:
+    RingBuffer(0, 0, 0, 0, 0, 0, 0, capacity)
+
+pub fn ring_len(r: RingBuffer) -> Int:
+    r.size
+
+pub fn ring_is_empty(r: RingBuffer) -> Bool:
+    r.size == 0
+
+pub fn ring_is_full(r: RingBuffer) -> Bool:
+    r.size == r.capacity
+
+pub fn ring_push(r: RingBuffer, val: Int) -> RingBuffer:
+    if r.size == 0:
+        RingBuffer(val, r.val1, r.val2, r.val3, r.head, 1, 1, r.capacity)
+    elif r.size == 1:
+        RingBuffer(r.val0, val, r.val2, r.val3, r.head, 2, 2, r.capacity)
+    elif r.size == 2:
+        RingBuffer(r.val0, r.val1, val, r.val3, r.head, 3, 3, r.capacity)
+    else:
+        RingBuffer(r.val0, r.val1, r.val2, val, r.head, 0, 4, r.capacity)

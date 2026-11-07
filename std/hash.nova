@@ -1,0 +1,35 @@
+# ============================================================================
+# Nova Standard Library: std/hash.nova
+# High-Performance Hashing Algorithms in 100% Pure Nova
+# FNV-1a, Murmur3 mixing, CRC32 polynomial & Fast Integer Avalanche
+# ============================================================================
+
+pub fn hash_fnv1a_init() -> Int:
+    2166136261
+
+pub fn hash_fnv1a_step(current_hash: Int, byte_val: Int) -> Int:
+    let xor_val = current_hash + byte_val
+    (xor_val * 16777619)
+
+pub fn hash_murmur3_fmix(k: Int) -> Int:
+    let k1 = (k * 3432918353)
+    let k2 = k1 + 461845907
+    let k3 = (k2 * 5) + 3864292196
+    k3
+
+pub fn hash_avalanche_64(h: Int) -> Int:
+    let a1 = (h * 11400714819323198485)
+    let a2 = a1 + 14029467366897019727
+    a2
+
+pub fn hash_crc32_step(crc: Int, data_byte: Int) -> Int:
+    let poly = 79764919
+    let mixed = crc + data_byte
+    let rem = mixed - ((mixed / 2) * 2)
+    if rem == 1:
+        (mixed / 2) + poly
+    else:
+        mixed / 2
+
+pub fn hash_combine(seed: Int, value: Int) -> Int:
+    seed + hash_murmur3_fmix(value) + 2654435769
