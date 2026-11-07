@@ -36,7 +36,20 @@ $LocalBinExists = Test-Path (Join-Path $CurrentScriptDir "bin\novac.exe") -or (T
 
 if (-not $LocalBinExists) {
     Write-Host "-> Fetching latest Windows binary distribution from GitHub Releases..." -ForegroundColor Yellow
-    $ZipUrl = "https://github.com/novasystems-dev/nova/releases/latest/download/nova-windows-x86_64.zip"
+    $Tag = "v0.3.0"
+    try {
+        $Req = [System.Net.WebRequest]::Create("https://github.com/novasystems-dev/nova/releases/latest")
+        $Req.AllowAutoRedirect = $false
+        $Resp = $Req.GetResponse()
+        $Loc = $Resp.GetResponseHeader("Location")
+        $TagPart = $Loc.Substring($Loc.LastIndexOf('/') + 1)
+        if ($TagPart) { $Tag = $TagPart }
+        $Resp.Close()
+    } catch {
+        $Tag = "v0.3.0"
+    }
+
+    $ZipUrl = "https://github.com/novasystems-dev/nova/releases/download/$Tag/nova-dev-full-$Tag-windows-x86_64.zip"
     $TempZip = Join-Path $env:TEMP "nova-windows-install.zip"
     $TempExtract = Join-Path $env:TEMP "nova-windows-extracted"
     
@@ -55,7 +68,7 @@ if (-not $LocalBinExists) {
     }
     catch {
         Write-Host "   Falling back to tar.gz asset if .zip is unavailable..." -ForegroundColor Gray
-        $TarUrl = "https://github.com/novasystems-dev/nova/releases/latest/download/nova-dev-full-windows-x86_64.tar.gz"
+        $TarUrl = "https://github.com/novasystems-dev/nova/releases/download/$Tag/nova-dev-full-$Tag-windows-x86_64.tar.gz"
         $TempTar = Join-Path $env:TEMP "nova-windows-install.tar.gz"
         Invoke-WebRequest -Uri $TarUrl -OutFile $TempTar -UseBasicParsing
         tar -xzf $TempTar -C $env:TEMP
@@ -83,7 +96,7 @@ if (Test-Path $RuntimeSrc) {
 Write-Host "-> Installing standard library into $StdDir..." -ForegroundColor Green
 $StdSrc = Join-Path $CurrentScriptDir "std"
 if (Test-Path $StdSrc) {
-    Copy-Item -Path (Join-Path $StdSrc "*.nova") -Destination $StdDir -Force
+    Copy-Item -Path (Join-Path $StdSrc "*") -Destination $StdDir -Recurse -Force
 }
 
 Write-Host "-> Configuring User Environment Variables..." -ForegroundColor Green
