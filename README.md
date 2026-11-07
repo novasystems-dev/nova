@@ -75,21 +75,21 @@ irm https://raw.githubusercontent.com/novasystems-dev/nova/master/install.ps1 | 
 
 Nova features an uncompromising **100% Pure Nova Native** foundation designed to eliminate C, libc, and external runtime dependencies entirely ("The Great C Purge"):
 
-- **Direct Bare-Metal Kernel System Calls**: Zero-libc x86_64 Linux syscalls (`std/runtime/sys_linux.nova`) & Windows NT VirtualMemory/Thread subsystems (`std/runtime/sys_windows.nova`).
-- **Direct Standalone Binary Codegen**: Direct ELF64 Linux executable builder (`compiler/backend/elf64.nova`) & Windows PE32+ `.exe` builder (`compiler/backend/pe.nova`) with native opcode encoding (`compiler/backend/x86_64_enc.nova`).
-- **Perceus In-Place Slab Allocator**: Zero-fragmentation, deterministic reference-counted memory reuse (`std/runtime/perceus_alloc.nova`).
-- **High-Throughput Web & Storage**: Event reactor HTTP/1.1 & HTTP/2 framework (`std/colossus_web.nova`) and Titan LSM-Tree with Raft consensus (`std/titan_db.nova`).
+- **Direct Bare-Metal Kernel System Calls**: Zero-libc x86_64 Linux syscalls (`std/runtime/sys_linux.nv`) & Windows NT VirtualMemory/Thread subsystems (`std/runtime/sys_windows.nv`).
+- **Direct Standalone Binary Codegen**: Direct ELF64 Linux executable builder (`compiler/backend/elf64.nv`) & Windows PE32+ `.exe` builder (`compiler/backend/pe.nv`) with native opcode encoding (`compiler/backend/x86_64_enc.nv`).
+- **Perceus In-Place Slab Allocator**: Zero-fragmentation, deterministic reference-counted memory reuse (`std/runtime/perceus_alloc.nv`).
+- **High-Throughput Web & Storage**: Event reactor HTTP/1.1 & HTTP/2 framework (`std/colossus_web.nv`) and Titan LSM-Tree with Raft consensus (`std/titan_db.nv`).
 - **10 Industrial Standard Modules**:
-  1. `std/ml_tensor.nova`: N-Dimensional tensors, matrix multiplication shapes & scaled activation functions.
-  2. `std/crypto_postquantum.nova`: NIST-standardized Kyber/ML-KEM lattice cryptography & Poly1305 MAC authenticator.
-  3. `std/distributed_cluster.nova`: Cluster node membership, Gossip protocol, & Phi Accrual failure detection.
-  4. `std/tls13.nova`: TLS 1.3 cryptographic record layer & RFC 8446 handshake state machine.
-  5. `std/grpc_pure.nova`: Pure Nova Protocol Buffers varint encoding & gRPC 5-byte framed streaming.
-  6. `std/columnar_store.nova`: OLAP Parquet-style columnar chunk storage, RLE compression & ZoneMaps.
-  7. `std/sql_query_engine.nova`: Relational algebra query plan optimizer, filter pushdown & cost estimation.
-  8. `std/linear_algebra.nova`: Vector3D cross/dot products, Matrix 3x3 trace, determinant & invertibility proofs.
-  9. `std/lockfree_queue.nova`: Atomic CAS sequences, MPMC ring buffers & hazard pointer memory reclamation.
-  10. `std/bytecode_vm.nova`: Register-based bytecode virtual machine with instruction decoding & gas metering.
+  1. `std/ml_tensor.nv`: N-Dimensional tensors, matrix multiplication shapes & scaled activation functions.
+  2. `std/crypto_postquantum.nv`: NIST-standardized Kyber/ML-KEM lattice cryptography & Poly1305 MAC authenticator.
+  3. `std/distributed_cluster.nv`: Cluster node membership, Gossip protocol, & Phi Accrual failure detection.
+  4. `std/tls13.nv`: TLS 1.3 cryptographic record layer & RFC 8446 handshake state machine.
+  5. `std/grpc_pure.nv`: Pure Nova Protocol Buffers varint encoding & gRPC 5-byte framed streaming.
+  6. `std/columnar_store.nv`: OLAP Parquet-style columnar chunk storage, RLE compression & ZoneMaps.
+  7. `std/sql_query_engine.nv`: Relational algebra query plan optimizer, filter pushdown & cost estimation.
+  8. `std/linear_algebra.nv`: Vector3D cross/dot products, Matrix 3x3 trace, determinant & invertibility proofs.
+  9. `std/lockfree_queue.nv`: Atomic CAS sequences, MPMC ring buffers & hazard pointer memory reclamation.
+  10. `std/bytecode_vm.nv`: Register-based bytecode virtual machine with instruction decoding & gas metering.
 
 ---
 
@@ -166,16 +166,16 @@ orbit run     # Runs target/release/app.nova
 
 ```bash
 # Compile and run an example
-novac run examples/01_hello.nova
+novac run examples/01_hello.nv
 
 # Compile an enterprise B-Tree indexed database
-novac run examples/10_btree_database.nova
+novac run examples/10_btree_database.nv
 
 # Compile a scientific linear algebra neural network
-novac run examples/12_matrix_neural_network.nova
+novac run examples/12_matrix_neural_network.nv
 
 # Compile with Z3 formal refinement verification
-novac check examples/02_refinements_z3.nova
+novac check examples/02_refinements_z3.nv
 ```
 
 ---

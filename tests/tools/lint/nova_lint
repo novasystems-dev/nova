@@ -50,7 +50,7 @@ def main():
     files = [Path(p) for p in sys.argv[1:]]
 
     for p in files:
-        if not p.exists() or p.suffix != ".nova":
+        if not p.exists() or p.suffix not in [".nv", ".nova"]:
             continue
         issues = lint_file(p)
         for line_no, code, msg in issues:

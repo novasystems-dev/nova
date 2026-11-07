@@ -11,9 +11,9 @@ echo "  NOVA BENCHMARK RUNNER"
 echo "=========================================================="
 
 BENCH_FILES=(
-    "tests/benchmarks/01_perceus_allocation.nova"
-    "tests/benchmarks/02_arithmetic_throughput.nova"
-    "tests/benchmarks/03_channel_concurrency.nova"
+    "tests/benchmarks/01_perceus_allocation.nv"
+    "tests/benchmarks/02_arithmetic_throughput.nv"
+    "tests/benchmarks/03_channel_concurrency.nv"
 )
 
 get_time_ms() {
@@ -38,7 +38,7 @@ for file in "${BENCH_FILES[@]}"; do
     echo "   Build Time:     ${BUILD_MS} ms"
     
     # Measure execution time
-    BIN_NAME="$(basename "$file" .nova).out"
+    BIN_NAME="$(basename "$(basename "$file" .nova)" .nv).out"
     TARGET_EXEC="./$BIN_NAME"
     if [ ! -f "$TARGET_EXEC" ] && [ -f "${TARGET_EXEC}.exe" ]; then
         TARGET_EXEC="${TARGET_EXEC}.exe"

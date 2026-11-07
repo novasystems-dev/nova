@@ -47,7 +47,7 @@ os.makedirs("./tmp_nova_fuzz", exist_ok=True)
 for i in range(100):
     seed = random.choice(seeds)
     mut = random.choice(mutations)(seed)
-    with open(f"./tmp_nova_fuzz/test_{i}.nova", "w") as f:
+    with open(f"./tmp_nova_fuzz/test_{i}.nv", "w") as f:
         f.write(mut)
 EOF
 
@@ -64,7 +64,7 @@ run_with_timeout() {
 }
 
 for i in $(seq 0 $((TOTAL_ITERATIONS - 1))); do
-    TEST_FILE="$TMP_DIR/test_${i}.nova"
+    TEST_FILE="$TMP_DIR/test_${i}.nv"
     # Run compiler with timeout
     if ! run_with_timeout "$TIMEOUT_SEC" ./bin/novac check "$TEST_FILE" > /dev/null 2>&1; then
         EXIT_CODE=$?

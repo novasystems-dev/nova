@@ -1,6 +1,8 @@
 # GitHub Linguist Language Configuration for Nova Systems Programming Language
-# Ensure GitHub displays Nova as the primary language and highlights .nova files
+# Ensure GitHub displays Nova as the primary language and highlights .nv and .nova files
 
+*.nv linguist-language=Rust
+*.nv linguist-detectable=true
 *.nova linguist-language=Rust
 *.nova linguist-detectable=true
 

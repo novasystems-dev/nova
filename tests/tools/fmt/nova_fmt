@@ -35,7 +35,7 @@ def main():
         sys.exit(1)
         
     for path in sys.argv[1:]:
-        if os.path.isfile(path) and path.endswith(".nova"):
+        if os.path.isfile(path) and (path.endswith(".nv") or path.endswith(".nova")):
             format_file(path)
 
 if __name__ == "__main__":

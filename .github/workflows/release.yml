@@ -159,7 +159,7 @@ jobs:
           if [ -f "bin/novac.exe" ]; then NOVAC="./bin/novac.exe"; fi
 
           echo "Compiling Orbit..."
-          if ! $NOVAC build tests/tools/orbit/main.nova 2>&1 | tee orbit_build.log; then
+          if ! $NOVAC build tests/tools/orbit/main.nv 2>&1 | tee orbit_build.log; then
             ERR_MSG=$(tail -n 25 orbit_build.log | tr '\r\n' ' ' | sed 's/"//g')
             echo "::error title=Orbit Build Failed::$ERR_MSG"
             cat orbit_build.log
@@ -178,7 +178,7 @@ jobs:
           rm -f main.out main.out.exe
 
           echo "Compiling DocGen..."
-          if ! $NOVAC build tests/tools/docgen/main.nova 2>&1 | tee docgen_build.log; then
+          if ! $NOVAC build tests/tools/docgen/main.nv 2>&1 | tee docgen_build.log; then
             ERR_MSG=$(tail -n 25 docgen_build.log | tr '\r\n' ' ' | sed 's/"//g')
             echo "::error title=DocGen Build Failed::$ERR_MSG"
             cat docgen_build.log
