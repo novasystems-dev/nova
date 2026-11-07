@@ -68,7 +68,7 @@ chmod +x "$FULL_DIR/bin/"* 2>/dev/null || true
 cp -r runtime "$FULL_DIR/"
 cp -r std "$FULL_DIR/"
 cp -r examples "$FULL_DIR/"
-cp -r editors "$FULL_DIR/" 2>/dev/null || true
+cp -r compiler "$FULL_DIR/" 2>/dev/null || true
 cp -r docs "$FULL_DIR/" 2>/dev/null || true
 cp install.sh install.ps1 install.bat "$FULL_DIR/" 2>/dev/null || true
 cp orbit.toml Orbit.lock LICENSE README.md "$FULL_DIR/" 2>/dev/null || true
