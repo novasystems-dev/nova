@@ -480,7 +480,11 @@ const char *nova_os_args_get(int64_t idx) {
 int64_t nova_process_run(const char *cmd) {
     if (!cmd) return -1;
     int res = system(cmd);
+#ifdef _WIN32
+    return (int64_t)res;
+#else
     return (int64_t)WEXITSTATUS(res);
+#endif
 }
 
 const char *nova_os_getenv(const char *name) {

@@ -8,6 +8,11 @@ import os
 import shutil
 import tempfile
 import subprocess
+import signal
+try:
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+except (AttributeError, ValueError):
+    pass
 try:
     import readline
 except ImportError:
@@ -164,9 +169,19 @@ def main():
             out_bin = tmp_path.replace(".nova", ".out")
             if os.path.exists(out_bin):
                 os.remove(out_bin)
-            c_file = "/tmp/" + os.path.basename(tmp_path).replace(".nova", ".c")
+            out_exe = tmp_path.replace(".nova", ".out.exe")
+            if os.path.exists(out_exe):
+                os.remove(out_exe)
+            c_file = os.path.join(tempfile.gettempdir(), os.path.basename(tmp_path).replace(".nova", ".c"))
             if os.path.exists(c_file):
                 os.remove(c_file)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (BrokenPipeError, KeyboardInterrupt):
+        try:
+            sys.stdout.close()
+        except Exception:
+            pass
+        sys.exit(0)

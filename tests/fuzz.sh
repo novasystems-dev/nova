@@ -17,7 +17,12 @@ echo "=========================================================="
 echo "  NOVA GRAMMAR MUTATION FUZZER (Running $TOTAL_ITERATIONS iterations)"
 echo "=========================================================="
 
-python3 - << 'EOF'
+PYTHON_BIN="python3"
+if ! command -v python3 >/dev/null 2>&1 && command -v python >/dev/null 2>&1; then
+    PYTHON_BIN="python"
+fi
+
+$PYTHON_BIN - << 'EOF'
 import random
 import string
 import os

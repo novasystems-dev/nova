@@ -119,7 +119,7 @@ fi
 # 6. Tooling checks
 run_test "Orbit capability audit" "./bin/orbit audit"
 run_test "Orbit lockfile generation (orbit lock)" "./bin/orbit lock"
-run_test "Interactive REPL evaluation pipeline" "printf 'let x = 21\nx * 2\n:quit\n' | ./bin/nova-repl | grep -q '42'"
+run_test "Interactive REPL evaluation pipeline" "out=\$(printf 'let x = 21\nx * 2\n:quit\n' | ./bin/nova-repl); echo \"\$out\" | grep -q '42'"
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
