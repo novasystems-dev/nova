@@ -13,6 +13,7 @@
 #include <windows.h>
 #include <io.h>
 #include <process.h>
+#include <sys/stat.h>
 #define F_OK 0
 #define access _access
 #define unlink _unlink
@@ -270,13 +271,14 @@ int64_t nova_random_int(int64_t min, int64_t max) {
     return min + (rand() % (max - min + 1));
 }
 
-// Low-level POSIX Socket Networking
+// Low-level POSIX / Winsock Socket Networking
 int64_t nova_tcp_listen(int64_t port) {
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0) return -1;
+#ifdef _WIN32
+    SOCKET server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == INVALID_SOCKET) return -1;
     
     int opt = 1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt));
     
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
@@ -295,13 +297,45 @@ int64_t nova_tcp_listen(int64_t port) {
     }
     
     return (int64_t)server_fd;
+#else
+    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0) return -1;
+    
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt));
+    
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons((uint16_t)port);
+    
+    if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        NOVA_CLOSE_SOCKET(server_fd);
+        return -2;
+    }
+    
+    if (listen(server_fd, 128) < 0) {
+        NOVA_CLOSE_SOCKET(server_fd);
+        return -3;
+    }
+    
+    return (int64_t)server_fd;
+#endif
 }
 
 int64_t nova_tcp_accept(int64_t server_fd) {
     struct sockaddr_in client_addr;
+#ifdef _WIN32
+    int client_len = sizeof(client_addr);
+    SOCKET client_fd = accept((SOCKET)server_fd, (struct sockaddr *)&client_addr, &client_len);
+    if (client_fd == INVALID_SOCKET) return -1;
+    return (int64_t)client_fd;
+#else
     socklen_t client_len = sizeof(client_addr);
     int client_fd = accept((int)server_fd, (struct sockaddr *)&client_addr, &client_len);
     return (int64_t)client_fd;
+#endif
 }
 
 int64_t nova_tcp_send_response(int64_t client_fd, const char *status_code, const char *body) {
