@@ -78,6 +78,11 @@ jobs:
           which z3 || true
           gcc --version
           z3 --version
+          echo "=== Testing MinGW-w64 GCC linking with -lpthread -lm -lws2_32 ==="
+          echo 'int main(){return 0;}' > test_link.c
+          gcc -O3 -std=c99 test_link.c -lpthread -lm -lws2_32 -o test_link.exe
+          ./test_link.exe
+          rm -f test_link.c test_link.exe
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
@@ -139,7 +144,12 @@ jobs:
           NOVAC="./bin/novac"
           if [ -f "bin/novac.exe" ]; then NOVAC="./bin/novac.exe"; fi
 
-          $NOVAC build tools/orbit/main.nova || { echo "::error title=Orbit Build Failed::Failed to compile tools/orbit/main.nova with novac"; exit 1; }
+          echo "Compiling Orbit..."
+          $NOVAC build tools/orbit/main.nova 2>&1 | tee orbit_build.log || {
+            echo "::error title=Orbit Build Failed::Failed to compile tools/orbit/main.nova with novac"
+            cat orbit_build.log
+            exit 1
+          }
           if [ -f "main.out" ]; then
             cp -f main.out tools/orbit/orbit
             cp -f main.out bin/orbit
@@ -152,7 +162,12 @@ jobs:
           fi
           rm -f main.out main.out.exe
 
-          $NOVAC build tools/docgen/main.nova || { echo "::error title=DocGen Build Failed::Failed to compile tools/docgen/main.nova with novac"; exit 1; }
+          echo "Compiling DocGen..."
+          $NOVAC build tools/docgen/main.nova 2>&1 | tee docgen_build.log || {
+            echo "::error title=DocGen Build Failed::Failed to compile tools/docgen/main.nova with novac"
+            cat docgen_build.log
+            exit 1
+          }
           if [ -f "main.out" ]; then
             cp -f main.out tools/docgen/nova_doc
             cp -f main.out bin/nova-doc
@@ -178,7 +193,20 @@ jobs:
         if: always()
         run: |
           echo "### Test Execution Results (${{ matrix.target }})" >> $GITHUB_STEP_SUMMARY
+          if [ -f orbit_build.log ]; then
+            echo "#### Orbit Build Output" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            cat orbit_build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f docgen_build.log ]; then
+            echo "#### DocGen Build Output" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            cat docgen_build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
           if [ -f test_results.log ]; then
+            echo "#### Test Results Log" >> $GITHUB_STEP_SUMMARY
             echo '```text' >> $GITHUB_STEP_SUMMARY
             tail -n 120 test_results.log >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY

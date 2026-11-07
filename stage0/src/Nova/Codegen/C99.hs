@@ -9,7 +9,7 @@ module Nova.Codegen.C99
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Map.Strict as Map
-import System.Process (callCommand)
+import System.Process (callProcess)
 import System.FilePath ((</>))
 import Data.Char (isUpper)
 import qualified System.Info as Info
@@ -439,8 +439,8 @@ emitUnOp OpAddrOf = "&"
 compileAndLinkC99 :: FilePath -> FilePath -> FilePath -> IO ()
 compileAndLinkC99 cSource runtimeDir outBinary = do
     let runtimeC = runtimeDir </> "nova_rt.c"
-    let winLibs = if Info.os == "mingw32" then " -lws2_32" else ""
+    let winLibs = if Info.os == "mingw32" then ["-lws2_32"] else []
     let normPath p = map (\c -> if c == '\\' then '/' else c) p
-    let cmd = "gcc -O3 -std=c99 -I\"" <> normPath runtimeDir <> "\" \"" <> normPath cSource <> "\" \"" <> normPath runtimeC <> "\" -lpthread -lm" <> winLibs <> " -o \"" <> normPath outBinary <> "\""
-    putStrLn $ "-> Compiling C99: " <> cmd
-    callCommand cmd
+    let args = ["-O3", "-std=c99", "-I" ++ normPath runtimeDir, normPath cSource, normPath runtimeC, "-lpthread", "-lm"] ++ winLibs ++ ["-o", normPath outBinary]
+    putStrLn $ "-> Compiling C99: gcc " ++ unwords args
+    callProcess "gcc" args

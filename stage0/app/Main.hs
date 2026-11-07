@@ -5,7 +5,7 @@ module Main where
 import System.Environment (getArgs, getExecutablePath, lookupEnv)
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath (takeBaseName, takeDirectory, (</>))
-import System.Process (callCommand)
+import System.Process (callCommand, callProcess)
 import System.Directory (getCurrentDirectory, doesFileExist, getTemporaryDirectory)
 import qualified System.Info as Info
 import Data.Text (Text)
@@ -74,7 +74,7 @@ main = do
             let runCmd = if Info.os == "mingw32" then "." </> outBin else "./" <> outBin
             TIO.putStrLn $ "-> Executing binary: " <> T.pack runCmd
             TIO.putStrLn "----------------------------------------------------------"
-            callCommand runCmd
+            callProcess runCmd []
             exitSuccess
 
         ["repl"] -> do
