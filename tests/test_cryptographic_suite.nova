@@ -1,0 +1,17 @@
+# Test: Unit verification for Cryptographic Suite
+
+type CryptoState = struct:
+    hash: Int
+    rounds: Int
+
+fn crypto_init() -> CryptoState:
+    CryptoState(2166136261, 14)
+
+fn crypto_mix(s: CryptoState, v: Int) -> CryptoState:
+    CryptoState(s.hash + (v * 16777619), s.rounds)
+
+pub fn main():
+    let s = crypto_init()
+    let s1 = crypto_mix(s, 42)
+    print_str("Crypto state hash: ")
+    print_int(s1.hash)

@@ -1,0 +1,15 @@
+# Test: Unit verification for B-Tree Index
+
+type Node = struct:
+    k0: Int
+    v0: Int
+
+fn node_new(k: Int, v: Int) -> Node:
+    Node(k, v)
+
+pub fn main():
+    let n = node_new(500, 999)
+    print_str("B-Tree key: ")
+    print_int(n.k0)
+    print_str(" val: ")
+    print_int(n.v0)

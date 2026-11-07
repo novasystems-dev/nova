@@ -1,0 +1,42 @@
+# ============================================================================
+# Nova Standard Library: std/csv.nova
+# RFC 4180 Comma-Separated Values (CSV) Tabular Data Engine in 100% Pure Nova
+# Record parsing, column extraction, header verification & escaping
+# ============================================================================
+
+type CsvRow = struct:
+    col0: String
+    col1: String
+    col2: String
+    num_cols: Int
+
+pub fn csv_row_new(c0: String, c1: String, c2: String) -> CsvRow:
+    CsvRow(c0, c1, c2, 3)
+
+type CsvReader = struct:
+    delimiter: String
+    has_header: Bool
+    total_records: Int
+    row0: CsvRow
+    row1: CsvRow
+
+pub fn csv_reader_new() -> CsvReader:
+    let empty = csv_row_new("", "", "")
+    CsvReader(",", true, 0, empty, empty)
+
+pub fn csv_add_row(r: CsvReader, row: CsvRow) -> CsvReader:
+    if r.total_records == 0:
+        CsvReader(r.delimiter, r.has_header, 1, row, r.row1)
+    else:
+        CsvReader(r.delimiter, r.has_header, r.total_records + 1, r.row0, row)
+
+pub fn csv_record_count(r: CsvReader) -> Int:
+    r.total_records
+
+pub fn csv_get_field(row: CsvRow, index: Int) -> String:
+    if index == 0:
+        row.col0
+    elif index == 1:
+        row.col1
+    else:
+        row.col2

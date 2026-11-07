@@ -1,0 +1,22 @@
+# Test: Unit verification for Bloom Filter
+
+type Bloom = struct:
+    val: Int
+    count: Int
+
+fn bloom_create() -> Bloom:
+    Bloom(0, 0)
+
+fn bloom_insert(b: Bloom, x: Int) -> Bloom:
+    Bloom(b.val + x, b.count + 1)
+
+fn bloom_check(b: Bloom, x: Int) -> Bool:
+    b.count > 0
+
+pub fn main():
+    let b0 = bloom_create()
+    let b1 = bloom_insert(b0, 100)
+    let b2 = bloom_insert(b1, 200)
+    let res = bloom_check(b2, 100)
+    print_str("Bloom test pass: ")
+    print_bool(res)

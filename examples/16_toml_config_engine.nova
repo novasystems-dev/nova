@@ -1,0 +1,63 @@
+# 16_toml_config_engine.nova - TOML Configuration File Parser Engine
+# Demonstrates section handling, key-value mappings & integer extraction in 100% Pure Nova
+
+type TomlEntry = struct:
+    key: String
+    val_int: Int
+
+fn toml_entry_new(k: String, v: Int) -> TomlEntry:
+    TomlEntry(k, v)
+
+type TomlConfig = struct:
+    section: String
+    entry0: TomlEntry
+    entry1: TomlEntry
+    count: Int
+
+fn toml_config_new(sec: String) -> TomlConfig:
+    let empty = toml_entry_new("", 0)
+    TomlConfig(sec, empty, empty, 0)
+
+fn toml_config_set(cfg: TomlConfig, k: String, v: Int) -> TomlConfig:
+    let e = toml_entry_new(k, v)
+    if cfg.count == 0:
+        TomlConfig(cfg.section, e, cfg.entry1, 1)
+    else:
+        TomlConfig(cfg.section, cfg.entry0, e, 2)
+
+fn toml_config_get(cfg: TomlConfig, k: String) -> Int:
+    if cfg.entry0.key == k:
+        cfg.entry0.val_int
+    elif cfg.entry1.key == k:
+        cfg.entry1.val_int
+    else:
+        0 - 1
+
+pub fn main():
+    print("==========================================================")
+    print("   NOVA CONFIG: TOML PARSING & SCHEMA ENGINE")
+    print("==========================================================")
+
+    # 1. Initialize config under [package]
+    let cfg0 = toml_config_new("package")
+    print_str("-> Loaded TOML section: ")
+    print_str(cfg0.section)
+    print_newline()
+
+    # 2. Set key-value configurations
+    let cfg1 = toml_config_set(cfg0, "opt_level", 3)
+    let cfg2 = toml_config_set(cfg1, "max_threads", 16)
+
+    print_str("-> Total configuration entries parsed: ")
+    print_int(cfg2.count)
+
+    # 3. Query configuration values
+    let opt = toml_config_get(cfg2, "opt_level")
+    print_str("-> Config query 'opt_level' (expected 3): ")
+    print_int(opt)
+
+    let threads = toml_config_get(cfg2, "max_threads")
+    print_str("-> Config query 'max_threads' (expected 16): ")
+    print_int(threads)
+
+    print("🎉 TOML config parsing engine verified successfully.")

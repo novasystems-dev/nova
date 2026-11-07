@@ -1,0 +1,20 @@
+# Test: Unit verification for LRU Cache
+
+type Cache = struct:
+    k0: Int
+    v0: Int
+    size: Int
+
+fn cache_new() -> Cache:
+    Cache(0, 0, 0)
+
+fn cache_put(c: Cache, k: Int, v: Int) -> Cache:
+    Cache(k, v, c.size + 1)
+
+pub fn main():
+    let c = cache_new()
+    let c1 = cache_put(c, 42, 100)
+    print_str("Cache key: ")
+    print_int(c1.k0)
+    print_str(" size: ")
+    print_int(c1.size)

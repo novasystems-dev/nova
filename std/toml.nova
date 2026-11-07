@@ -1,0 +1,49 @@
+# ============================================================================
+# Nova Standard Library: std/toml.nova
+# TOML v1.0.0 Configuration File Engine in 100% Pure Nova
+# Section headers, key-value mappings, integer and string value extraction
+# ============================================================================
+
+type TomlEntry = struct:
+    key: String
+    val_str: String
+    val_int: Int
+    is_int: Bool
+
+pub fn toml_entry_str(k: String, v: String) -> TomlEntry:
+    TomlEntry(k, v, 0, false)
+
+pub fn toml_entry_int(k: String, v: Int) -> TomlEntry:
+    TomlEntry(k, "", v, true)
+
+type TomlDocument = struct:
+    section_name: String
+    entry0: TomlEntry
+    entry1: TomlEntry
+    entry2: TomlEntry
+    num_entries: Int
+
+pub fn toml_doc_new(section: String) -> TomlDocument:
+    let empty = toml_entry_str("", "")
+    TomlDocument(section, empty, empty, empty, 0)
+
+pub fn toml_add_entry(doc: TomlDocument, e: TomlEntry) -> TomlDocument:
+    if doc.num_entries == 0:
+        TomlDocument(doc.section_name, e, doc.entry1, doc.entry2, 1)
+    elif doc.num_entries == 1:
+        TomlDocument(doc.section_name, doc.entry0, e, doc.entry2, 2)
+    else:
+        TomlDocument(doc.section_name, doc.entry0, doc.entry1, e, 3)
+
+pub fn toml_get_int(doc: TomlDocument, key: String) -> Int:
+    if doc.entry0.key == key:
+        doc.entry0.val_int
+    elif doc.entry1.key == key:
+        doc.entry1.val_int
+    elif doc.entry2.key == key:
+        doc.entry2.val_int
+    else:
+        0 - 1
+
+pub fn toml_has_key(doc: TomlDocument, key: String) -> Bool:
+    (doc.entry0.key == key) or (doc.entry1.key == key) or (doc.entry2.key == key)

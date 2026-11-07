@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#180B2B" />
+      <stop offset="60%" stop-color="#0B0314" />
+      <stop offset="100%" stop-color="#040108" />
+    </radialGradient>
+
+    <!-- Supernova Core Gradient -->
+    <linearGradient id="novaStar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="35%" stop-color="#7B2CBF" />
+      <stop offset="70%" stop-color="#C77DFF" />
+      <stop offset="100%" stop-color="#FF548F" />
+    </linearGradient>
+
+    <!-- Glowing Core Filter -->
+    <filter id="superGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <radialGradient id="centralLight" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="40%" stop-color="#E0AAFF" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#7B2CBF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base Circle Frame -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="#7B2CBF" stroke-width="4" stroke-opacity="0.6" />
+
+  <!-- Orbital Rings -->
+  <ellipse cx="256" cy="256" rx="200" ry="70" fill="none" stroke="#00F0FF" stroke-width="2" stroke-opacity="0.4" transform="rotate(-30 256 256)" stroke-dasharray="8 6" />
+  <ellipse cx="256" cy="256" rx="200" ry="70" fill="none" stroke="#C77DFF" stroke-width="2" stroke-opacity="0.3" transform="rotate(35 256 256)" />
+
+  <!-- Outer Glow Halo -->
+  <circle cx="256" cy="256" r="140" fill="url(#centralLight)" opacity="0.4" />
+
+  <!-- Supernova 8-Pointed Star -->
+  <g filter="url(#superGlow)">
+    <!-- Primary Vertical/Horizontal Rays -->
+    <polygon points="256,40 274,210 440,256 274,302 256,472 238,302 72,256 238,210" fill="url(#novaStar)" />
+    <!-- Diagonal Secondary Rays -->
+    <polygon points="256,120 270,225 365,200 280,270 340,365 245,285 145,340 230,245 145,145 240,230" fill="url(#novaStar)" opacity="0.85" />
+  </g>
+
+  <!-- Inner Diamond Shard -->
+  <polygon points="256,160 290,256 256,352 222,256" fill="#FFFFFF" opacity="0.9" />
+
+  <!-- Super Bright Core Center -->
+  <circle cx="256" cy="256" r="18" fill="#FFFFFF" filter="url(#superGlow)" />
+  <circle cx="256" cy="256" r="8" fill="#00F0FF" />
+</svg>

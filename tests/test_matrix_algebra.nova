@@ -1,0 +1,17 @@
+# Test: Unit verification for Linear Algebra
+
+type Vec2 = struct:
+    x: Int
+    y: Int
+
+fn vec2_add(a: Vec2, b: Vec2) -> Vec2:
+    Vec2(a.x + b.x, a.y + b.y)
+
+pub fn main():
+    let v1 = Vec2(3, 4)
+    let v2 = Vec2(1, 2)
+    let s = vec2_add(v1, v2)
+    print_str("Vec2 sum x: ")
+    print_int(s.x)
+    print_str(" y: ")
+    print_int(s.y)

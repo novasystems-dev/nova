@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="orbitBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#081C2E" />
+      <stop offset="100%" stop-color="#020810" />
+    </radialGradient>
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="50%" stop-color="#3A86FF" />
+      <stop offset="100%" stop-color="#7B2CBF" />
+    </linearGradient>
+    <filter id="orbitGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <circle cx="256" cy="256" r="248" fill="url(#orbitBg)" stroke="#00F0FF" stroke-width="4" stroke-opacity="0.6" />
+
+  <!-- Multiple Orbit Rings -->
+  <ellipse cx="256" cy="256" rx="210" ry="75" fill="none" stroke="#00F0FF" stroke-width="4" stroke-opacity="0.8" transform="rotate(-25 256 256)" filter="url(#orbitGlow)" />
+  <ellipse cx="256" cy="256" rx="190" ry="60" fill="none" stroke="#7B2CBF" stroke-width="3" stroke-opacity="0.6" transform="rotate(40 256 256)" />
+  <ellipse cx="256" cy="256" rx="160" ry="45" fill="none" stroke="#3A86FF" stroke-width="2" stroke-opacity="0.5" transform="rotate(-65 256 256)" stroke-dasharray="6 4" />
+
+  <!-- Orbiting Satellites -->
+  <circle cx="430" cy="180" r="10" fill="#00F0FF" filter="url(#orbitGlow)" />
+  <circle cx="100" cy="360" r="8" fill="#7B2CBF" filter="url(#orbitGlow)" />
+
+  <!-- Isometric Package Cube at Center -->
+  <g transform="translate(256, 256) scale(1.1)">
+    <!-- Top Face -->
+    <polygon points="0,-70 60,-35 0,0 -60,-35" fill="#00F0FF" opacity="0.9" />
+    <!-- Left Face -->
+    <polygon points="-60,-35 0,0 0,70 -60,35" fill="#3A86FF" opacity="0.85" />
+    <!-- Right Face -->
+    <polygon points="0,0 60,-35 60,35 0,70" fill="#7B2CBF" opacity="0.95" />
+    <!-- Inner Seam Lines -->
+    <line x1="0" y1="0" x2="0" y2="70" stroke="#FFFFFF" stroke-width="2" opacity="0.6" />
+    <line x1="0" y1="0" x2="-60" y2="-35" stroke="#FFFFFF" stroke-width="2" opacity="0.6" />
+    <line x1="0" y1="0" x2="60" y2="-35" stroke="#FFFFFF" stroke-width="2" opacity="0.6" />
+  </g>
+</svg>
