@@ -44,13 +44,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc make tree libgmp-dev z3
-          chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/* tools/*.sh 2>/dev/null || true
+          chmod +x bin/* tests/*.sh tests/benchmarks/*.sh tests/tools/*/* tests/tools/*.sh 2>/dev/null || true
 
       - name: Set up Environment (macOS)
         if: runner.os == 'macOS'
         run: |
           brew install z3 coreutils
-          chmod +x bin/* tests/*.sh benchmarks/*.sh tools/*/* tools/*.sh 2>/dev/null || true
+          chmod +x bin/* tests/*.sh tests/benchmarks/*.sh tests/tools/*/* tests/tools/*.sh 2>/dev/null || true
 
       - name: Set up Environment (Windows)
         id: msys2
@@ -159,44 +159,44 @@ jobs:
           if [ -f "bin/novac.exe" ]; then NOVAC="./bin/novac.exe"; fi
 
           echo "Compiling Orbit..."
-          if ! $NOVAC build tools/orbit/main.nova 2>&1 | tee orbit_build.log; then
+          if ! $NOVAC build tests/tools/orbit/main.nova 2>&1 | tee orbit_build.log; then
             ERR_MSG=$(tail -n 25 orbit_build.log | tr '\r\n' ' ' | sed 's/"//g')
             echo "::error title=Orbit Build Failed::$ERR_MSG"
             cat orbit_build.log
             exit 1
           fi
           if [ -f "main.out" ]; then
-            cp -f main.out tools/orbit/orbit
+            cp -f main.out tests/tools/orbit/orbit
             cp -f main.out bin/orbit
           fi
           if [ -f "main.out.exe" ]; then
-            cp -f main.out.exe tools/orbit/orbit.exe
-            cp -f main.out.exe tools/orbit/orbit 2>/dev/null || true
+            cp -f main.out.exe tests/tools/orbit/orbit.exe
+            cp -f main.out.exe tests/tools/orbit/orbit 2>/dev/null || true
             cp -f main.out.exe bin/orbit.exe
             cp -f main.out.exe bin/orbit 2>/dev/null || true
           fi
           rm -f main.out main.out.exe
 
           echo "Compiling DocGen..."
-          if ! $NOVAC build tools/docgen/main.nova 2>&1 | tee docgen_build.log; then
+          if ! $NOVAC build tests/tools/docgen/main.nova 2>&1 | tee docgen_build.log; then
             ERR_MSG=$(tail -n 25 docgen_build.log | tr '\r\n' ' ' | sed 's/"//g')
             echo "::error title=DocGen Build Failed::$ERR_MSG"
             cat docgen_build.log
             exit 1
           fi
           if [ -f "main.out" ]; then
-            cp -f main.out tools/docgen/nova_doc
+            cp -f main.out tests/tools/docgen/nova_doc
             cp -f main.out bin/nova-doc
           fi
           if [ -f "main.out.exe" ]; then
-            cp -f main.out.exe tools/docgen/nova_doc.exe
-            cp -f main.out.exe tools/docgen/nova_doc 2>/dev/null || true
+            cp -f main.out.exe tests/tools/docgen/nova_doc.exe
+            cp -f main.out.exe tests/tools/docgen/nova_doc 2>/dev/null || true
             cp -f main.out.exe bin/nova-doc.exe
             cp -f main.out.exe bin/nova-doc 2>/dev/null || true
           fi
           rm -f main.out main.out.exe
 
-          chmod +x tools/orbit/orbit* tools/docgen/nova_doc* bin/* 2>/dev/null || true
+          chmod +x tests/tools/orbit/orbit* tests/tools/docgen/nova_doc* bin/* 2>/dev/null || true
 
       - name: Run Verification Test Suite (59 Tests)
         run: |
@@ -234,7 +234,7 @@ jobs:
           if [ -z "$VERSION" ] || [ "$VERSION" = "master" ]; then
             VERSION="${{ github.event.inputs.tag_name || 'v0.2.5' }}"
           fi
-          ./tools/package.sh "$VERSION" "${{ matrix.target }}"
+          ./tests/tools/package.sh "$VERSION" "${{ matrix.target }}"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4

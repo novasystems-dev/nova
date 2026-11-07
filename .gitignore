@@ -1,24 +1,20 @@
 # Nova .gitignore
 
-# Build outputs
+# Build outputs & generated binaries
+bin/
 *.out
+*.out.exe
+*.exe
 *.o
-*.hi
-*.dyn_o
-*.dyn_hi
-stage0/novac
+*.log
 
-# Haskell build artifacts
-dist-newstyle/
-.ghc.environment.*
-
-# Temporary artifacts
+# Temporary build artifacts
 build/
 target/
 dist/
 *.c
 !runtime/nova_rt.c
-!bootstrap/novac_bootstrap.c
+!compiler/bootstrap/novac_bootstrap.c
 *.ll
 *.bc
 *.s

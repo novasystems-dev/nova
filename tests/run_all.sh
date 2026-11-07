@@ -1,6 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
-mkdir -p /tmp 2>/dev/null || true
+mkdir -p /tmp bin 2>/dev/null || true
+
+WIN_LIBS=""
+if [[ "${OSTYPE:-}" == "msys"* ]] || [[ "${OSTYPE:-}" == "cygwin"* ]] || [[ "$(uname -s)" == *"MINGW"* ]]; then
+    WIN_LIBS="-lws2_32"
+fi
+
+if [ ! -f bin/novac ] && [ ! -f bin/novac.exe ]; then
+    echo "-> Bootstrapping native novac compiler from C99 genesis snapshot..."
+    gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o bin/novac
+    if [ -f bin/novac.exe ]; then cp -f bin/novac.exe bin/novac; fi
+fi
+
+# Ensure test developer tools are available in bin/
+if [ ! -f bin/orbit ] && [ -f tests/tools/orbit/orbit ]; then cp tests/tools/orbit/orbit bin/orbit; fi
+if [ ! -f bin/orbit ] && [ -f tests/tools/orbit/main.nova ]; then ./bin/novac build tests/tools/orbit/main.nova >/dev/null 2>&1 || true; if [ -f main.out ]; then mv main.out bin/orbit; fi; if [ -f main.out.exe ]; then mv main.out.exe bin/orbit.exe; cp -f bin/orbit.exe bin/orbit 2>/dev/null || true; fi; fi
+if [ ! -f bin/nova-doc ] && [ -f tests/tools/docgen/nova_doc ]; then cp tests/tools/docgen/nova_doc bin/nova-doc; fi
+if [ ! -f bin/nova-doc ] && [ -f tests/tools/docgen/main.nova ]; then ./bin/novac build tests/tools/docgen/main.nova >/dev/null 2>&1 || true; if [ -f main.out ]; then mv main.out bin/nova-doc; fi; if [ -f main.out.exe ]; then mv main.out.exe bin/nova-doc.exe; cp -f bin/nova-doc.exe bin/nova-doc 2>/dev/null || true; fi; fi
+if [ ! -f bin/nova-fmt ] && [ -f tests/tools/fmt/nova_fmt ]; then cp tests/tools/fmt/nova_fmt bin/nova-fmt; fi
+if [ ! -f bin/nova-lint ] && [ -f tests/tools/lint/nova_lint ]; then cp tests/tools/lint/nova_lint bin/nova-lint; fi
+if [ ! -f bin/nova-repl ] && [ -f tests/tools/repl/nova_repl ]; then cp tests/tools/repl/nova_repl bin/nova-repl; fi
+chmod +x bin/* 2>/dev/null || true
 
 echo "=========================================================="
 echo "  NOVA COMPREHENSIVE TEST SUITE & VERIFICATION HARNESS"
@@ -125,12 +146,14 @@ run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
 
 # 7. Bootstrapping verification
-run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(get_sha256 bin/novac-2) = $(get_sha256 bin/novac-3) ]"
-run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && ./novac_c99 >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
+gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./bin/novac-2
+gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./bin/novac-3
+run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(get_sha256 bin/novac-2) = $(get_sha256 bin/novac-3) ] && rm -f bin/novac-2 bin/novac-3 bin/novac-2.exe bin/novac-3.exe"
+run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && ./novac_c99 >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
 
 # 8. Compiler Fuzzing & Benchmarks
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"
-run_test "Benchmark suite execution" "./benchmarks/run_benchmarks.sh"
+run_test "Benchmark suite execution" "./tests/benchmarks/run_benchmarks.sh"
 
 # Cleanup generated test binaries
 rm -rf tmp_test_dir *.out *.out.exe

@@ -11,9 +11,9 @@ echo "  NOVA BENCHMARK RUNNER"
 echo "=========================================================="
 
 BENCH_FILES=(
-    "benchmarks/01_perceus_allocation.nova"
-    "benchmarks/02_arithmetic_throughput.nova"
-    "benchmarks/03_channel_concurrency.nova"
+    "tests/benchmarks/01_perceus_allocation.nova"
+    "tests/benchmarks/02_arithmetic_throughput.nova"
+    "tests/benchmarks/03_channel_concurrency.nova"
 )
 
 get_time_ms() {
