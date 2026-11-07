@@ -10,7 +10,7 @@ TOTAL_ITERATIONS=100
 CRASHES=0
 TIMEOUT_SEC=2
 
-TMP_DIR="/tmp/nova_fuzz"
+TMP_DIR="./tmp_nova_fuzz"
 mkdir -p "$TMP_DIR"
 
 echo "=========================================================="
@@ -38,11 +38,11 @@ mutations = [
     lambda s: "".join(random.choices(string.ascii_letters + " \n\t:()", k=50)),
 ]
 
-os.makedirs("/tmp/nova_fuzz", exist_ok=True)
+os.makedirs("./tmp_nova_fuzz", exist_ok=True)
 for i in range(100):
     seed = random.choice(seeds)
     mut = random.choice(mutations)(seed)
-    with open(f"/tmp/nova_fuzz/test_{i}.nova", "w") as f:
+    with open(f"./tmp_nova_fuzz/test_{i}.nova", "w") as f:
         f.write(mut)
 EOF
 

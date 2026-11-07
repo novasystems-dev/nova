@@ -20,6 +20,7 @@ run_test() {
     else
         echo "FAILED"
         echo "   [ERROR]: $out"
+        echo "::error title=Test Failure - $name::$out"
         FAILED=$((FAILED + 1))
     fi
 }
@@ -35,6 +36,7 @@ run_rejection_test() {
     else
         echo "FAILED (Unexpected success)"
         echo "   [UNEXPECTED OUTPUT]: $out"
+        echo "::error title=Negative Test Failure - $name::$out"
         FAILED=$((FAILED + 1))
     fi
 }
@@ -124,7 +126,7 @@ run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
 
 # 7. Bootstrapping verification
 run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(get_sha256 bin/novac-2) = $(get_sha256 bin/novac-3) ]"
-run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o /tmp/novac_c99 && /tmp/novac_c99 >/dev/null && rm -f /tmp/novac_c99 /tmp/novac_c99.exe"
+run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && ./novac_c99 >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
 
 # 8. Compiler Fuzzing & Benchmarks
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"

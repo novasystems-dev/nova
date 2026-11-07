@@ -8,7 +8,10 @@ import os
 import shutil
 import tempfile
 import subprocess
-import readline
+try:
+    import readline
+except ImportError:
+    pass
 
 def find_novac():
     if "NOVAC_BIN" in os.environ and os.path.exists(os.environ["NOVAC_BIN"]):

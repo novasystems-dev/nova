@@ -54,10 +54,12 @@ jobs:
 
       - name: Set up Environment (Windows)
         if: runner.os == 'Windows'
-        run: |
-          choco install mingw z3 -y
-          echo "C:\tools\mingw64\bin" >> $GITHUB_PATH
-          echo "C:\ProgramData\chocolatey\bin" >> $GITHUB_PATH
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-z3
+          path-type: inherit
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
@@ -92,7 +94,7 @@ jobs:
           NOVAC="./bin/novac"
           if [ -f "bin/novac.exe" ]; then NOVAC="./bin/novac.exe"; fi
 
-          $NOVAC build tools/orbit/main.nova
+          $NOVAC build tools/orbit/main.nova || { echo "::error title=Orbit Build Failed::Failed to compile tools/orbit/main.nova with novac"; exit 1; }
           if [ -f "main.out" ]; then
             cp main.out tools/orbit/orbit
             cp main.out bin/orbit
@@ -104,7 +106,7 @@ jobs:
           fi
           rm -f main.out main.out.exe
 
-          $NOVAC build tools/docgen/main.nova
+          $NOVAC build tools/docgen/main.nova || { echo "::error title=DocGen Build Failed::Failed to compile tools/docgen/main.nova with novac"; exit 1; }
           if [ -f "main.out" ]; then
             cp main.out tools/docgen/nova_doc
             cp main.out bin/nova-doc
