@@ -77,4 +77,5 @@ orbit run
 ---
 
 ## License
-MIT License. See [LICENSE](LICENSE) for details.
+PolyForm Noncommercial License 1.0.0. Copyright (c) 2026 Fyew999 (Nova Systems).
+Permits free personal, educational, and open-source use, modification, and recoding. Commercial sale, commercial distribution, or closed-source incorporation is strictly prohibited without a commercial license. See [LICENSE](LICENSE) for details.
