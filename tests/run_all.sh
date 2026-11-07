@@ -81,6 +81,8 @@ run_test "Check compiler/lexer.nova" "./bin/novac check compiler/lexer.nova"
 run_test "Check compiler/parser.nova" "./bin/novac check compiler/parser.nova"
 run_test "Check compiler/checker.nova" "./bin/novac check compiler/checker.nova"
 run_test "Check compiler/codegen_c.nova" "./bin/novac check compiler/codegen_c.nova"
+run_test "Check compiler/codegen_llvm.nova" "./bin/novac check compiler/codegen_llvm.nova"
+run_test "Check compiler/codegen_cranelift.nova" "./bin/novac check compiler/codegen_cranelift.nova"
 run_test "Check compiler/optimizer.nova" "./bin/novac check compiler/optimizer.nova"
 run_test "Check compiler/main.nova" "./bin/novac check compiler/main.nova"
 
