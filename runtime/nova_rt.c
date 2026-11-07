@@ -455,7 +455,11 @@ bool nova_fs_mkdir_p(const char *path) {
 const char *nova_fs_sha256(const char *path) {
     if (!path) return "0000000000000000000000000000000000000000000000000000000000000000";
     char cmd[1024];
+#ifdef __APPLE__
+    snprintf(cmd, sizeof(cmd), "shasum -a 256 \"%s\" 2>/dev/null | awk '{print $1}'", path);
+#else
     snprintf(cmd, sizeof(cmd), "sha256sum \"%s\" 2>/dev/null | awk '{print $1}'", path);
+#endif
     FILE *p = popen(cmd, "r");
     if (!p) return "0000000000000000000000000000000000000000000000000000000000000000";
     static char hash[65];

@@ -50,6 +50,19 @@ cp -L bin/nova-fmt "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-lint "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-doc "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-doc.exe "$FULL_DIR/bin/" 2>/dev/null || true
+
+# Explicit fallback from tools/ if bin/ symlinks failed on Windows
+if [ ! -f "$FULL_DIR/bin/orbit" ] && [ ! -f "$FULL_DIR/bin/orbit.exe" ]; then
+    cp tools/orbit/orbit "$FULL_DIR/bin/" 2>/dev/null || cp tools/orbit/orbit.exe "$FULL_DIR/bin/" 2>/dev/null || true
+fi
+if [ ! -f "$FULL_DIR/bin/nova-doc" ] && [ ! -f "$FULL_DIR/bin/nova-doc.exe" ]; then
+    cp tools/docgen/nova_doc "$FULL_DIR/bin/nova-doc" 2>/dev/null || cp tools/docgen/nova_doc.exe "$FULL_DIR/bin/nova-doc.exe" 2>/dev/null || true
+fi
+if [ ! -f "$FULL_DIR/bin/nova-fmt" ]; then cp tools/fmt/nova_fmt "$FULL_DIR/bin/nova-fmt" 2>/dev/null || true; fi
+if [ ! -f "$FULL_DIR/bin/nova-lint" ]; then cp tools/lint/nova_lint "$FULL_DIR/bin/nova-lint" 2>/dev/null || true; fi
+if [ ! -f "$FULL_DIR/bin/nova-repl" ]; then cp tools/repl/nova_repl "$FULL_DIR/bin/nova-repl" 2>/dev/null || true; fi
+if [ ! -f "$FULL_DIR/bin/nova-lsp" ]; then cp tools/lsp/nova_lsp "$FULL_DIR/bin/nova-lsp" 2>/dev/null || true; fi
+
 chmod +x "$FULL_DIR/bin/"* 2>/dev/null || true
 
 cp -r runtime "$FULL_DIR/"

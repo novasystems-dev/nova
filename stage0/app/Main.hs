@@ -6,7 +6,8 @@ import System.Environment (getArgs, getExecutablePath, lookupEnv)
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath (takeBaseName, takeDirectory, (</>))
 import System.Process (callCommand)
-import System.Directory (getCurrentDirectory, doesFileExist)
+import System.Directory (getCurrentDirectory, doesFileExist, getTemporaryDirectory)
+import qualified System.Info as Info
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
@@ -70,9 +71,10 @@ main = do
         ["run", file] -> do
             TIO.putStrLn banner
             outBin <- buildFile file
-            TIO.putStrLn $ "-> Executing binary: ./" <> T.pack outBin
+            let runCmd = if Info.os == "mingw32" then "." </> outBin else "./" <> outBin
+            TIO.putStrLn $ "-> Executing binary: " <> T.pack runCmd
             TIO.putStrLn "----------------------------------------------------------"
-            callCommand ("./" <> outBin)
+            callCommand runCmd
             exitSuccess
 
         ["repl"] -> do
@@ -192,8 +194,10 @@ buildFile file = do
                 Right () -> do
                     let cCode = emitC99Program ast
                     let base = takeBaseName file
-                    let cFile = "/tmp/" <> base <> ".c"
-                    let outBin = base <> ".out"
+                    tmpDir <- getTemporaryDirectory
+                    let cFile = tmpDir </> (base <> ".c")
+                    let exeExt = if Info.os == "mingw32" then ".exe" else ""
+                    let outBin = base <> ".out" <> exeExt
                     TIO.writeFile cFile cCode
                     runtimeDir <- findRuntimeDir
                     compileAndLinkC99 cFile runtimeDir outBin

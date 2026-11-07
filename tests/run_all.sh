@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+mkdir -p /tmp 2>/dev/null || true
 
 echo "=========================================================="
 echo "  NOVA COMPREHENSIVE TEST SUITE & VERIFICATION HARNESS"
@@ -97,24 +98,40 @@ run_test "Dump MIR (--dump-mir)" "./bin/novac --dump-mir examples/01_hello.nova"
 run_test "Emit LLVM IR (--emit-llvm)" "./bin/novac --emit-llvm examples/01_hello.nova"
 run_test "Emit C99 (--emit-c)" "./bin/novac --emit-c examples/01_hello.nova"
 
+get_sha256() {
+    local target="$1"
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$target" | awk '{print $1}'
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$target" | awk '{print $1}'
+    else
+        openssl dgst -sha256 "$target" | awk '{print $NF}'
+    fi
+}
+
+WIN_LIBS=""
+if [[ "${OSTYPE:-}" == "msys"* ]] || [[ "${OSTYPE:-}" == "cygwin"* ]] || [[ "$(uname -s)" == *"MINGW"* ]]; then
+    WIN_LIBS="-lws2_32"
+fi
+
 # 6. Tooling checks
 run_test "Orbit capability audit" "./bin/orbit audit"
 run_test "Orbit lockfile generation (orbit lock)" "./bin/orbit lock"
-run_test "Interactive REPL evaluation pipeline" "echo -e 'let x = 21\nx * 2\n:quit' | ./bin/nova-repl | grep -q '42'"
+run_test "Interactive REPL evaluation pipeline" "printf 'let x = 21\nx * 2\n:quit\n' | ./bin/nova-repl | grep -q '42'"
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
 
 # 7. Bootstrapping verification
-run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(sha256sum bin/novac-2 | awk '{print $1}') = $(sha256sum bin/novac-3 | awk '{print $1}') ]"
-run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm -o /tmp/novac_c99 && /tmp/novac_c99 >/dev/null && rm -f /tmp/novac_c99"
+run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(get_sha256 bin/novac-2) = $(get_sha256 bin/novac-3) ]"
+run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o /tmp/novac_c99 && /tmp/novac_c99 >/dev/null && rm -f /tmp/novac_c99 /tmp/novac_c99.exe"
 
 # 8. Compiler Fuzzing & Benchmarks
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"
 run_test "Benchmark suite execution" "./benchmarks/run_benchmarks.sh"
 
 # Cleanup generated test binaries
-rm -f *.out
+rm -f *.out *.out.exe
 
 echo "=========================================================="
 echo "  TEST RESULTS: $PASSED PASSED, $FAILED FAILED"

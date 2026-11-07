@@ -46,10 +46,22 @@ for i in range(100):
         f.write(mut)
 EOF
 
+run_with_timeout() {
+    local sec="$1"
+    shift
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$sec" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$sec" "$@"
+    else
+        "$@"
+    fi
+}
+
 for i in $(seq 0 $((TOTAL_ITERATIONS - 1))); do
     TEST_FILE="$TMP_DIR/test_${i}.nova"
     # Run compiler with timeout
-    if ! timeout "$TIMEOUT_SEC" ./bin/novac check "$TEST_FILE" > /dev/null 2>&1; then
+    if ! run_with_timeout "$TIMEOUT_SEC" ./bin/novac check "$TEST_FILE" > /dev/null 2>&1; then
         EXIT_CODE=$?
         # Exit code 124 means timeout; 139 means SIGSEGV; 134 means SIGABRT
         if [ "$EXIT_CODE" -eq 139 ] || [ "$EXIT_CODE" -eq 134 ] || [ "$EXIT_CODE" -eq 124 ]; then
