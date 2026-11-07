@@ -36,7 +36,7 @@ $LocalBinExists = Test-Path (Join-Path $CurrentScriptDir "bin\novac.exe") -or (T
 
 if (-not $LocalBinExists) {
     Write-Host "-> Fetching latest Windows binary distribution from GitHub Releases..." -ForegroundColor Yellow
-    $Tag = "v0.3.0"
+    $Tag = "v0.31.00"
     try {
         $Req = [System.Net.WebRequest]::Create("https://github.com/novasystems-dev/nova/releases/latest")
         $Req.AllowAutoRedirect = $false
@@ -46,7 +46,7 @@ if (-not $LocalBinExists) {
         if ($TagPart) { $Tag = $TagPart }
         $Resp.Close()
     } catch {
-        $Tag = "v0.3.0"
+        $Tag = "v0.31.00"
     }
 
     $ZipUrl = "https://github.com/novasystems-dev/nova/releases/download/$Tag/nova-dev-full-$Tag-windows-x86_64.zip"
@@ -78,7 +78,7 @@ if (-not $LocalBinExists) {
 }
 
 Write-Host "-> Installing binaries into $BinDir..." -ForegroundColor Green
-$BinFiles = @("novac.exe", "orbit.exe", "nova-runner.exe", "nova-fmt.exe", "nova-lint.exe", "nova-doc.exe", "novac", "orbit", "nova-runner")
+$BinFiles = @("novac.exe", "orbit.exe", "nova-runner.exe", "nova-fmt.exe", "nova-lint.exe", "nova-doc.exe", "nova-repl.exe", "nova-lsp.exe", "novac", "orbit", "nova-runner", "nova-fmt", "nova-lint", "nova-doc", "nova-repl", "nova-lsp")
 foreach ($bf in $BinFiles) {
     $src = Join-Path $CurrentScriptDir "bin\$bf"
     if (Test-Path $src) {

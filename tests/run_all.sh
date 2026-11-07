@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export NOVA_RUNTIME="$ROOT_DIR/runtime"
 mkdir -p /tmp bin 2>/dev/null || true
 
 WIN_LIBS=""

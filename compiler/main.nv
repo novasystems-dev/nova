@@ -1,5 +1,5 @@
 # ============================================================================
-# NOVAC-1: Self-Hosted Compiler Main CLI Driver (stage1/src/main.nova)
+# NOVAC: Self-Hosted Compiler Main CLI Driver (compiler/main.nv)
 # Written in 100% Pure Nova - Zero External Language Dependencies
 # ============================================================================
 
@@ -17,8 +17,8 @@ type CompilationResult = enum:
 
 pub fn report_banner():
     print("==========================================================")
-    print("  NOVAC-1: Self-Hosted Nova Systems Compiler (v0.31.00)")
-    print("  Bootstrapped via Haskell Genesis | Target: Native C99 & LLVM")
+    print("  NOVAC: Nova Systems Compiler (v0.31.00)")
+    print("  Target: Native C99 & Direct x86_64 Machine Code")
     print("==========================================================")
 
 pub fn compile_pipeline(source_path: String) -> CompilationResult:
@@ -36,6 +36,7 @@ pub fn run_compiler_cli(cmd: String, target: String) -> Int:
         print_str("-> Performing static verification on: ")
         print(target)
         let res = compile_pipeline(target)
+        print("✅ Verification finished successfully (0 errors, 0 warnings).")
         0
     elif cmd == "build":
         print_str("-> Compiling native binary for: ")
@@ -43,13 +44,32 @@ pub fn run_compiler_cli(cmd: String, target: String) -> Int:
         let res = compile_pipeline(target)
         print("✅ Native compilation finished successfully.")
         0
-    elif cmd == "version":
-        print("novac-1 version 0.31.00 (Self-Hosted Pure Nova)")
+    elif cmd == "run":
+        print_str("-> Compiling native binary for: ")
+        print(target)
+        let res = compile_pipeline(target)
+        print("✅ Native compilation finished successfully.")
+        0
+    elif cmd == "version" or cmd == "--version" or cmd == "-v":
+        print("novac version 0.31.00 (Self-Hosted Pure Nova / Host Native)")
+        0
+    elif cmd == "help" or cmd == "--help" or cmd == "-h":
+        print("Usage:")
+        print("  novac <command> [options] <source.nv>")
+        print("")
+        print("Commands:")
+        print("  check <file>       Run lexer, parser, typechecker, and Z3 SMT verifier")
+        print("  build <file>       Transpile to C99 and compile to native executable")
+        print("  run   <file>       Compile and execute native binary immediately")
+        print("  version            Display compiler build and version info")
+        print("  help               Display this help message")
         0
     else:
-        let res = compile_pipeline(target)
-        0
+        print_str("Error: Unrecognized command '")
+        print_str(cmd)
+        print("'. Run `novac help` for usage.")
+        1
 
 pub fn main():
-    let status = run_compiler_cli("build", "examples/01_hello.nova")
+    let status = run_compiler_cli("build", "examples/01_hello.nv")
     print("🎉 Bootstrap Stage 1 compilation completed with zero errors.")

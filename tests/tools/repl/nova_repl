@@ -25,14 +25,14 @@ def find_novac():
             return nb
         if os.path.exists(nb + ".exe"):
             return nb + ".exe"
-    which_novac = shutil.which("novac")
-    if which_novac and os.path.exists(which_novac):
-        return which_novac
     rel_novac = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bin/novac"))
     if os.path.exists(rel_novac):
         return rel_novac
     if os.path.exists(rel_novac + ".exe"):
         return rel_novac + ".exe"
+    which_novac = shutil.which("novac")
+    if which_novac and os.path.exists(which_novac):
+        return which_novac
     home_novac = os.path.expanduser("~/Documents/Nova/bin/novac")
     if os.path.exists(home_novac):
         return home_novac
@@ -50,7 +50,7 @@ BANNER = r"""
   | |\  | |_| / /  \ \/ / /\ \ |_|
   |_| \_|\___/_/    \__/ /  \_\(_)
 
-  Nova Systems Programming Language v0.1.0-alpha
+  Nova Systems Programming Language v0.31.00
   Zero GC | Perceus In-Place Reuse | Refinement Safety
   Type expressions, statements, or ':help' for commands.
   Press Ctrl+D or type ':quit' to exit.

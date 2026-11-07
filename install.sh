@@ -57,7 +57,7 @@ else
     esac
 
     # Resolve latest release tag
-    TAG="v0.3.0"
+    TAG="v0.31.00"
     if command -v curl >/dev/null 2>&1; then
         LATEST_TAG=$(curl -sI https://github.com/novasystems-dev/nova/releases/latest 2>/dev/null | grep -i "^location:" | awk -F'/' '{print $NF}' | tr -d '\r\n' || true)
         if [ -n "$LATEST_TAG" ]; then TAG="$LATEST_TAG"; fi
@@ -126,6 +126,10 @@ else
             if [ -f "$GIT_DIR/tests/tools/runner/main.c" ]; then
                 gcc -O2 -Wall "$GIT_DIR/tests/tools/runner/main.c" -o "$GIT_DIR/bin/nova-runner" 2>/dev/null || true
             fi
+            if [ -f "$GIT_DIR/tests/tools/fmt/nova_fmt" ]; then cp -f "$GIT_DIR/tests/tools/fmt/nova_fmt" "$GIT_DIR/bin/nova-fmt"; fi
+            if [ -f "$GIT_DIR/tests/tools/lsp/nova_lsp" ]; then cp -f "$GIT_DIR/tests/tools/lsp/nova_lsp" "$GIT_DIR/bin/nova-lsp"; fi
+            if [ -f "$GIT_DIR/tests/tools/lint/nova_lint" ]; then cp -f "$GIT_DIR/tests/tools/lint/nova_lint" "$GIT_DIR/bin/nova-lint"; fi
+            if [ -f "$GIT_DIR/tests/tools/repl/nova_repl" ]; then cp -f "$GIT_DIR/tests/tools/repl/nova_repl" "$GIT_DIR/bin/nova-repl"; fi
             SRC_DIR="$GIT_DIR"
         else
             echo "❌ Error: Precompiled binaries are incompatible with host and 'gcc' was not found to bootstrap."
