@@ -57,6 +57,7 @@ run_test "Check stage1/src/checker.nova" "./bin/novac check stage1/src/checker.n
 run_test "Check stage1/src/codegen_c.nova" "./bin/novac check stage1/src/codegen_c.nova"
 run_test "Check stage1/src/optimizer.nova" "./bin/novac check stage1/src/optimizer.nova"
 run_test "Check stage1/src/main.nova" "./bin/novac check stage1/src/main.nova"
+run_test "Check compiler/main.nova (Pure Nova Master)" "./bin/novac check compiler/main.nova"
 
 # 2. Standard Library checks
 run_test "Check std/vec.nova" "./bin/novac check std/vec.nova"

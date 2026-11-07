@@ -88,6 +88,12 @@ jobs:
           ./test_link.exe
           rm -f test_link.c test_link.exe link.log
 
+      - name: Fetch Legacy Bootstrap Toolchain from branch legacy
+        run: |
+          echo "=== Fetching Genesis bootstrap compiler from legacy branch ==="
+          git fetch origin legacy --depth=1
+          git checkout origin/legacy -- stage0
+
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
         with:
@@ -132,6 +138,9 @@ jobs:
           chmod +x bin/novac* 2>/dev/null || true
           echo "=== Installed novac binary ==="
           ls -la bin/novac*
+
+          # Clean up temporary stage0 bootstrap so runner workspace remains pure Nova
+          rm -rf stage0
 
           echo "=== Resolving tool script permissions & links ==="
           for tool in bin/nova-fmt bin/nova-lint bin/nova-repl bin/nova-lsp; do

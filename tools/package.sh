@@ -70,11 +70,30 @@ cp -r std "$FULL_DIR/"
 cp -r examples "$FULL_DIR/"
 cp -r editors "$FULL_DIR/" 2>/dev/null || true
 cp -r docs "$FULL_DIR/" 2>/dev/null || true
-cp install.sh "$FULL_DIR/" 2>/dev/null || true
+cp install.sh install.ps1 install.bat "$FULL_DIR/" 2>/dev/null || true
 cp orbit.toml Orbit.lock LICENSE README.md "$FULL_DIR/" 2>/dev/null || true
 
 tar -czf "${DIST_DIR}/${FULL_PKG_NAME}.tar.gz" -C "$DIST_DIR" "$FULL_PKG_NAME"
 echo "   Artifact created: ${DIST_DIR}/${FULL_PKG_NAME}.tar.gz"
+
+# Also create standard zip package for Windows environments
+if [[ "$TARGET" == *"windows"* ]] || command -v zip >/dev/null 2>&1 || python3 -c "import zipfile" 2>/dev/null; then
+    echo "-> Creating Zip package for Windows compatibility..."
+    python3 -c "
+import zipfile, os
+dist_dir = '$DIST_DIR'
+pkg_name = '$FULL_PKG_NAME'
+zip_path = os.path.join(dist_dir, pkg_name + '.zip')
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(os.path.join(dist_dir, pkg_name)):
+        for f in files:
+            full = os.path.join(root, f)
+            rel = os.path.relpath(full, dist_dir)
+            z.write(full, rel)
+print('   Artifact created:', zip_path)
+" 2>/dev/null || true
+fi
+
 rm -rf "$FULL_DIR"
 
 # 3. Generate SHA-256 Checksums
@@ -83,6 +102,7 @@ cd "$DIST_DIR"
 
 compute_sha256() {
     local file="$1"
+    if [ ! -f "$file" ]; then return 0; fi
     if command -v sha256sum >/dev/null 2>&1; then
         sha256sum "$file"
     elif command -v shasum >/dev/null 2>&1; then
@@ -96,6 +116,11 @@ compute_sha256 "nova-runtime-${VERSION}-${TARGET}.tar.gz" > "nova-runtime-${VERS
 compute_sha256 "nova-dev-full-${VERSION}-${TARGET}.tar.gz" > "nova-dev-full-${VERSION}-${TARGET}.tar.gz.sha256"
 cat "nova-runtime-${VERSION}-${TARGET}.tar.gz.sha256" >> "SHA256SUMS.txt"
 cat "nova-dev-full-${VERSION}-${TARGET}.tar.gz.sha256" >> "SHA256SUMS.txt"
+
+if [ -f "nova-dev-full-${VERSION}-${TARGET}.zip" ]; then
+    compute_sha256 "nova-dev-full-${VERSION}-${TARGET}.zip" > "nova-dev-full-${VERSION}-${TARGET}.zip.sha256"
+    cat "nova-dev-full-${VERSION}-${TARGET}.zip.sha256" >> "SHA256SUMS.txt"
+fi
 cd ..
 
 echo "=========================================================="

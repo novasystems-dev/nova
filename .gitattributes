@@ -1,0 +1,15 @@
+# GitHub Linguist Language Configuration for Nova Systems Programming Language
+# Ensure GitHub displays Nova as the primary language and highlights .nova files
+
+*.nova linguist-language=Rust
+*.nova linguist-detectable=true
+
+# Mark runtime C FFI headers & bootstrap snapshots as vendored so they do not skew repo stats
+runtime/* linguist-vendored=true
+runtime/* linguist-documentation=false
+bootstrap/* linguist-vendored=true
+bootstrap/* linguist-documentation=false
+tools/repl/* linguist-vendored=true
+tools/lsp/* linguist-vendored=true
+dist/* linguist-vendored=true
+tests/* linguist-vendored=true

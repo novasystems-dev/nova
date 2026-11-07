@@ -24,10 +24,28 @@ Nova is a modern systems programming language engineered to achieve the memory s
 ## Quickstart
 
 ### Installation
+
+#### Linux & macOS (Apple Silicon / Intel)
 ```bash
+# One-line automated install
+curl -fsSL https://raw.githubusercontent.com/novasystems-dev/nova/master/install.sh | bash
+
+# Or from local clone / release archive:
 ./install.sh
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+#### Windows (PowerShell / Command Prompt)
+```powershell
+# One-line automated install in PowerShell
+irm https://raw.githubusercontent.com/novasystems-dev/nova/master/install.ps1 | iex
+
+# Or run the Windows installer from extracted release:
+.\install.ps1
+# or: install.bat
+```
+
+> **Precompiled Native Binaries**: Prebuilt standalone executables (`.zip` for Windows, `.tar.gz` for macOS & Linux) are available on [GitHub Releases](https://github.com/novasystems-dev/nova/releases/latest). Zero dependencies required to run precompiled binaries.
 
 ### Running an Example
 ```bash
