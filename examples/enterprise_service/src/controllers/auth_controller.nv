@@ -1,0 +1,14 @@
+# Controller Layer: User Authentication & Token Endpoint
+# Module: controllers.auth_controller
+
+import dto.auth_dto { LoginRequest, AuthTokenResponse }
+import dto.api_response { ApiResponse, make_success_response, make_error_response }
+import service.auth_service { auth_service_authenticate }
+
+pub fn auth_controller_login(user: String, pass: String, ip: String) -> ApiResponse:
+    let req = LoginRequest { username: user, password_plain: pass, client_ip: ip }
+    let auth_res = auth_service_authenticate(req)
+    if auth_res.user_id > 0:
+        make_success_response(200, "Authentication successful", "trace_auth_success", auth_res.access_token)
+    else:
+        make_error_response(401, "Invalid credentials", "trace_auth_fail")

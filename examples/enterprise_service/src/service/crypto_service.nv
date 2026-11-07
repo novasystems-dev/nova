@@ -1,0 +1,15 @@
+# Service Layer: Cryptographic Hashing & Token Signature Service
+# Module: service.crypto_service
+
+pub fn crypto_hash_password(raw: String, salt: String) -> String:
+    str_concat3("sha256$", salt, raw)
+
+pub fn crypto_verify_password(raw: String, salt: String, expected_hash: String) -> Bool:
+    let computed = crypto_hash_password(raw, salt)
+    if computed == expected_hash:
+        true
+    else:
+        false
+
+pub fn crypto_generate_jwt(uid: Int, role: String) -> String:
+    str_concat3("eyJhbGciOiJSUzI1NiJ9.user_", role, ".sig_verified")

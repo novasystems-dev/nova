@@ -1,0 +1,29 @@
+# DTO Layer: Authentication & Registration Transfer Objects
+# Module: dto.auth_dto
+
+type LoginRequest = struct:
+    username: String
+    password_plain: String
+    client_ip: String
+
+type RegisterRequest = struct:
+    username: String
+    email: String
+    password_plain: String
+    initial_role: String
+
+type AuthTokenResponse = struct:
+    access_token: String
+    token_type: String
+    expires_in_seconds: Int
+    user_id: Int
+    role: String
+
+pub fn make_auth_response(token: String, ttl: Int, uid: Int, role: String) -> AuthTokenResponse:
+    AuthTokenResponse {
+        access_token: token,
+        token_type: "Bearer",
+        expires_in_seconds: ttl,
+        user_id: uid,
+        role: role
+    }

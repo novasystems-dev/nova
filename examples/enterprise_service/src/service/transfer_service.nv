@@ -1,0 +1,23 @@
+# Service Layer: High-Assurance Financial Transfer & Ledger Reconciliation
+# Module: service.transfer_service
+
+import models.account { Account, account_deposit, account_withdraw }
+import repository.account_repo { account_repo_find_by_id, account_repo_check_balance, account_repo_is_active }
+import repository.transaction_repo { tx_repo_record, tx_repo_record_failure, tx_repo_check_idempotency }
+import dto.transfer_dto { TransferRequestDTO, TransferReceiptDTO, make_transfer_receipt }
+
+pub fn transfer_service_execute(req: TransferRequestDTO) -> TransferReceiptDTO:
+    if tx_repo_check_idempotency(req.idempotency_key):
+        make_transfer_receipt(0, req.idempotency_key, "REJECTED_DUPLICATE_IDEMPOTENCY", 0, 0)
+    elif req.amount_cents <= 0:
+        make_transfer_receipt(0, req.idempotency_key, "REJECTED_INVALID_AMOUNT", 0, 0)
+    else:
+        let src_acc = account_repo_find_by_id(req.source_account_id)
+        if src_acc.balance_cents < req.amount_cents:
+            make_transfer_receipt(0, req.idempotency_key, "REJECTED_INSUFFICIENT_FUNDS", 0, src_acc.balance_cents)
+        elif src_acc.is_frozen:
+            make_transfer_receipt(0, req.idempotency_key, "REJECTED_ACCOUNT_FROZEN", 0, src_acc.balance_cents)
+        else:
+            let updated_src = account_withdraw(src_acc, req.amount_cents)
+            let tx = tx_repo_record(9001, req.idempotency_key, req.source_account_id, req.destination_account_id, req.amount_cents)
+            make_transfer_receipt(tx.tx_id, req.idempotency_key, "SUCCESS", req.amount_cents, updated_src.balance_cents)

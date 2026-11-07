@@ -1,0 +1,24 @@
+# Controller Layer: Transaction Execution & Receipt Dispatcher
+# Module: controllers.transfer_controller
+
+import dto.transfer_dto { TransferRequestDTO, TransferReceiptDTO }
+import dto.api_response { ApiResponse, make_success_response, make_error_response }
+import service.transfer_service { transfer_service_execute }
+import middleware.auth_guard { auth_guard_verify }
+
+pub fn transfer_controller_post_transfer(token: String, ikey: String, src: Int, dst: Int, amt: Int) -> ApiResponse:
+    if not auth_guard_verify(token, "USER"):
+        make_error_response(403, "Access denied: transfer requires authenticated session", "trace_tx_denied")
+    else:
+        let req = TransferRequestDTO {
+            idempotency_key: ikey,
+            source_account_id: src,
+            destination_account_id: dst,
+            amount_cents: amt,
+            description: "Enterprise multi-module funds transfer"
+        }
+        let receipt = transfer_service_execute(req)
+        if receipt.status == "SUCCESS":
+            make_success_response(200, "Transfer completed successfully", "trace_tx_ok", receipt.status)
+        else:
+            make_error_response(400, receipt.status, "trace_tx_err")

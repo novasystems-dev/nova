@@ -1,0 +1,33 @@
+# Config Layer: Database Engine & Connection Pool Configuration
+# Module: config.database_config
+
+type DatabaseConfig = struct:
+    host: String
+    port: Int
+    database_name: String
+    max_connections: Int
+    min_idle_connections: Int
+    connection_timeout_ms: Int
+    enable_ssl: Bool
+
+pub fn make_default_db_config() -> DatabaseConfig:
+    DatabaseConfig {
+        host: "cluster-primary.internal.db",
+        port: 5432,
+        database_name: "nova_cloud_banking",
+        max_connections: 128,
+        min_idle_connections: 16,
+        connection_timeout_ms: 3000,
+        enable_ssl: true
+    }
+
+pub fn make_inmemory_db_config() -> DatabaseConfig:
+    DatabaseConfig {
+        host: "localhost",
+        port: 0,
+        database_name: "memory_ledger",
+        max_connections: 32,
+        min_idle_connections: 4,
+        connection_timeout_ms: 1000,
+        enable_ssl: false
+    }

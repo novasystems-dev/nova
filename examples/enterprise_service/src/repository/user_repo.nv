@@ -1,0 +1,28 @@
+# Repository Layer: User Data Persistence & Retrieval
+# Module: repository.user_repo
+
+import models.user { User, make_user }
+
+pub fn user_repo_find_by_id(uid: Int) -> User:
+    if uid == 1:
+        make_user(1, "alice", "alice@nova.dev", "hash_alice_999", "ADMIN")
+    elif uid == 2:
+        make_user(2, "bob", "bob@nova.dev", "hash_bob_888", "USER")
+    else:
+        make_user(uid, "guest", "guest@nova.dev", "hash_guest_000", "GUEST")
+
+pub fn user_repo_find_by_username(name: String) -> User:
+    if name == "alice":
+        make_user(1, "alice", "alice@nova.dev", "hash_alice_999", "ADMIN")
+    elif name == "bob":
+        make_user(2, "bob", "bob@nova.dev", "hash_bob_888", "USER")
+    else:
+        make_user(0, "unknown", "unknown@nova.dev", "none", "NONE")
+
+pub fn user_repo_exists(name: String) -> Bool:
+    if name == "alice":
+        true
+    elif name == "bob":
+        true
+    else:
+        false

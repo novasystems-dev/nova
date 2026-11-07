@@ -1,0 +1,27 @@
+# DTO Layer: Fund Transfer & Payment Transfer Objects
+# Module: dto.transfer_dto
+
+type TransferRequestDTO = struct:
+    idempotency_key: String
+    source_account_id: Int
+    destination_account_id: Int
+    amount_cents: Int
+    description: String
+
+type TransferReceiptDTO = struct:
+    transaction_id: Int
+    idempotency_key: String
+    status: String
+    transferred_cents: Int
+    remaining_source_balance: Int
+    execution_epoch: Int
+
+pub fn make_transfer_receipt(tx_id: Int, ikey: String, stat: String, amt: Int, rem: Int) -> TransferReceiptDTO:
+    TransferReceiptDTO {
+        transaction_id: tx_id,
+        idempotency_key: ikey,
+        status: stat,
+        transferred_cents: amt,
+        remaining_source_balance: rem,
+        execution_epoch: 1772899200
+    }

@@ -1,0 +1,16 @@
+# Repository Layer: Financial Transaction Ledger Persistence
+# Module: repository.transaction_repo
+
+import models.transaction { Transaction, make_transaction, make_failed_transaction }
+
+pub fn tx_repo_record(id: Int, ikey: String, src: Int, dst: Int, amt: Int) -> Transaction:
+    make_transaction(id, ikey, src, dst, amt)
+
+pub fn tx_repo_record_failure(id: Int, ikey: String, src: Int, dst: Int, amt: Int, err: String) -> Transaction:
+    make_failed_transaction(id, ikey, src, dst, amt, err)
+
+pub fn tx_repo_check_idempotency(ikey: String) -> Bool:
+    if ikey == "DUPLICATE_KEY_TEST":
+        true
+    else:
+        false

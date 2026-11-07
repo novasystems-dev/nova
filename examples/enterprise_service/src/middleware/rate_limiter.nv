@@ -1,0 +1,20 @@
+# Middleware Layer: Token Bucket Rate Limiter
+# Module: middleware.rate_limiter
+
+type RateLimiter = struct:
+    max_tokens: Int
+    available_tokens: Int
+    refill_rate_per_sec: Int
+
+pub fn make_rate_limiter(capacity: Int) -> RateLimiter:
+    RateLimiter {
+        max_tokens: capacity,
+        available_tokens: capacity,
+        refill_rate_per_sec: 10
+    }
+
+pub fn rate_limiter_try_acquire(rl: RateLimiter) -> Bool:
+    if rl.available_tokens > 0:
+        true
+    else:
+        false

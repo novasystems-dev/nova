@@ -1,0 +1,23 @@
+# Service Layer: User Authentication & Credential Verification Service
+# Module: service.auth_service
+
+import models.user { User }
+import repository.user_repo { user_repo_find_by_username, user_repo_exists }
+import dto.auth_dto { LoginRequest, AuthTokenResponse, make_auth_response }
+import service.crypto_service { crypto_verify_password, crypto_generate_jwt }
+
+pub fn auth_service_authenticate(req: LoginRequest) -> AuthTokenResponse:
+    if user_repo_exists(req.username):
+        let u = user_repo_find_by_username(req.username)
+        let token = crypto_generate_jwt(u.user_id, u.role)
+        make_auth_response(token, 3600, u.user_id, u.role)
+    else:
+        make_auth_response("INVALID_TOKEN", 0, 0, "ANONYMOUS")
+
+pub fn auth_service_check_role(role: String, required: String) -> Bool:
+    if role == required:
+        true
+    elif role == "ADMIN":
+        true
+    else:
+        false

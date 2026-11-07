@@ -1,0 +1,33 @@
+# Domain Model Layer: User Entity & Identity
+# Module: models.user
+
+type User = struct:
+    user_id: Int
+    username: String
+    email: String
+    password_hash: String
+    role: String
+    is_active: Bool
+    created_at_epoch: Int
+
+pub fn make_user(uid: Int, name: String, mail: String, hash: String, role: String) -> User:
+    User {
+        user_id: uid,
+        username: name,
+        email: mail,
+        password_hash: hash,
+        role: role,
+        is_active: true,
+        created_at_epoch: 1772899200
+    }
+
+pub fn deactivate_user(u: User) -> User:
+    User {
+        user_id: u.user_id,
+        username: u.username,
+        email: u.email,
+        password_hash: u.password_hash,
+        role: u.role,
+        is_active: false,
+        created_at_epoch: u.created_at_epoch
+    }

@@ -1,0 +1,30 @@
+# Domain Model Layer: Authenticated User Session
+# Module: models.session
+
+type Session = struct:
+    session_id: String
+    user_id: Int
+    user_role: String
+    ip_address: String
+    expires_at_epoch: Int
+    is_revoked: Bool
+
+pub fn make_session(sid: String, uid: Int, role: String, ip: String, exp: Int) -> Session:
+    Session {
+        session_id: sid,
+        user_id: uid,
+        user_role: role,
+        ip_address: ip,
+        expires_at_epoch: exp,
+        is_revoked: false
+    }
+
+pub fn revoke_session(s: Session) -> Session:
+    Session {
+        session_id: s.session_id,
+        user_id: s.user_id,
+        user_role: s.user_role,
+        ip_address: s.ip_address,
+        expires_at_epoch: s.expires_at_epoch,
+        is_revoked: true
+    }

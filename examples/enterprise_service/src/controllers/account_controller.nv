@@ -1,0 +1,14 @@
+# Controller Layer: Account Inquiry & Statement Endpoint
+# Module: controllers.account_controller
+
+import dto.account_dto { AccountSummaryResponse }
+import dto.api_response { ApiResponse, make_success_response, make_error_response }
+import service.account_service { account_service_get_summary }
+import middleware.auth_guard { auth_guard_verify }
+
+pub fn account_controller_get_balance(token: String, acc_id: Int) -> ApiResponse:
+    if not auth_guard_verify(token, "USER"):
+        make_error_response(403, "Access denied: insufficient permissions", "trace_acc_denied")
+    else:
+        let summary = account_service_get_summary(acc_id)
+        make_success_response(200, "Account retrieved", "trace_acc_ok", summary.account_number)

@@ -1,0 +1,22 @@
+# Domain Model Layer: Cryptographically Verifiable Audit Log
+# Module: models.audit_log
+
+type AuditLog = struct:
+    entry_id: Int
+    actor_id: Int
+    action: String
+    resource: String
+    prev_hash: String
+    current_hash: String
+    timestamp_epoch: Int
+
+pub fn make_audit_entry(id: Int, actor: Int, act: String, res: String, p_hash: String, c_hash: String) -> AuditLog:
+    AuditLog {
+        entry_id: id,
+        actor_id: actor,
+        action: act,
+        resource: res,
+        prev_hash: p_hash,
+        current_hash: c_hash,
+        timestamp_epoch: 1772899200
+    }

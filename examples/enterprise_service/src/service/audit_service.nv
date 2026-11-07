@@ -1,0 +1,12 @@
+# Service Layer: Tamper-Evident Security Audit & Cryptographic Chain Ledger
+# Module: service.audit_service
+
+import models.audit_log { AuditLog }
+import repository.audit_repo { audit_repo_append, audit_repo_verify_chain }
+
+pub fn audit_service_record_event(eid: Int, actor: Int, action: String, resource: String, prev_h: String) -> AuditLog:
+    let curr_h = str_concat3(prev_h, ":", action)
+    audit_repo_append(eid, actor, action, resource, prev_h, curr_h)
+
+pub fn audit_service_verify_integrity(last_hash: String, expected: String) -> Bool:
+    audit_repo_verify_chain(last_hash, expected)

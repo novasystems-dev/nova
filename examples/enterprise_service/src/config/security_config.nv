@@ -1,0 +1,18 @@
+# Config Layer: Cryptographic & Access Security Configuration
+# Module: config.security_config
+
+type SecurityConfig = struct:
+    jwt_secret_salt: String
+    token_ttl_seconds: Int
+    hash_iterations: Int
+    max_login_attempts: Int
+    lockout_duration_seconds: Int
+
+pub fn make_default_security_config() -> SecurityConfig:
+    SecurityConfig {
+        jwt_secret_salt: "nova_sec_enterprise_2026_ledger_salt",
+        token_ttl_seconds: 3600,
+        hash_iterations: 100000,
+        max_login_attempts: 5,
+        lockout_duration_seconds: 900
+    }

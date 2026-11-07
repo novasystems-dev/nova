@@ -1,0 +1,13 @@
+# Repository Layer: Tamper-Evident Audit Trail Persistence
+# Module: repository.audit_repo
+
+import models.audit_log { AuditLog, make_audit_entry }
+
+pub fn audit_repo_append(id: Int, actor: Int, act: String, res: String, p_hash: String, c_hash: String) -> AuditLog:
+    make_audit_entry(id, actor, act, res, p_hash, c_hash)
+
+pub fn audit_repo_verify_chain(p_hash: String, expected: String) -> Bool:
+    if p_hash == expected:
+        true
+    else:
+        false

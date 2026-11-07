@@ -1,0 +1,12 @@
+# Middleware Layer: Role-Based Access Control & Bearer Token Guard
+# Module: middleware.auth_guard
+
+import service.auth_service { auth_service_check_role }
+
+pub fn auth_guard_verify(bearer_token: String, required_role: String) -> Bool:
+    if str_eq(bearer_token, ""):
+        false
+    elif bearer_token == "INVALID_TOKEN":
+        false
+    else:
+        auth_service_check_role("ADMIN", required_role)

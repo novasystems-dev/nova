@@ -1,0 +1,27 @@
+# Middleware Layer: HTTP Access & Observability Logger
+# Module: middleware.logger_middleware
+
+type RequestLogContext = struct:
+    request_id: String
+    http_method: String
+    request_path: String
+    client_ip: String
+    start_time_epoch_ms: Int
+
+pub fn make_log_context(rid: String, method: String, path: String, ip: String) -> RequestLogContext:
+    RequestLogContext {
+        request_id: rid,
+        http_method: method,
+        request_path: path,
+        client_ip: ip,
+        start_time_epoch_ms: 1772899200000
+    }
+
+pub fn log_request_finish(ctx: RequestLogContext, status_code: Int):
+    print_str(" [ACCESS-LOG] ")
+    print_str(ctx.http_method)
+    print_str(" ")
+    print_str(ctx.request_path)
+    print_str(" -> ")
+    print_int(status_code)
+    print_newline()

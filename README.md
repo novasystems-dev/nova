@@ -9,7 +9,7 @@
 [![Website](https://img.shields.io/badge/website-live-10b981?style=flat&labelColor=0f172a&logo=github&logoColor=white)](https://novasystems-dev.github.io)
 [![CI Build](https://img.shields.io/github/actions/workflow/status/novasystems-dev/nova/release.yml?branch=master&style=flat&labelColor=0f172a&color=10b981&logo=githubactions&logoColor=white)](https://github.com/novasystems-dev/nova/actions)
 [![Release](https://img.shields.io/github/v/release/novasystems-dev/nova?style=flat&labelColor=0f172a&color=8b5cf6&logo=semver&logoColor=white)](https://github.com/novasystems-dev/nova/releases/latest)
-[![Tests](https://img.shields.io/badge/formal_proofs-144%20verified-38bdf8?style=flat&labelColor=0f172a&logo=checkmarx&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/formal_proofs-177%20verified-38bdf8?style=flat&labelColor=0f172a&logo=checkmarx&logoColor=white)](tests/)
 [![License](https://img.shields.io/badge/license-PolyForm-a855f7?style=flat&labelColor=0f172a&logo=open-source-initiative&logoColor=white)](LICENSE)
 [![Pure Nova](https://img.shields.io/badge/compiler-100%25%20pure%20nova-ec4899?style=flat&labelColor=0f172a&logo=starship&logoColor=white)](compiler/)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-12%20repos-f59e0b?style=flat&labelColor=0f172a&logo=git&logoColor=white)](https://github.com/novasystems-dev)
@@ -66,6 +66,75 @@ irm https://raw.githubusercontent.com/novasystems-dev/nova/master/install.ps1 | 
 ```
 
 > **Precompiled Native Binaries**: Standalone executable archives (`.zip` for Windows, `.tar.gz` for macOS & Linux) are available on [GitHub Releases](https://github.com/novasystems-dev/nova/releases/latest). Zero dependencies required to run precompiled binaries.
+
+---
+
+## ☕ Modular Enterprise Architecture & Java-Style Project Organization
+
+Nova embraces a modular architecture inspired by Java/Spring Boot enterprise conventions, scaling from lightweight scripts to million-line enterprise ecosystems:
+
+### File Extension Convention:
+- **Source Code (`*.nv`)**: Developer source files are named with the sleek `.nv` extension (similar to `.rs`, `.go`, `.ts`, `.py`).
+- **Native Executable Bundle (`*.nova`)**: Compiled standalone native binaries are bundled as `*.nova` (analogous to Java's `.jar`, but compiled to native C99/LLVM machine code with zero VM overhead).
+
+### Architectural Layering (Separation of Concerns):
+An enterprise Nova service organizes code across granular, decoupled layers:
+
+```text
+examples/enterprise_service/
+├── Orbit.toml
+└── src/
+    ├── config/           # Server, Database, and Cryptographic Security settings
+    │   ├── app_config.nv
+    │   ├── database_config.nv
+    │   └── security_config.nv
+    ├── models/           # Domain entities with formal Z3 invariant contracts
+    │   ├── user.nv
+    │   ├── account.nv
+    │   ├── transaction.nv
+    │   ├── audit_log.nv
+    │   └── session.nv
+    ├── dto/              # API request payloads & standardized envelopes
+    │   ├── api_response.nv
+    │   ├── auth_dto.nv
+    │   ├── account_dto.nv
+    │   └── transfer_dto.nv
+    ├── repository/       # Data persistence & atomic balance mutations
+    │   ├── user_repo.nv
+    │   ├── account_repo.nv
+    │   ├── transaction_repo.nv
+    │   └── audit_repo.nv
+    ├── service/          # Business logic, token minting & ledger reconciliation
+    │   ├── crypto_service.nv
+    │   ├── auth_service.nv
+    │   ├── account_service.nv
+    │   ├── transfer_service.nv
+    │   └── audit_service.nv
+    ├── middleware/       # Observability, Rate Limiting, CORS & Auth Guards
+    │   ├── logger_middleware.nv
+    │   ├── auth_guard.nv
+    │   ├── rate_limiter.nv
+    │   └── cors_filter.nv
+    ├── controllers/      # Health, Authentication, Account & Transfer Endpoints
+    │   ├── health_controller.nv
+    │   ├── auth_controller.nv
+    │   ├── account_controller.nv
+    │   └── transfer_controller.nv
+    └── main.nv           # Application bootstrap & dependency injection runner
+```
+
+### Building & Running with Orbit:
+```bash
+# Create a new project (scaffolds src/main.nv)
+orbit new cloud_ledger
+
+# Compile multi-file project into standalone native bundle
+cd cloud_ledger
+orbit build   # Emits target/release/app.nova
+
+# Execute native binary directly
+orbit run     # Runs target/release/app.nova
+```
 
 ---
 

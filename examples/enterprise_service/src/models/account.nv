@@ -1,0 +1,55 @@
+# Domain Model Layer: Bank Account Entity & Balance Invariants
+# Module: models.account
+
+type Account = struct:
+    account_id: Int
+    owner_user_id: Int
+    account_number: String
+    currency: String
+    balance_cents: Int
+    overdraft_limit_cents: Int
+    is_frozen: Bool
+
+pub fn make_account(acc_id: Int, uid: Int, acc_num: String, initial_bal: Int) -> Account:
+    Account {
+        account_id: acc_id,
+        owner_user_id: uid,
+        account_number: acc_num,
+        currency: "USD",
+        balance_cents: initial_bal,
+        overdraft_limit_cents: 0,
+        is_frozen: false
+    }
+
+pub fn account_deposit(acc: Account, amount_cents: Int) -> Account:
+    Account {
+        account_id: acc.account_id,
+        owner_user_id: acc.owner_user_id,
+        account_number: acc.account_number,
+        currency: acc.currency,
+        balance_cents: acc.balance_cents + amount_cents,
+        overdraft_limit_cents: acc.overdraft_limit_cents,
+        is_frozen: acc.is_frozen
+    }
+
+pub fn account_withdraw(acc: Account, amount_cents: Int) -> Account:
+    Account {
+        account_id: acc.account_id,
+        owner_user_id: acc.owner_user_id,
+        account_number: acc.account_number,
+        currency: acc.currency,
+        balance_cents: acc.balance_cents - amount_cents,
+        overdraft_limit_cents: acc.overdraft_limit_cents,
+        is_frozen: acc.is_frozen
+    }
+
+pub fn account_freeze(acc: Account) -> Account:
+    Account {
+        account_id: acc.account_id,
+        owner_user_id: acc.owner_user_id,
+        account_number: acc.account_number,
+        currency: acc.currency,
+        balance_cents: acc.balance_cents,
+        overdraft_limit_cents: acc.overdraft_limit_cents,
+        is_frozen: true
+    }

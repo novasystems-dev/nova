@@ -1,0 +1,10 @@
+# Controller Layer: Liveness, Readiness & System Telemetry Endpoint
+# Module: controllers.health_controller
+
+import dto.api_response { ApiResponse, make_success_response }
+
+pub fn health_check_liveness() -> ApiResponse:
+    make_success_response(200, "System is live", "trace_live_01", "{\"status\":\"UP\"}")
+
+pub fn health_check_readiness() -> ApiResponse:
+    make_success_response(200, "Ready to receive traffic", "trace_ready_01", "{\"db\":\"CONNECTED\",\"ledger\":\"SYNCED\"}")

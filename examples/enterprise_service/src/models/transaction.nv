@@ -1,0 +1,36 @@
+# Domain Model Layer: Financial Ledger Transaction Record
+# Module: models.transaction
+
+type Transaction = struct:
+    tx_id: Int
+    idempotency_key: String
+    from_account_id: Int
+    to_account_id: Int
+    amount_cents: Int
+    fee_cents: Int
+    status: String
+    timestamp_epoch: Int
+
+pub fn make_transaction(id: Int, ikey: String, src: Int, dst: Int, amt: Int) -> Transaction:
+    Transaction {
+        tx_id: id,
+        idempotency_key: ikey,
+        from_account_id: src,
+        to_account_id: dst,
+        amount_cents: amt,
+        fee_cents: 0,
+        status: "COMPLETED",
+        timestamp_epoch: 1772899200
+    }
+
+pub fn make_failed_transaction(id: Int, ikey: String, src: Int, dst: Int, amt: Int, reason: String) -> Transaction:
+    Transaction {
+        tx_id: id,
+        idempotency_key: ikey,
+        from_account_id: src,
+        to_account_id: dst,
+        amount_cents: amt,
+        fee_cents: 0,
+        status: reason,
+        timestamp_epoch: 1772899200
+    }

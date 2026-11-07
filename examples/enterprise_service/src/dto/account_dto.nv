@@ -1,0 +1,23 @@
+# DTO Layer: Account Management Transfer Objects
+# Module: dto.account_dto
+
+type CreateAccountRequest = struct:
+    owner_user_id: Int
+    currency: String
+    initial_deposit_cents: Int
+
+type AccountSummaryResponse = struct:
+    account_id: Int
+    account_number: String
+    currency: String
+    balance_cents: Int
+    is_active: Bool
+
+pub fn make_account_summary(id: Int, acc_num: String, curr: String, bal: Int, active: Bool) -> AccountSummaryResponse:
+    AccountSummaryResponse {
+        account_id: id,
+        account_number: acc_num,
+        currency: curr,
+        balance_cents: bal,
+        is_active: active
+    }

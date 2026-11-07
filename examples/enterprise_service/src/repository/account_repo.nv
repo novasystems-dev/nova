@@ -1,0 +1,23 @@
+# Repository Layer: Bank Account Data Persistence & Atomic Balance Updates
+# Module: repository.account_repo
+
+import models.account { Account, make_account, account_deposit, account_withdraw }
+
+pub fn account_repo_find_by_id(acc_id: Int) -> Account:
+    if acc_id == 101:
+        make_account(101, 1, "US99NOVA0000000101", 500000)
+    elif acc_id == 102:
+        make_account(102, 2, "US99NOVA0000000102", 150000)
+    else:
+        make_account(acc_id, 0, "US99NOVA0000000000", 0)
+
+pub fn account_repo_check_balance(acc_id: Int) -> Int:
+    let acc = account_repo_find_by_id(acc_id)
+    acc.balance_cents
+
+pub fn account_repo_is_active(acc_id: Int) -> Bool:
+    let acc = account_repo_find_by_id(acc_id)
+    if not acc.is_frozen:
+        true
+    else:
+        false

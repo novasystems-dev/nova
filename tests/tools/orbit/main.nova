@@ -1,13 +1,14 @@
 # Orbit Pure Nova Package Manager
+# Version 0.31.00 (Java-style modular enterprise support & .nv / .nova convention)
 
 fn print_usage():
     print_str("Orbit - Official Package Manager for Nova\n")
     print_str("Usage: orbit <command> [args]\n\n")
     print_str("Commands:\n")
-    print_str("  new <name>   Create a new Nova package\n")
+    print_str("  new <name>   Create a new Nova package (.nv source)\n")
     print_str("  init         Initialize package in current dir\n")
-    print_str("  build        Compile current package\n")
-    print_str("  run          Execute current package\n")
+    print_str("  build        Compile package to native .nova bundle\n")
+    print_str("  run          Execute native .nova package\n")
     print_str("  test         Run tests\n")
     print_str("  lock         Generate Orbit.lock\n")
     print_str("  search <q>   Search registry for packages\n")
@@ -30,15 +31,15 @@ fn orbit_new(name: String) -> Int:
     let cmd_dirs_full = str_concat3(cmd_dirs, name, "/tests\"")
     process_run(cmd_dirs_full)
 
-    let manifest = "[package]\nversion = \"0.1.0\"\nedition = \"2026\"\nauthors = [\"Nova Developer\"]\n\n[dependencies]\n"
+    let manifest = "[package]\nversion = \"0.31.00\"\nedition = \"2026\"\nauthors = [\"Nova Systems\"]\n\n[dependencies]\n"
     let toml_path = str_concat(name, "/Orbit.toml")
     fs_write_string(toml_path, manifest)
 
-    let main_code = "fn main():\n    print_str(\"Hello from Nova!\\n\")\n"
-    let main_path = str_concat(name, "/src/main.nova")
+    let main_code = "pub fn main():\n    print(\"Hello, world from Nova (.nv)!\")\n"
+    let main_path = str_concat(name, "/src/main.nv")
     fs_write_string(main_path, main_code)
 
-    print_str("Created binary package: ")
+    print_str("Created binary package (.nv source): ")
     print_str(name)
     print_newline()
     0
@@ -49,10 +50,37 @@ fn orbit_build() -> Int:
         return 1
 
     fs_mkdir_p("bin")
-    print_str("   Compiling package (src/main.nova)...\n")
-    let code = process_run("novac build src/main.nova")
+    fs_mkdir_p("target/release")
+
+    let mut target_label = "src/main.nv"
+    if not fs_exists("src/main.nv") and fs_exists("src/main.nova"):
+        target_label = "src/main.nova"
+
+    print_str("   Compiling package (")
+    print_str(target_label)
+    print_str(")...\n")
+
+    # Multi-file Java-style project bundler
+    let bundle_cmd = "python3 -c '\nimport os, glob\nlayers = [\"config\", \"models\", \"dto\", \"repository\", \"service\", \"middleware\", \"controllers\"]\nparts = []\nfor l in layers:\n    ldir = os.path.join(\"src\", l)\n    if os.path.isdir(ldir):\n        for f in sorted(glob.glob(os.path.join(ldir, \"*.nv\"))):\n            with open(f) as fp: parts.append(fp.read())\nmain_f = \"src/main.nv\" if os.path.exists(\"src/main.nv\") else \"src/main.nova\"\nif os.path.exists(main_f):\n    with open(main_f) as fp: parts.append(fp.read())\nall_code = \"\\n\".join(parts)\nclean_lines = [line for line in all_code.splitlines() if not (line.startswith(\"import config.\") or line.startswith(\"import models.\") or line.startswith(\"import dto.\") or line.startswith(\"import repository.\") or line.startswith(\"import service.\") or line.startswith(\"import middleware.\") or line.startswith(\"import controllers.\"))]\nwith open(\"target/release/bundle.nv\", \"w\") as fp:\n    fp.write(\"\\n\".join(clean_lines))\n'"
+    process_run(bundle_cmd)
+
+    let mut compile_cmd = "PATH=\"$PATH:./bin:../bin:../../bin:$HOME/.nova/bin:/home/nam/Documents/Nova/bin\" novac build src/main.nv"
+    if fs_exists("target/release/bundle.nv"):
+        compile_cmd = "PATH=\"$PATH:./bin:../bin:../../bin:$HOME/.nova/bin:/home/nam/Documents/Nova/bin\" novac build target/release/bundle.nv"
+    elif fs_exists("src/main.nova"):
+        compile_cmd = "PATH=\"$PATH:./bin:../bin:../../bin:$HOME/.nova/bin:/home/nam/Documents/Nova/bin\" novac build src/main.nova"
+
+    let code = process_run(compile_cmd)
     if code == 0:
-        print_str("    Finished release [optimized] target(s)\n")
+        if fs_exists("bundle.nova"):
+            process_run("cp -f bundle.nova target/release/app.nova 2>/dev/null; cp -f bundle.nova bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null; rm -f bundle.nova bundle.out")
+        elif fs_exists("bundle.out"):
+            process_run("cp -f bundle.out target/release/app.nova 2>/dev/null; cp -f bundle.out bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null; rm -f bundle.out")
+        elif fs_exists("main.nova"):
+            process_run("cp -f main.nova target/release/app.nova 2>/dev/null; cp -f main.nova bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null")
+        elif fs_exists("main.out"):
+            process_run("cp -f main.out target/release/app.nova 2>/dev/null; cp -f main.out bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null")
+        print_str("    Finished release [optimized] target(s) -> target/release/app.nova\n")
     else:
         print_str("Error: Build failed\n")
     code
@@ -62,8 +90,18 @@ fn orbit_run() -> Int:
         print_str("Error: Could not find 'orbit.toml' in current directory.\n")
         return 1
 
-    print_str("     Running package (src/main.nova)...\n")
-    process_run("novac run src/main.nova")
+    if fs_exists("target/release/app.nova"):
+        print_str("     Running package (target/release/app.nova)...\n")
+        process_run("./target/release/app.nova")
+    elif fs_exists("bin/app.nova"):
+        print_str("     Running package (bin/app.nova)...\n")
+        process_run("./bin/app.nova")
+    elif fs_exists("src/main.nv"):
+        print_str("     Running package (src/main.nv)...\n")
+        process_run("novac run src/main.nv")
+    else:
+        print_str("     Running package (src/main.nova)...\n")
+        process_run("novac run src/main.nova")
 
 fn orbit_test() -> Int:
     print_str("     Testing package...\n")

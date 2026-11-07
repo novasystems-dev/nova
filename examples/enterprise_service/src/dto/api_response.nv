@@ -1,0 +1,27 @@
+# DTO Layer: Standardized Enterprise API Envelope
+# Module: dto.api_response
+
+type ApiResponse = struct:
+    status_code: Int
+    success: Bool
+    message: String
+    trace_id: String
+    data_payload: String
+
+pub fn make_success_response(status: Int, msg: String, trace: String, payload: String) -> ApiResponse:
+    ApiResponse {
+        status_code: status,
+        success: true,
+        message: msg,
+        trace_id: trace,
+        data_payload: payload
+    }
+
+pub fn make_error_response(status: Int, err_msg: String, trace: String) -> ApiResponse:
+    ApiResponse {
+        status_code: status,
+        success: false,
+        message: err_msg,
+        trace_id: trace,
+        data_payload: "{}"
+    }

@@ -102,6 +102,38 @@ run_test "Check compiler/wasm_tables.nova" "./bin/novac check compiler/wasm_tabl
 run_test "Check compiler/optimizer.nova" "./bin/novac check compiler/optimizer.nova"
 run_test "Check compiler/main.nova" "./bin/novac check compiler/main.nova"
 
+# 1.1 Java-Style Modular Architecture (.nv) checks
+run_test "Check enterprise_service/src/config/app_config.nv" "./bin/novac check examples/enterprise_service/src/config/app_config.nv"
+run_test "Check enterprise_service/src/config/database_config.nv" "./bin/novac check examples/enterprise_service/src/config/database_config.nv"
+run_test "Check enterprise_service/src/config/security_config.nv" "./bin/novac check examples/enterprise_service/src/config/security_config.nv"
+run_test "Check enterprise_service/src/models/user.nv" "./bin/novac check examples/enterprise_service/src/models/user.nv"
+run_test "Check enterprise_service/src/models/account.nv" "./bin/novac check examples/enterprise_service/src/models/account.nv"
+run_test "Check enterprise_service/src/models/transaction.nv" "./bin/novac check examples/enterprise_service/src/models/transaction.nv"
+run_test "Check enterprise_service/src/models/audit_log.nv" "./bin/novac check examples/enterprise_service/src/models/audit_log.nv"
+run_test "Check enterprise_service/src/models/session.nv" "./bin/novac check examples/enterprise_service/src/models/session.nv"
+run_test "Check enterprise_service/src/dto/api_response.nv" "./bin/novac check examples/enterprise_service/src/dto/api_response.nv"
+run_test "Check enterprise_service/src/dto/auth_dto.nv" "./bin/novac check examples/enterprise_service/src/dto/auth_dto.nv"
+run_test "Check enterprise_service/src/dto/account_dto.nv" "./bin/novac check examples/enterprise_service/src/dto/account_dto.nv"
+run_test "Check enterprise_service/src/dto/transfer_dto.nv" "./bin/novac check examples/enterprise_service/src/dto/transfer_dto.nv"
+run_test "Check enterprise_service/src/repository/user_repo.nv" "./bin/novac check examples/enterprise_service/src/repository/user_repo.nv"
+run_test "Check enterprise_service/src/repository/account_repo.nv" "./bin/novac check examples/enterprise_service/src/repository/account_repo.nv"
+run_test "Check enterprise_service/src/repository/transaction_repo.nv" "./bin/novac check examples/enterprise_service/src/repository/transaction_repo.nv"
+run_test "Check enterprise_service/src/repository/audit_repo.nv" "./bin/novac check examples/enterprise_service/src/repository/audit_repo.nv"
+run_test "Check enterprise_service/src/service/crypto_service.nv" "./bin/novac check examples/enterprise_service/src/service/crypto_service.nv"
+run_test "Check enterprise_service/src/service/auth_service.nv" "./bin/novac check examples/enterprise_service/src/service/auth_service.nv"
+run_test "Check enterprise_service/src/service/account_service.nv" "./bin/novac check examples/enterprise_service/src/service/account_service.nv"
+run_test "Check enterprise_service/src/service/transfer_service.nv" "./bin/novac check examples/enterprise_service/src/service/transfer_service.nv"
+run_test "Check enterprise_service/src/service/audit_service.nv" "./bin/novac check examples/enterprise_service/src/service/audit_service.nv"
+run_test "Check enterprise_service/src/middleware/logger_middleware.nv" "./bin/novac check examples/enterprise_service/src/middleware/logger_middleware.nv"
+run_test "Check enterprise_service/src/middleware/auth_guard.nv" "./bin/novac check examples/enterprise_service/src/middleware/auth_guard.nv"
+run_test "Check enterprise_service/src/middleware/rate_limiter.nv" "./bin/novac check examples/enterprise_service/src/middleware/rate_limiter.nv"
+run_test "Check enterprise_service/src/middleware/cors_filter.nv" "./bin/novac check examples/enterprise_service/src/middleware/cors_filter.nv"
+run_test "Check enterprise_service/src/controllers/health_controller.nv" "./bin/novac check examples/enterprise_service/src/controllers/health_controller.nv"
+run_test "Check enterprise_service/src/controllers/auth_controller.nv" "./bin/novac check examples/enterprise_service/src/controllers/auth_controller.nv"
+run_test "Check enterprise_service/src/controllers/account_controller.nv" "./bin/novac check examples/enterprise_service/src/controllers/account_controller.nv"
+run_test "Check enterprise_service/src/controllers/transfer_controller.nv" "./bin/novac check examples/enterprise_service/src/controllers/transfer_controller.nv"
+run_test "Check enterprise_service/src/main.nv" "./bin/novac check examples/enterprise_service/src/main.nv"
+
 # 2. Standard Library checks
 run_test "Check std/vec.nova" "./bin/novac check std/vec.nova"
 run_test "Check std/map.nova" "./bin/novac check std/map.nova"
@@ -229,6 +261,9 @@ run_test "Interactive REPL evaluation pipeline" "out=\$(printf 'let x = 21\nx * 
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
+run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
+run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"
+run_test "Execute enterprise_service.nova bundle" "./examples/enterprise_service/target/release/app.nova >/dev/null && rm -rf examples/enterprise_service/target examples/enterprise_service/bin"
 
 # 7. Bootstrapping verification
 gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./bin/novac-2
@@ -241,7 +276,7 @@ run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"
 run_test "Benchmark suite execution" "./tests/benchmarks/run_benchmarks.sh"
 
 # Cleanup generated test binaries
-rm -rf tmp_test_dir *.out *.out.exe
+rm -rf tmp_test_dir *.out *.out.exe 0*.nova
 
 echo "=========================================================="
 echo "  TEST RESULTS: $PASSED PASSED, $FAILED FAILED"
