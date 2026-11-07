@@ -21,6 +21,7 @@ if [ ! -f bin/nova-doc ] && [ -f tests/tools/docgen/main.nova ]; then ./bin/nova
 if [ ! -f bin/nova-fmt ] && [ -f tests/tools/fmt/nova_fmt ]; then cp tests/tools/fmt/nova_fmt bin/nova-fmt; fi
 if [ ! -f bin/nova-lint ] && [ -f tests/tools/lint/nova_lint ]; then cp tests/tools/lint/nova_lint bin/nova-lint; fi
 if [ ! -f bin/nova-repl ] && [ -f tests/tools/repl/nova_repl ]; then cp tests/tools/repl/nova_repl bin/nova-repl; fi
+if [ ! -f bin/nova-runner ] && [ -f tests/tools/runner/main.c ]; then gcc -O2 -Wall tests/tools/runner/main.c -o bin/nova-runner; fi
 chmod +x bin/* 2>/dev/null || true
 
 echo "=========================================================="
@@ -261,6 +262,8 @@ run_test "Interactive REPL evaluation pipeline" "out=\$(printf 'let x = 21\nx * 
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nova std/*.nova"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nova std/*.nova"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
+run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.31.00'"
+run_test "Nova-runner console-hold execution (--hold)" "echo '' | ./bin/nova-runner --hold ./bin/nova-doc --version | grep -q 'Process exited with code: 0'"
 run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
 run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"
 run_test "Execute enterprise_service.nova bundle" "./examples/enterprise_service/target/release/app.nova >/dev/null && rm -rf examples/enterprise_service/target examples/enterprise_service/bin"

@@ -1,0 +1,20 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Classes\.nova]
+@="NovaApp"
+"Content Type"="application/x-nova"
+
+[HKEY_CURRENT_USER\Software\Classes\NovaApp]
+@="Nova Native Application Bundle"
+
+[HKEY_CURRENT_USER\Software\Classes\NovaApp\DefaultIcon]
+@="C:\\nova\\assets\\branding\\favicon.ico,0"
+
+[HKEY_CURRENT_USER\Software\Classes\NovaApp\shell]
+@="open"
+
+[HKEY_CURRENT_USER\Software\Classes\NovaApp\shell\open]
+@="Run with Nova Runtime"
+
+[HKEY_CURRENT_USER\Software\Classes\NovaApp\shell\open\command]
+@="\"C:\\nova\\bin\\nova-runner.exe\" --hold \"%1\" %*"

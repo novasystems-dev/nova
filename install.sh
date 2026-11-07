@@ -28,7 +28,14 @@ cp -f bin/nova-fmt "$BIN_DIR/nova-fmt"
 cp -f bin/nova-lsp "$BIN_DIR/nova-lsp"
 cp -f bin/nova-lint "$BIN_DIR/nova-lint"
 cp -f bin/nova-repl "$BIN_DIR/nova-repl"
+if [ -f bin/nova-runner ]; then cp -f bin/nova-runner "$BIN_DIR/nova-runner"; fi
 chmod +x "$BIN_DIR/novac" "$BIN_DIR/orbit" "$BIN_DIR/nova-fmt" "$BIN_DIR/nova-lsp" "$BIN_DIR/nova-lint" "$BIN_DIR/nova-repl"
+if [ -f "$BIN_DIR/nova-runner" ]; then chmod +x "$BIN_DIR/nova-runner"; fi
+
+echo "-> Registering desktop integration and .nova file association..."
+if [ -f assets/desktop/register_linux.sh ]; then
+    bash assets/desktop/register_linux.sh >/dev/null 2>&1 || true
+fi
 
 echo "-> Installing runtime headers into $LIB_DIR/runtime..."
 cp -f runtime/nova_rt.h "$LIB_DIR/runtime/nova_rt.h"

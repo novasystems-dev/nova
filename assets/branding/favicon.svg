@@ -1,30 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="iconPlanetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#EDA1AC" />
-      <stop offset="40%" stop-color="#E78895" />
-      <stop offset="100%" stop-color="#CF5D6E" />
+    <!-- Coral / Rose Planet Gradients -->
+    <linearGradient id="planetGrad" x1="0.2" y1="0.0" x2="0.8" y2="1.0">
+      <stop offset="0%" stop-color="#F2AFB8" />
+      <stop offset="45%" stop-color="#EAA2AC" />
+      <stop offset="80%" stop-color="#D96E7E" />
+      <stop offset="100%" stop-color="#B84959" />
     </linearGradient>
-    <linearGradient id="iconSkyGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="50%" stop-color="#FCE7F3" />
-      <stop offset="100%" stop-color="#E2E8F0" />
+      <stop offset="40%" stop-color="#F7E6E8" />
+      <stop offset="100%" stop-color="#EAA2AC" />
     </linearGradient>
+
+    <!-- Clip path to circular planet body -->
+    <clipPath id="planetClip">
+      <circle cx="256" cy="256" r="216" />
+    </clipPath>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="planetShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#7A2433" flood-opacity="0.25" />
+    </filter>
+
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#FFFFFF" flood-opacity="0.6" />
+    </filter>
   </defs>
 
-  <g transform="rotate(-13 256 256) translate(-44 46)">
-    <path d="M 90 210 A 210 135 0 0 1 510 210 Z" fill="url(#iconSkyGrad)" stroke="#1E1B2E" stroke-width="5" />
+  <!-- Circular Outer Guide / Orbit Ring -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="#EAA2AC" stroke-width="2.5" stroke-dasharray="8 6" opacity="0.6" />
 
-    <path d="M 115 185 Q 300 155 485 185" stroke="#E78895" stroke-width="6" stroke-dasharray="45 12 25 10 70 15" fill="none" stroke-linecap="round" opacity="0.85" />
-    <path d="M 135 160 Q 300 132 465 160" stroke="#CF5D6E" stroke-width="5" stroke-dasharray="35 15 55 12" fill="none" stroke-linecap="round" opacity="0.75" />
-    <path d="M 170 135 Q 300 110 430 135" stroke="#EDA1AC" stroke-width="5" stroke-dasharray="60 14 30 10" fill="none" stroke-linecap="round" opacity="0.9" />
-    <path d="M 210 115 Q 300 95 390 115" stroke="#FFFFFF" stroke-width="3.5" stroke-dasharray="40 12" fill="none" stroke-linecap="round" opacity="0.95" />
+  <!-- Main Spherical Celestial Body -->
+  <g filter="url(#planetShadow)">
+    <!-- Base Sphere -->
+    <circle cx="256" cy="256" r="216" fill="url(#planetGrad)" stroke="#221C1E" stroke-width="4.5" />
 
-    <path d="M 90 210 A 210 135 0 0 0 510 210 Z" fill="url(#iconPlanetGrad)" stroke="#1E1B2E" stroke-width="5" />
+    <!-- Clipped Internal Atmospheric Layers -->
+    <g clip-path="url(#planetClip)">
+      <!-- Upper Atmospheric Sky Dome -->
+      <path d="M 40,256 C 40,136 136,40 256,40 C 376,40 472,136 472,256 C 400,270 280,210 160,240 C 90,255 50,256 40,256 Z" fill="url(#skyGrad)" opacity="0.95" />
 
-    <path d="M 225 210 C 225 135 395 135 395 210 C 395 285 175 290 165 210 C 155 130 340 125 350 210" 
-          fill="none" stroke="#1E1B2E" stroke-width="6" stroke-linecap="round" />
+      <!-- Authentic Horizontal Atmospheric Brush Bands (User's hand-drawn style) -->
+      <!-- Band 1 -->
+      <path d="M 80,105 Q 180,98 300,108 Q 380,114 430,110" stroke="#D96E7E" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.75" />
+      <path d="M 120,113 Q 220,107 340,115 T 410,118" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8" />
+      <path d="M 95,119 Q 200,112 360,121" stroke="#C95B6A" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6" />
+
+      <!-- Band 2 (Dense cluster) -->
+      <path d="M 60,132 Q 170,124 290,133 Q 390,138 452,130" stroke="#D96E7E" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.8" />
+      <path d="M 90,140 Q 210,131 330,141 Q 400,143 440,138" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.9" />
+      <path d="M 75,147 Q 190,139 310,149 T 455,145" stroke="#C95B6A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7" />
+      <path d="M 130,154 Q 240,146 370,156" stroke="#D96E7E" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.65" />
+
+      <!-- Band 3 -->
+      <path d="M 48,168 Q 160,158 280,170 Q 380,177 465,166" stroke="#D96E7E" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.75" />
+      <path d="M 70,176 Q 190,167 320,178 Q 410,181 462,174" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8" />
+      <path d="M 55,185 Q 175,176 300,188 Q 390,192 468,183" stroke="#C95B6A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.65" />
+      <path d="M 90,193 Q 220,184 350,195" stroke="#D96E7E" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5" />
+
+      <!-- Band 4 (Transitional near equator) -->
+      <path d="M 42,208 Q 160,198 280,210 Q 380,218 470,206" stroke="#D96E7E" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6" />
+      <path d="M 65,217 Q 190,207 330,220 Q 420,224 471,215" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.75" />
+      <path d="M 50,227 Q 180,218 310,230 Q 400,234 472,226" stroke="#C95B6A" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.55" />
+    </g>
   </g>
 
-  <text x="256" y="295" font-family="'Georgia', 'Playfair Display', serif" font-size="140" font-style="italic" font-weight="bold" fill="#1E1B2E" text-anchor="middle" letter-spacing="-4">Nova</text>
+  <!-- Orbital Loop / Orbit Spiral (passing behind & around center) -->
+  <path d="M 85,340 C 120,440 370,440 430,310 C 470,220 380,110 270,140 C 170,170 120,270 200,345 C 260,395 360,360 380,290" 
+        fill="none" stroke="#221C1E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- The Iconic Wordmark "Nova" (Serif Italic with subtle translucency) -->
+  <g id="wordmark" transform="translate(256, 280)">
+    <!-- Drop Shadow / Glow backing -->
+    <text x="0" y="0" text-anchor="middle"
+          font-family="'Playfair Display', 'Noto Serif', 'Nimbus Roman', 'Baskerville', 'Georgia', 'Times New Roman', serif"
+          font-size="124" font-style="italic" font-weight="bold"
+          fill="#FFFFFF" opacity="0.6" filter="url(#textGlow)">Nova</text>
+
+    <!-- Main Lettering (Translucent dark charcoal matching user drawing) -->
+    <text x="0" y="0" text-anchor="middle"
+          font-family="'Playfair Display', 'Noto Serif', 'Nimbus Roman', 'Baskerville', 'Georgia', 'Times New Roman', serif"
+          font-size="124" font-style="italic" font-weight="bold"
+          fill="#221A1D" opacity="0.88">Nova</text>
+  </g>
 </svg>

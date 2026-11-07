@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-nova">
+    <comment>Nova Native Application Bundle</comment>
+    <glob pattern="*.nova"/>
+    <glob pattern="*.nv"/>
+    <icon name="nova"/>
+  </mime-type>
+</mime-info>

@@ -65,7 +65,7 @@ if (-not $LocalBinExists) {
 }
 
 Write-Host "-> Installing binaries into $BinDir..." -ForegroundColor Green
-$BinFiles = @("novac.exe", "orbit.exe", "nova-fmt.exe", "nova-lint.exe", "nova-doc.exe", "novac", "orbit")
+$BinFiles = @("novac.exe", "orbit.exe", "nova-runner.exe", "nova-fmt.exe", "nova-lint.exe", "nova-doc.exe", "novac", "orbit", "nova-runner")
 foreach ($bf in $BinFiles) {
     $src = Join-Path $CurrentScriptDir "bin\$bf"
     if (Test-Path $src) {

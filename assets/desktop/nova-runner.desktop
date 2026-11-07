@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Nova Runtime Launcher
+GenericName=Nova Application Runner
+Comment=Execute Nova native application packages with console hold
+Exec=nova-runner %f
+Icon=/usr/share/icons/hicolor/512x512/apps/nova.png
+Terminal=false
+MimeType=application/x-nova;
+Categories=Development;System;Utility;
+StartupNotify=true
