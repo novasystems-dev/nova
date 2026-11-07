@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/branding/logo.svg" width="300" alt="Nova Systems Logo" />
+
 # 🌌 Nova Systems Language
 
 **Provable Memory Safety • Perceus In-Place Reuse • Zero GC • SMT Refinements • Bare-Metal Control**
