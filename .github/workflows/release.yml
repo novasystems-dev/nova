@@ -88,11 +88,12 @@ jobs:
           ./test_link.exe
           rm -f test_link.c test_link.exe link.log
 
-      - name: Fetch Legacy Bootstrap Toolchain from branch legacy
+      - name: Fetch Legacy Bootstrap Toolchain from nova-legacy-haskell
         run: |
-          echo "=== Fetching Genesis bootstrap compiler from legacy branch ==="
-          git fetch origin legacy --depth=1
-          git checkout origin/legacy -- stage0
+          echo "=== Fetching Genesis bootstrap compiler from nova-legacy-haskell ==="
+          git clone --depth=1 https://github.com/novasystems-dev/nova-legacy-haskell.git stage0_repo
+          cp -r stage0_repo/stage0 .
+          rm -rf stage0_repo
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
