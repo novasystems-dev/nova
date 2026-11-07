@@ -1,30 +1,33 @@
-<p align="center">
-  <img src="assets/banner.svg" alt="Nova Systems Language Banner" width="100%" />
-</p>
+<div align="center">
 
-<p align="center">
-  <a href="https://github.com/novasystems-dev/nova/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/novasystems-dev/nova/release.yml?branch=master&style=for-the-badge&logo=github&label=Build%20%26%20Release" alt="CI Status" /></a>
-  <a href="https://github.com/novasystems-dev/nova/releases/latest"><img src="https://img.shields.io/github/v/release/novasystems-dev/nova?style=for-the-badge&color=7B2CBF&label=Release" alt="Latest Release" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-blueviolet?style=for-the-badge" alt="License" /></a>
-  <a href="tests/"><img src="https://img.shields.io/badge/Tests-85%2F85%20Passed-00F0FF?style=for-the-badge&logo=checkmarx" alt="Test Status" /></a>
-  <a href="https://github.com/novasystems-dev"><img src="https://img.shields.io/badge/Ecosystem-10%20Repos-FF548F?style=for-the-badge" alt="Ecosystem" /></a>
-</p>
+# 🌌 Nova Systems Language
 
-<h3 align="center">
-  <b>Provable Memory Safety • Perceus In-Place Reuse • Zero GC • SMT Refinements • Bare-Metal Systems Control</b>
-</h3>
+**Provable Memory Safety • Perceus In-Place Reuse • Zero GC • SMT Refinements • Bare-Metal Control**
+
+<br />
+
+[![CI Build](https://img.shields.io/github/actions/workflow/status/novasystems-dev/nova/release.yml?branch=master&style=flat&labelColor=0f172a&color=10b981&logo=githubactions&logoColor=white)](https://github.com/novasystems-dev/nova/actions)
+[![Release](https://img.shields.io/github/v/release/novasystems-dev/nova?style=flat&labelColor=0f172a&color=8b5cf6&logo=semver&logoColor=white)](https://github.com/novasystems-dev/nova/releases/latest)
+[![Tests](https://img.shields.io/badge/formal_proofs-117%20verified-38bdf8?style=flat&labelColor=0f172a&logo=checkmarx&logoColor=white)](tests/)
+[![License](https://img.shields.io/badge/license-PolyForm-a855f7?style=flat&labelColor=0f172a&logo=open-source-initiative&logoColor=white)](LICENSE)
+[![Pure Nova](https://img.shields.io/badge/compiler-100%25%20pure%20nova-ec4899?style=flat&labelColor=0f172a&logo=rust&logoColor=white)](compiler/)
+[![Ecosystem](https://img.shields.io/badge/ecosystem-10%20repos-f59e0b?style=flat&labelColor=0f172a&logo=git&logoColor=white)](https://github.com/novasystems-dev)
+
+<br />
+
+</div>
 
 ---
 
-## 🌌 Overview
+## ⚡ Overview
 
-**Nova** is an advanced, industrial-grade systems programming language engineered to achieve the memory safety guarantees of Rust, the raw execution speed and bare-metal hardware control of C/C++, and the mathematical correctness proofs of SMT-backed Refinement Types (via Microsoft Z3).
+**Nova** is a modern systems programming language engineered to achieve the memory safety guarantees of Rust, the raw execution speed and bare-metal hardware control of C/C++, and the mathematical correctness proofs of SMT-backed Refinement Types (via Microsoft Z3).
 
 The Nova project is governed by **Nova Systems** and developed under the [`@novasystems-dev`](https://github.com/novasystems-dev) GitHub organization following an ultra-clean, multi-repository architecture modeled after `rust-lang`.
 
 ---
 
-## ⚡ Core Language Pillars
+## 🏛️ Key Language Pillars
 
 1. **Deterministic Zero-GC Memory Management**:
    Nova employs the **Perceus reference-counting model** with compile-time in-place buffer recycling. When an object's reference count is 1, mutations execute destructively in place without allocating new memory chunks, eliminating both garbage collection pauses and manual `malloc`/`free` errors.
@@ -35,7 +38,7 @@ The Nova project is governed by **Nova Systems** and developed under the [`@nova
 4. **Bare-Metal & Kernel Parity**:
    Hardware raw pointers (`*mut T`, `*const T`), address-of (`&val`), dereference (`*ptr`), inline assembly, and capability-gated concurrency (`iso`, `val`, `ref`).
 5. **Industrial Standard Library**:
-   33 high-performance standard modules including B-Trees, Bloom Filters, LRU Caches, Priority Queues, Linear Algebra Matrices, AES/SHA/ChaCha20 cryptography, Network Sockets, and Async Event Loops.
+   42 high-performance standard modules including B-Trees, Bloom Filters, LRU Caches, Priority Queues, Linear Algebra Matrices, Unicode 15.1 tables, AES/SHA/ChaCha20 cryptography, Network Sockets, and Async Event Loops.
 
 ---
 
