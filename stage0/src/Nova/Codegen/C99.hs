@@ -440,5 +440,6 @@ compileAndLinkC99 :: FilePath -> FilePath -> FilePath -> IO ()
 compileAndLinkC99 cSource runtimeDir outBinary = do
     let runtimeC = runtimeDir </> "nova_rt.c"
     let winLibs = if Info.os == "mingw32" then " -lws2_32" else ""
-    let cmd = "gcc -O3 -std=c99 -I\"" <> runtimeDir <> "\" \"" <> cSource <> "\" \"" <> runtimeC <> "\" -lpthread -lm" <> winLibs <> " -o \"" <> outBinary <> "\""
+    let normPath p = map (\c -> if c == '\\' then '/' else c) p
+    let cmd = "gcc -O3 -std=c99 -I\"" <> normPath runtimeDir <> "\" \"" <> normPath cSource <> "\" \"" <> normPath runtimeC <> "\" -lpthread -lm" <> winLibs <> " -o \"" <> normPath outBinary <> "\""
     callCommand cmd

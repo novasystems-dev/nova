@@ -131,7 +131,7 @@ run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"
 run_test "Benchmark suite execution" "./benchmarks/run_benchmarks.sh"
 
 # Cleanup generated test binaries
-rm -f *.out *.out.exe
+rm -rf tmp_test_dir *.out *.out.exe
 
 echo "=========================================================="
 echo "  TEST RESULTS: $PASSED PASSED, $FAILED FAILED"

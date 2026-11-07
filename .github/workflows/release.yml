@@ -55,9 +55,9 @@ jobs:
       - name: Set up Environment (Windows)
         if: runner.os == 'Windows'
         run: |
-          echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
+          choco install mingw z3 -y
+          echo "C:\tools\mingw64\bin" >> $GITHUB_PATH
           echo "C:\ProgramData\chocolatey\bin" >> $GITHUB_PATH
-          choco install z3 -y
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
@@ -121,14 +121,25 @@ jobs:
       - name: Run Verification Test Suite (59 Tests)
         run: |
           export PATH="$GITHUB_WORKSPACE/bin:$PATH"
+          export NOVAC_BIN="$GITHUB_WORKSPACE/bin/novac"
           chmod +x tests/run_all.sh
-          ./tests/run_all.sh
+          ./tests/run_all.sh 2>&1 | tee test_results.log
+
+      - name: Report Test Results Summary
+        if: always()
+        run: |
+          echo "### Test Execution Results (${{ matrix.target }})" >> $GITHUB_STEP_SUMMARY
+          if [ -f test_results.log ]; then
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 test_results.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Package Runtime & Full-Dev Distributions
         run: |
           VERSION="${{ github.ref_name }}"
           if [ -z "$VERSION" ] || [ "$VERSION" = "master" ]; then
-            VERSION="${{ github.event.inputs.tag_name || 'v0.1.1' }}"
+            VERSION="${{ github.event.inputs.tag_name || 'v0.2.3' }}"
           fi
           ./tools/package.sh "$VERSION" "${{ matrix.target }}"
 

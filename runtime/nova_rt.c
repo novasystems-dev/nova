@@ -445,7 +445,13 @@ bool nova_fs_mkdir_p(const char *path) {
     if (!path || strlen(path) == 0) return false;
     char tmp[1024];
 #ifdef _WIN32
-    snprintf(tmp, sizeof(tmp), "mkdir \"%s\" 2>nul", path);
+    char winPath[1024];
+    strncpy(winPath, path, sizeof(winPath) - 1);
+    winPath[sizeof(winPath) - 1] = '\0';
+    for (char *p = winPath; *p; p++) {
+        if (*p == '/') *p = '\\';
+    }
+    snprintf(tmp, sizeof(tmp), "mkdir \"%s\" 2>nul", winPath);
 #else
     snprintf(tmp, sizeof(tmp), "mkdir -p \"%s\" 2>/dev/null", path);
 #endif
@@ -453,24 +459,7 @@ bool nova_fs_mkdir_p(const char *path) {
 }
 
 const char *nova_fs_sha256(const char *path) {
-    if (!path) return "0000000000000000000000000000000000000000000000000000000000000000";
-    char cmd[1024];
-#ifdef __APPLE__
-    snprintf(cmd, sizeof(cmd), "shasum -a 256 \"%s\" 2>/dev/null | awk '{print $1}'", path);
-#else
-    snprintf(cmd, sizeof(cmd), "sha256sum \"%s\" 2>/dev/null | awk '{print $1}'", path);
-#endif
-    FILE *p = popen(cmd, "r");
-    if (!p) return "0000000000000000000000000000000000000000000000000000000000000000";
-    static char hash[65];
-    if (fgets(hash, sizeof(hash), p)) {
-        size_t len = strlen(hash);
-        if (len > 0 && hash[len - 1] == '\n') hash[len - 1] = '\0';
-        pclose(p);
-        return strdup(hash);
-    }
-    pclose(p);
-    return "0000000000000000000000000000000000000000000000000000000000000000";
+    return nova_crypto_sha256_file(path);
 }
 
 // ============================================================================
