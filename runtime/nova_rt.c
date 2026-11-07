@@ -234,12 +234,15 @@ void nova_print_newline(void) {
 }
 
 void nova_sleep_ms(int64_t ms) {
-    if (ms > 0) {
-        struct timespec ts;
-        ts.tv_sec = (time_t)(ms / 1000);
-        ts.tv_nsec = (long)((ms % 1000) * 1000000);
-        nanosleep(&ts, NULL);
-    }
+    if (ms <= 0) return;
+#ifdef _WIN32
+    Sleep((DWORD)ms);
+#else
+    struct timespec ts;
+    ts.tv_sec = (time_t)(ms / 1000);
+    ts.tv_nsec = (long)((ms % 1000) * 1000000);
+    nanosleep(&ts, NULL);
+#endif
 }
 
 void nova_clear_screen(void) {
@@ -282,7 +285,7 @@ int64_t nova_tcp_listen(int64_t port) {
     addr.sin_port = htons((uint16_t)port);
     
     if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        close(server_fd);
+        NOVA_CLOSE_SOCKET(server_fd);
         return -2;
     }
     
