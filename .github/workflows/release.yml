@@ -56,10 +56,25 @@ jobs:
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: false
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-z3
+          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-z3
           path-type: inherit
+
+      - name: Export Windows Toolchain to PATH
+        if: runner.os == 'Windows'
+        run: |
+          echo "C:\msys64\ucrt64\bin" >> $GITHUB_PATH
+          echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+
+      - name: Verify Toolchain in PATH (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "=== Windows PATH Verification ==="
+          which gcc
+          gcc --version
+          which z3
+          z3 --version
 
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
@@ -141,7 +156,7 @@ jobs:
         run: |
           VERSION="${{ github.ref_name }}"
           if [ -z "$VERSION" ] || [ "$VERSION" = "master" ]; then
-            VERSION="${{ github.event.inputs.tag_name || 'v0.2.3' }}"
+            VERSION="${{ github.event.inputs.tag_name || 'v0.2.5' }}"
           fi
           ./tools/package.sh "$VERSION" "${{ matrix.target }}"
 

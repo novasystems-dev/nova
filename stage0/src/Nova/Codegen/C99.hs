@@ -442,4 +442,5 @@ compileAndLinkC99 cSource runtimeDir outBinary = do
     let winLibs = if Info.os == "mingw32" then " -lws2_32" else ""
     let normPath p = map (\c -> if c == '\\' then '/' else c) p
     let cmd = "gcc -O3 -std=c99 -I\"" <> normPath runtimeDir <> "\" \"" <> normPath cSource <> "\" \"" <> normPath runtimeC <> "\" -lpthread -lm" <> winLibs <> " -o \"" <> normPath outBinary <> "\""
+    putStrLn $ "-> Compiling C99: " <> cmd
     callCommand cmd
