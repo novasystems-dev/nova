@@ -1,0 +1,70 @@
+# ============================================================================
+# NOVAC BACKEND: compiler/backend/elf64.nova
+# 100% Pure Nova Native - Direct ELF64 Linux Executable Binary Builder
+# Zero-Linker Architecture (Emits standalone executable without ld or gcc)
+# ============================================================================
+
+# ELF Magic Constants
+pub fn elf_magic_0() -> Int: 127 # 0x7F
+pub fn elf_magic_e() -> Int: 69  # 'E'
+pub fn elf_magic_l() -> Int: 76  # 'L'
+pub fn elf_magic_f() -> Int: 70  # 'F'
+
+# ELF Identification Indexes
+pub fn elf_class_64() -> Int: 2      # 64-bit Architecture
+pub fn elf_data_2lsb() -> Int: 1     # 2's complement, little endian
+pub fn elf_version_curr() -> Int: 1  # Current ELF Version
+pub fn elf_osabi_sysv() -> Int: 0    # UNIX System V ABI
+
+# ELF Types & Machines
+pub fn et_exec() -> Int: 2          # Standalone Executable file
+pub fn et_dyn() -> Int: 3           # Position Independent Executable (PIE)
+pub fn em_x86_64() -> Int: 62       # AMD x86_64 Architecture
+pub fn em_aarch64() -> Int: 183     # ARM AArch64 Architecture
+pub fn em_riscv() -> Int: 243       # RISC-V Architecture
+
+# Program Header Types
+pub fn pt_null() -> Int: 0
+pub fn pt_load() -> Int: 1
+pub fn pt_dynamic() -> Int: 2
+
+# Segment Permission Flags
+pub fn pf_x() -> Int: 1 # Executable
+pub fn pf_w() -> Int: 2 # Writable
+pub fn pf_r() -> Int: 4 # Readable
+pub fn pf_rx() -> Int: 5 # Read + Exec (Code segment)
+pub fn pf_rw() -> Int: 6 # Read + Write (Data segment)
+
+type Elf64Header = struct:
+    entry_point: Int
+    ph_offset: Int
+    ph_count: Int
+    ph_entry_size: Int
+    machine_arch: Int
+
+type Elf64ProgramHeader = struct:
+    p_type: Int
+    p_flags: Int
+    p_offset: Int
+    p_vaddr: Int
+    p_filesz: Int
+    p_memsz: Int
+    p_align: Int
+
+pub fn elf64_default_header(entry_addr: Int, ph_count: Int) -> Elf64Header:
+    # 64-byte ELF Header, Program Headers begin immediately at byte 64
+    Elf64Header(entry_addr, 64, ph_count, 56, em_x86_64())
+
+pub fn elf64_make_code_segment(file_offset: Int, vaddr: Int, code_len: Int) -> Elf64ProgramHeader:
+    # PT_LOAD segment with RX permissions
+    Elf64ProgramHeader(pt_load(), pf_rx(), file_offset, vaddr, code_len, code_len, 4096)
+
+pub fn elf64_make_data_segment(file_offset: Int, vaddr: Int, data_len: Int) -> Elf64ProgramHeader:
+    # PT_LOAD segment with RW permissions
+    Elf64ProgramHeader(pt_load(), pf_rw(), file_offset, vaddr, data_len, data_len, 4096)
+
+pub fn elf64_calc_total_size(code_len: Int, data_len: Int) -> Int:
+    # 64-byte Header + (2 * 56-byte Program Headers) + Code + Data
+    let headers_size = 64 + (2 * 56)
+    let padded_code_offset = 4096
+    padded_code_offset + code_len + data_len

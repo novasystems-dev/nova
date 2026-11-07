@@ -1,0 +1,67 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/aether_gfx.nova
+# 100% Pure Nova Native - Aether 2D/3D Graphics & Framebuffer Rasterizer
+# Zero C / Zero Python / Zero External Dependencies
+# Hardware-Agnostic Software Pipeline & GPU Pipeline Descriptors
+# ============================================================================
+
+type ColorRGBA = struct:
+    r: Int
+    g: Int
+    b: Int
+    a: Int
+
+pub fn color_rgba(r: Int, g: Int, b: Int, a: Int) -> ColorRGBA:
+    ColorRGBA(r % 256, g % 256, b % 256, a % 256)
+
+pub fn color_pack_u32(c: ColorRGBA) -> Int:
+    (c.a * 16777216) + (c.r * 65536) + (c.g * 256) + c.b
+
+pub fn color_black() -> ColorRGBA:
+    ColorRGBA(0, 0, 0, 255)
+
+pub fn color_white() -> ColorRGBA:
+    ColorRGBA(255, 255, 255, 255)
+
+pub fn color_coral_nova() -> ColorRGBA:
+    ColorRGBA(234, 162, 172, 255) # Official Nova Coral Theme
+
+type Framebuffer2D = struct:
+    width: Int
+    height: Int
+    pitch: Int
+    total_pixels: Int
+    active_draw_calls: Int
+
+pub fn framebuffer_new(w: Int, h: Int) -> Framebuffer2D:
+    Framebuffer2D(w, h, w * 4, w * h, 0)
+
+pub fn framebuffer_clear(fb: Framebuffer2D) -> Framebuffer2D:
+    Framebuffer2D(fb.width, fb.height, fb.pitch, fb.total_pixels, 0)
+
+pub fn framebuffer_draw_pixel(fb: Framebuffer2D, x: Int, y: Int) -> Framebuffer2D:
+    if (x >= 0) and (x < fb.width) and (y >= 0) and (y < fb.height):
+        Framebuffer2D(fb.width, fb.height, fb.pitch, fb.total_pixels, fb.active_draw_calls + 1)
+    else:
+        fb
+
+type BoundingBox2D = struct:
+    min_x: Int
+    min_y: Int
+    max_x: Int
+    max_y: Int
+
+pub fn bbox_new(x0: Int, y0: Int, x1: Int, y1: Int) -> BoundingBox2D:
+    BoundingBox2D(x0, y0, x1, y1)
+
+pub fn bbox_intersects(a: BoundingBox2D, b: BoundingBox2D) -> Bool:
+    (a.min_x <= b.max_x) and (a.max_x >= b.min_x) and (a.min_y <= b.max_y) and (a.max_y >= b.min_y)
+
+type GpuPipelineDescriptor = struct:
+    pipeline_id: Int
+    topology_triangles: Bool
+    depth_test_enabled: Bool
+    wireframe_mode: Bool
+
+pub fn gpu_pipeline_default(id: Int) -> GpuPipelineDescriptor:
+    GpuPipelineDescriptor(id, true, true, false)

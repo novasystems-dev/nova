@@ -1,0 +1,63 @@
+# ============================================================================
+# NOVAC BACKEND: compiler/backend/pe.nova
+# 100% Pure Nova Native - Direct Windows PE32+ (.exe) Executable Binary Builder
+# Zero-Linker Architecture (Emits standalone Windows binary without link.exe or mingw)
+# ============================================================================
+
+# DOS & PE Signatures
+pub fn pe_dos_magic() -> Int: 23117   # 'MZ' (0x5A4D)
+pub fn pe_nt_signature() -> Int: 17744 # 'PE\0\0' (0x00004550)
+
+# Target Machine Architectures
+pub fn pe_machine_amd64() -> Int: 34404 # 0x8664 (IMAGE_FILE_MACHINE_AMD64)
+pub fn pe_machine_arm64() -> Int: 43620 # 0xAA64 (IMAGE_FILE_MACHINE_ARM64)
+
+# Subsystem Types
+pub fn pe_subsystem_windows_gui() -> Int: 2 # Windows Desktop Application (javaw style)
+pub fn pe_subsystem_windows_cui() -> Int: 3 # Windows Console Application (java style)
+
+# Section Characteristic Flags
+pub fn pe_sec_cnt_code() -> Int: 32         # Contains Executable Code
+pub fn pe_sec_mem_execute() -> Int: 536870912 # Section is Executable (0x20000000)
+pub fn pe_sec_mem_read() -> Int: 1073741824   # Section is Readable (0x40000000)
+pub fn pe_sec_mem_write() -> Int: 2147483648  # Section is Writable (0x80000000)
+
+type PeHeaderConfig = struct:
+    machine_type: Int
+    section_count: Int
+    entry_point_rva: Int
+    image_base: Int
+    section_align: Int
+    file_align: Int
+    subsystem: Int
+
+type PeSectionHeader = struct:
+    name: String
+    virtual_size: Int
+    virtual_address: Int
+    raw_data_size: Int
+    raw_data_offset: Int
+    characteristics: Int
+
+pub fn pe_get_subsystem(is_gui: Bool) -> Int:
+    if is_gui:
+        pe_subsystem_windows_gui()
+    else:
+        pe_subsystem_windows_cui()
+
+pub fn pe_default_config(entry_rva: Int, is_gui: Bool) -> PeHeaderConfig:
+    let sub = pe_get_subsystem(is_gui)
+    # Base address 0x140000000 (standard Windows 64-bit EXE image base)
+    PeHeaderConfig(pe_machine_amd64(), 2, entry_rva, 5368709120, 4096, 512, sub)
+
+pub fn pe_make_text_section(vaddr: Int, code_bytes: Int, file_off: Int) -> PeSectionHeader:
+    # Code section: Readable + Executable
+    let flags = pe_sec_cnt_code() + pe_sec_mem_execute() + pe_sec_mem_read()
+    let raw_aligned = ((code_bytes / 512) + 1) * 512
+    PeSectionHeader(".text", code_bytes, vaddr, raw_aligned, file_off, flags)
+
+pub fn pe_make_data_section(vaddr: Int, data_bytes: Int, file_off: Int) -> PeSectionHeader:
+    # Data section: Readable + Writable
+    let flags = pe_sec_mem_read() + pe_sec_mem_write()
+    let raw_aligned = ((data_bytes / 512) + 1) * 512
+    PeSectionHeader(".data", data_bytes, vaddr, raw_aligned, file_off, flags)

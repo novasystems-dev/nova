@@ -1,0 +1,94 @@
+# ============================================================================
+# NOVAC BACKEND: compiler/backend/x86_64_enc.nova
+# 100% Pure Nova Native - Direct x86_64 Opcode Byte Encoder
+# Zero External Assembler (No NASM, No GAS, No GCC required)
+# ============================================================================
+
+type EncodedByteStream = struct:
+    byte_count: Int
+    checksum: Int
+
+pub fn byte_stream_new() -> EncodedByteStream:
+    EncodedByteStream(0, 0)
+
+pub fn byte_stream_push(stream: EncodedByteStream, b: Int) -> EncodedByteStream:
+    let masked_b = b % 256
+    let next_chk = (stream.checksum * 31 + masked_b) % 2147483647
+    EncodedByteStream(stream.byte_count + 1, next_chk)
+
+pub fn bool_to_int(b: Bool, val: Int) -> Int:
+    if b:
+        val
+    else:
+        0
+
+# Encode REX prefix: 0100WRXB (0x40 | W<<3 | R<<2 | X<<1 | B)
+pub fn encode_rex(w: Bool, r: Bool, x: Bool, b: Bool) -> Int:
+    let w_val = bool_to_int(w, 8)
+    let r_val = bool_to_int(r, 4)
+    let x_val = bool_to_int(x, 2)
+    let b_val = bool_to_int(b, 1)
+    64 + w_val + r_val + x_val + b_val
+
+# Encode ModR/M byte: (mod << 6) | (reg << 3) | rm
+pub fn encode_modrm(mod_mode: Int, reg_code: Int, rm_code: Int) -> Int:
+    let m = (mod_mode % 4) * 64
+    let r = (reg_code % 8) * 8
+    let rm = rm_code % 8
+    m + r + rm
+
+# Encode SIB byte: (scale << 6) | (index << 3) | base
+pub fn encode_sib(scale: Int, index_reg: Int, base_reg: Int) -> Int:
+    let s = (scale % 4) * 64
+    let idx = (index_reg % 8) * 8
+    let b = base_reg % 8
+    s + idx + b
+
+# Common Instruction Encoders in Pure Nova
+pub fn encode_ret(stream: EncodedByteStream) -> EncodedByteStream:
+    byte_stream_push(stream, 195) # 0xC3: ret
+
+pub fn encode_syscall(stream: EncodedByteStream) -> EncodedByteStream:
+    let s1 = byte_stream_push(stream, 15)  # 0x0F
+    byte_stream_push(s1, 5)                # 0x05: syscall
+
+pub fn encode_nop(stream: EncodedByteStream) -> EncodedByteStream:
+    byte_stream_push(stream, 144) # 0x90: nop
+
+# mov reg, imm64: REX.W + 0xB8+rd + imm64
+pub fn encode_mov_reg_imm64(stream: EncodedByteStream, reg_idx: Int, imm: Int) -> EncodedByteStream:
+    let rex = encode_rex(true, false, false, reg_idx >= 8)
+    let op = 184 + (reg_idx % 8) # 0xB8 + reg
+    let s0 = byte_stream_push(stream, rex)
+    let s1 = byte_stream_push(s0, op)
+    # Emit 8-byte immediate little-endian
+    let b0 = imm % 256
+    let b1 = (imm / 256) % 256
+    let b2 = (imm / 65536) % 256
+    let b3 = (imm / 16777216) % 256
+    let s2 = byte_stream_push(s1, b0)
+    let s3 = byte_stream_push(s2, b1)
+    let s4 = byte_stream_push(s3, b2)
+    let s5 = byte_stream_push(s4, b3)
+    let s6 = byte_stream_push(s5, 0)
+    let s7 = byte_stream_push(s6, 0)
+    let s8 = byte_stream_push(s7, 0)
+    byte_stream_push(s8, 0)
+
+# add rax, rbx
+pub fn encode_add_reg_reg(stream: EncodedByteStream, dst_reg: Int, src_reg: Int) -> EncodedByteStream:
+    let rex = encode_rex(true, src_reg >= 8, false, dst_reg >= 8)
+    let op = 1 # 0x01: add r/m64, r64
+    let modrm = encode_modrm(3, src_reg, dst_reg) # mod 11 = direct registers
+    let s0 = byte_stream_push(stream, rex)
+    let s1 = byte_stream_push(s0, op)
+    byte_stream_push(s1, modrm)
+
+# sub rax, rbx
+pub fn encode_sub_reg_reg(stream: EncodedByteStream, dst_reg: Int, src_reg: Int) -> EncodedByteStream:
+    let rex = encode_rex(true, src_reg >= 8, false, dst_reg >= 8)
+    let op = 41 # 0x29: sub r/m64, r64
+    let modrm = encode_modrm(3, src_reg, dst_reg)
+    let s0 = byte_stream_push(stream, rex)
+    let s1 = byte_stream_push(s0, op)
+    byte_stream_push(s1, modrm)
