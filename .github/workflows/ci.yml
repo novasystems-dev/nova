@@ -20,12 +20,13 @@ jobs:
         sudo apt-get install -y gcc make tree libgmp-dev z3
         chmod +x bin/* tests/*.sh tests/benchmarks/*.sh tests/tools/*/* tests/tools/*.sh 2>/dev/null || true
 
-    - name: Test C99 Genesis Standalone Bootstrap
+    - name: Bootstrap Native Novac Compiler (C99 Genesis)
       run: |
         echo "=== Compiling novac from Genesis Snapshot C99 (Zero Haskell/Cabal required) ==="
-        gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm -o bin/novac-bootstrap-test
-        file bin/novac-bootstrap-test
-        ./bin/novac-bootstrap-test --version
+        mkdir -p bin
+        gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm -o bin/novac
+        chmod +x bin/novac
+        ./bin/novac --version
 
     - name: Run Full Test Suite (207 Industrial Tests)
       run: |

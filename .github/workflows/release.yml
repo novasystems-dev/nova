@@ -80,7 +80,7 @@ jobs:
           z3 --version
           echo "=== Testing MinGW-w64 GCC linking with runtime/nova_rt.c ==="
           printf '#include "nova_rt.h"\nint main(int argc, char** argv){ nova_set_args(argc, argv); return 0; }\n' > test_link.c
-          if ! gcc -O3 -std=c99 -I./runtime test_link.c runtime/nova_rt.c -lpthread -lm -lws2_32 -o test_link.exe 2>&1 | tee link.log; then
+          if ! gcc -O3 -std=c99 -I./runtime test_link.c runtime/nova_rt.c -lpthread -lm -lws2_32 -lgdi32 -luser32 -o test_link.exe 2>&1 | tee link.log; then
             ERR=$(head -n 25 link.log | tr '\r\n' ' ' | sed 's/"//g')
             echo "::error title=GCC Link Error::$ERR"
             exit 1

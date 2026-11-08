@@ -6,13 +6,14 @@ mkdir -p /tmp bin 2>/dev/null || true
 
 WIN_LIBS=""
 if [[ "${OSTYPE:-}" == "msys"* ]] || [[ "${OSTYPE:-}" == "cygwin"* ]] || [[ "$(uname -s)" == *"MINGW"* ]]; then
-    WIN_LIBS="-lws2_32"
+    WIN_LIBS="-lws2_32 -lgdi32 -luser32"
 fi
 
-if [ ! -f bin/novac ] && [ ! -f bin/novac.exe ]; then
+if [ ! -f bin/novac ] && [ ! -f bin/novac.exe ] || ! (./bin/novac --version 2>/dev/null || ./bin/novac.exe --version 2>/dev/null) >/dev/null 2>&1; then
     echo "-> Bootstrapping native novac compiler from C99 genesis snapshot..."
     gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o bin/novac
     if [ -f bin/novac.exe ]; then cp -f bin/novac.exe bin/novac; fi
+    chmod +x bin/novac* 2>/dev/null || true
 fi
 
 # Ensure test developer tools are available in bin/

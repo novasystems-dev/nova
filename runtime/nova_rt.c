@@ -1036,6 +1036,23 @@ uint64_t nova_fast_hash64(const void *data, size_t len) {
 // ============================================================================
 
 #ifdef _WIN32
+typedef HBRUSH (WINAPI *pfn_CreateSolidBrush)(COLORREF);
+typedef BOOL (WINAPI *pfn_DeleteObject)(HGDIOBJ);
+
+static pfn_CreateSolidBrush g_pfnCreateSolidBrush = NULL;
+static pfn_DeleteObject g_pfnDeleteObject = NULL;
+static bool g_gdi_init = false;
+
+static void nova_gui_init_gdi(void) {
+    if (g_gdi_init) return;
+    HMODULE hGdi = LoadLibraryA("gdi32.dll");
+    if (hGdi) {
+        g_pfnCreateSolidBrush = (pfn_CreateSolidBrush)GetProcAddress(hGdi, "CreateSolidBrush");
+        g_pfnDeleteObject = (pfn_DeleteObject)GetProcAddress(hGdi, "DeleteObject");
+    }
+    g_gdi_init = true;
+}
+
 static LRESULT CALLBACK NovaWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
         case WM_DESTROY:
@@ -1096,13 +1113,18 @@ bool nova_gui_window_draw_rect(int64_t win_handle, int64_t x, int64_t y, int64_t
     HWND hwnd = (HWND)(intptr_t)win_handle;
     HDC hdc = GetDC(hwnd);
     if (!hdc) return false;
+    nova_gui_init_gdi();
     int r = (color_rgba >> 16) & 0xFF;
     int g = (color_rgba >> 8) & 0xFF;
     int b = color_rgba & 0xFF;
-    HBRUSH brush = CreateSolidBrush(RGB(r, g, b));
-    RECT rect = {(LONG)x, (LONG)y, (LONG)(x + w), (LONG)(y + h)};
-    FillRect(hdc, &rect, brush);
-    DeleteObject(brush);
+    if (g_pfnCreateSolidBrush) {
+        HBRUSH brush = g_pfnCreateSolidBrush(RGB(r, g, b));
+        RECT rect = {(LONG)x, (LONG)y, (LONG)(x + w), (LONG)(y + h)};
+        FillRect(hdc, &rect, brush);
+        if (g_pfnDeleteObject) {
+            g_pfnDeleteObject(brush);
+        }
+    }
     ReleaseDC(hwnd, hdc);
     return true;
 }
