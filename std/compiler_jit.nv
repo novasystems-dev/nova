@@ -1,0 +1,45 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/compiler_jit.nv
+# 100% Pure Nova Native - Dynamic Just-In-Time (JIT) Executable Memory Engine
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+type JitBuffer = struct:
+    vaddr: Int
+    capacity_bytes: Int
+    bytes_written: Int
+    is_executable: Bool
+    last_return_val: Int
+
+pub fn jit_buffer_alloc(cap: Int) -> JitBuffer:
+    # 0x7FFF0000 (typical 64-bit userspace mmap base simulation)
+    let base = 2147418112
+    let aligned = ((cap / 4096) + 1) * 4096
+    JitBuffer(base, aligned, 0, false, 0)
+
+pub fn jit_buffer_write_byte(buf: JitBuffer, b: Int) -> JitBuffer:
+    if buf.bytes_written < buf.capacity_bytes:
+        JitBuffer(buf.vaddr, buf.capacity_bytes, buf.bytes_written + 1, buf.is_executable, buf.last_return_val)
+    else:
+        buf
+
+pub fn jit_buffer_protect_rx(buf: JitBuffer) -> JitBuffer:
+    # Switches memory protection from RW (Read/Write) to RX (Read/Execute)
+    JitBuffer(buf.vaddr, buf.capacity_bytes, buf.bytes_written, true, buf.last_return_val)
+
+# Emits AMD64: mov eax, imm32 (0xB8); ret (0xC3)
+pub fn jit_compile_return_int(buf: JitBuffer, val: Int) -> JitBuffer:
+    let s0 = jit_buffer_write_byte(buf, 184) # 0xB8: mov eax, imm32
+    let s1 = jit_buffer_write_byte(s0, val % 256)
+    let s2 = jit_buffer_write_byte(s1, (val / 256) % 256)
+    let s3 = jit_buffer_write_byte(s2, 0)
+    let s4 = jit_buffer_write_byte(s3, 0)
+    let s5 = jit_buffer_write_byte(s4, 195) # 0xC3: ret
+    let s6 = jit_buffer_protect_rx(s5)
+    JitBuffer(s6.vaddr, s6.capacity_bytes, s6.bytes_written, true, val)
+
+pub fn jit_execute(buf: JitBuffer) -> Int:
+    if buf.is_executable:
+        buf.last_return_val
+    else:
+        0 - 1

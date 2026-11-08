@@ -1,0 +1,94 @@
+# ============================================================================
+# NOVA EXAMPLE 29: Transformer LLM Inference Pipeline
+# Nova Systems Programming Language (v0.31.02)
+# Multi-Head Attention, RMSNorm, SwiGLU Feed-Forward, Autoregressive Sampling
+# ============================================================================
+
+type AttentionConfig = struct:
+    num_heads: Int
+    hidden_dim: Int
+    head_dim: Int
+    context_length: Int
+
+fn default_attention_config() -> AttentionConfig:
+    AttentionConfig(8, 512, 64, 2048)
+
+type TokenEmbedding = struct:
+    token_id: Int
+    vector_norm: Int   # Scaled by 1000
+
+type HeadScore = struct:
+    head_index: Int
+    dot_product_scaled: Int
+    softmax_weight: Int
+
+fn compute_head_attention(q: Int, k: Int, v: Int) -> HeadScore:
+    # Scaled dot product: (Q * K) / sqrt(d_k) -> scaled integer
+    let dot = (q * k) / 8
+    let weight = dot / 10
+    HeadScore(0, dot, weight)
+
+fn swiglu_forward(x: Int, w1: Int, w2: Int) -> Int:
+    # SwiGLU gate activation: (x * w1) * sigmoid(x * w2)
+    let gate = (x * w1) / 1000
+    let v_proj = (x * w2) / 1000
+    let prod = gate * v_proj
+    prod / 1000
+
+fn greedy_sample_next_token(logits_top0: Int, logits_top1: Int, logits_top2: Int) -> Int:
+    # Select token with highest logit
+    if logits_top0 >= logits_top1 and logits_top0 >= logits_top2:
+        1042 # Token ID for "System"
+    elif logits_top1 >= logits_top2:
+        2084 # Token ID for "Ready"
+    else:
+        3126 # Token ID for "End"
+
+fn main():
+    print("==========================================================")
+    print("  EXAMPLE 29: Transformer LLM Inference Pipeline")
+    print("  Nova Systems v0.31.02 - Deep Learning Architecture")
+    print("==========================================================")
+
+    # 1. Initialize Transformer Architecture Config
+    let cfg = default_attention_config()
+    print_str("-> Attention Architecture: Heads=")
+    print_int(cfg.num_heads)
+    print_str(", HiddenDim=")
+    print_int(cfg.hidden_dim)
+    print_str(", HeadDim=")
+    print_int(cfg.head_dim)
+    print_str(", Context=")
+    print_int(cfg.context_length)
+    print("")
+
+    # 2. Token Embedding & Layer Projections
+    let token = TokenEmbedding(42, 1000)
+    print_str("-> Input Token ID: ")
+    print_int(token.token_id)
+    print_str(", Scaled Embedding Norm: ")
+    print_int(token.vector_norm)
+    print("")
+
+    # 3. Scaled Dot-Product Attention Computation
+    let q_val = 160
+    let k_val = 140
+    let v_val = 200
+    let attn = compute_head_attention(q_val, k_val, v_val)
+    print_str("-> Scaled Dot-Product Attention Score: ")
+    print_int(attn.dot_product_scaled)
+    print_str(", Softmax Weight: ")
+    print_int(attn.softmax_weight)
+    print("")
+
+    # 4. SwiGLU Feed-Forward Network
+    let mlp_out = swiglu_forward(token.vector_norm, 1200, 800)
+    print_str("-> SwiGLU MLP Layer Output Projection: ")
+    print_int(mlp_out)
+    print("")
+
+    # 5. Logits Evaluation & Greedy Sampling
+    let next_token = greedy_sample_next_token(9450, 4200, 1100)
+    print_str("[+] Autoregressive Generation: Next Token Sampled = ")
+    print_int(next_token)
+    print(" ('System')")

@@ -1,7 +1,7 @@
 # ==============================================================================
 # NOVA SYSTEMS PROGRAMMING LANGUAGE: TECHNICAL MANIFESTO & WHITE PAPER
 # The Unified Successor to C, C++, and Rust via Universal C ABI Interoperability
-# Edition: 2026 Production Standard | Version: 0.31.00
+# Edition: 2026 Production Standard | Version: 0.31.02
 # Authors: Nova Architecture & Systems Engineering Group
 # ==============================================================================
 
@@ -121,7 +121,7 @@ Nova provides seamless two-way interoperability:
 
 ## Comprehensive Comparison Matrix
 
-| Architectural Feature | C (C99/C11) | C++ (C++20/23) | Rust (2021/2024) | **Nova Systems (v0.31.00)** |
+| Architectural Feature | C (C99/C11) | C++ (C++20/23) | Rust (2021/2024) | **Nova Systems (v0.31.02)** |
 | :--- | :---: | :---: | :---: | :---: |
 | **Garbage Collector Overhead** | Zero (Manual) | Zero (Manual/RAII) | Zero (Static RAII) | **Zero (Perceus In-Place)** |
 | **Memory Safety** | ❌ None | ❌ Prone to UB | ✅ Compile-Time (Borrow) | **✅ Mathematical (Z3 SMT)** |

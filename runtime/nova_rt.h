@@ -173,6 +173,17 @@ bool nova_gui_window_poll(int64_t win_handle);
 bool nova_gui_window_draw_rect(int64_t win_handle, int64_t x, int64_t y, int64_t w, int64_t h, int64_t color_rgba);
 bool nova_gui_alert(const char *title, const char *message);
 bool nova_gui_window_close(int64_t win_handle);
+int64_t nova_gui_get_key(int64_t win_handle);
+bool nova_gui_is_key_down(int64_t win_handle, int64_t scancode);
+
+// ============================================================================
+// SUPER-RUNTIME: REAL-TIME NATIVE AUDIO ENGINE (std/audio)
+// ============================================================================
+bool nova_audio_init(int64_t sample_rate);
+bool nova_audio_play_sfx(int64_t sound_id);
+bool nova_audio_play_music_tick(int64_t step);
+bool nova_audio_queue_pcm(const int16_t *samples, int64_t num_samples);
+void nova_audio_close(void);
 
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);

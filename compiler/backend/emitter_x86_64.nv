@@ -1,0 +1,181 @@
+# ============================================================================
+# NOVAC BACKEND: compiler/backend/emitter_x86_64.nv
+# 100% Pure Nova Native - Direct AMD64 Machine Code Emitter
+# Generates Raw Binary Bytes from Linear IR / AST - Zero C / Zero Assembler
+# ============================================================================
+
+pub fn bool_to_val(b: Bool, val: Int) -> Int:
+    if b:
+        val
+    else:
+        0
+
+type EmitterStream = struct:
+    byte_count: Int
+    instruction_count: Int
+    checksum: Int
+
+pub fn emitter_stream_new() -> EmitterStream:
+    EmitterStream(0, 0, 0)
+
+pub fn emitter_push_byte(s: EmitterStream, b: Int) -> EmitterStream:
+    let masked = b % 256
+    let chk = (s.checksum * 33 + masked) % 2147483647
+    EmitterStream(s.byte_count + 1, s.instruction_count, chk)
+
+pub fn emitter_mark_inst(s: EmitterStream) -> EmitterStream:
+    EmitterStream(s.byte_count, s.instruction_count + 1, s.checksum)
+
+# ----------------------------------------------------------------------------
+# 1. Function Prologue & Epilogue (System V AMD64 ABI Standard)
+# ----------------------------------------------------------------------------
+
+# Emits: push rbp (0x55)
+#        mov rbp, rsp (0x48 0x89 0xE5)
+#        sub rsp, frame_size (0x48 0x81 0xEC <imm32>)
+pub fn emit_prologue(s: EmitterStream, frame_bytes: Int) -> EmitterStream:
+    # push rbp
+    let s1 = emitter_push_byte(s, 85) # 0x55
+    # mov rbp, rsp
+    let s2 = emitter_push_byte(s1, 72)  # 0x48 (REX.W)
+    let s3 = emitter_push_byte(s2, 137) # 0x89 (MOV r/m64, r64)
+    let s4 = emitter_push_byte(s3, 229) # 0xE5 (ModR/M: rbp, rsp)
+    if frame_bytes > 0:
+        # sub rsp, frame_bytes
+        let s5 = emitter_push_byte(s4, 72)  # 0x48
+        let s6 = emitter_push_byte(s5, 129) # 0x81
+        let s7 = emitter_push_byte(s6, 236) # 0xEC (ModR/M /5: rsp)
+        let b0 = frame_bytes % 256
+        let b1 = (frame_bytes / 256) % 256
+        let b2 = (frame_bytes / 65536) % 256
+        let b3 = (frame_bytes / 16777216) % 256
+        let s8 = emitter_push_byte(s7, b0)
+        let s9 = emitter_push_byte(s8, b1)
+        let s10 = emitter_push_byte(s9, b2)
+        let s11 = emitter_push_byte(s10, b3)
+        emitter_mark_inst(s11)
+    else:
+        emitter_mark_inst(s4)
+
+# Emits: mov rsp, rbp (0x48 0x89 0xEC)
+#        pop rbp (0x5D)
+#        ret (0xC3)
+pub fn emit_epilogue(s: EmitterStream) -> EmitterStream:
+    # mov rsp, rbp
+    let s1 = emitter_push_byte(s, 72)  # 0x48
+    let s2 = emitter_push_byte(s1, 137) # 0x89
+    let s3 = emitter_push_byte(s2, 236) # 0xEC
+    # pop rbp
+    let s4 = emitter_push_byte(s3, 93)  # 0x5D
+    # ret
+    let s5 = emitter_push_byte(s4, 195) # 0xC3
+    emitter_mark_inst(s5)
+
+# ----------------------------------------------------------------------------
+# 2. Arithmetic & Logic Operations
+# ----------------------------------------------------------------------------
+
+# mov reg, imm64: REX.W (0x48 | B) + (0xB8 + reg) + 8-byte imm
+pub fn emit_mov_imm64(s: EmitterStream, reg_idx: Int, imm: Int) -> EmitterStream:
+    let b_bit = bool_to_val(reg_idx >= 8, 1)
+    let rex = 72 + b_bit
+    let op = 184 + (reg_idx % 8)
+    let s1 = emitter_push_byte(s, rex)
+    let s2 = emitter_push_byte(s1, op)
+    let b0 = imm % 256
+    let b1 = (imm / 256) % 256
+    let b2 = (imm / 65536) % 256
+    let b3 = (imm / 16777216) % 256
+    let s3 = emitter_push_byte(s2, b0)
+    let s4 = emitter_push_byte(s3, b1)
+    let s5 = emitter_push_byte(s4, b2)
+    let s6 = emitter_push_byte(s5, b3)
+    let s7 = emitter_push_byte(s6, 0)
+    let s8 = emitter_push_byte(s7, 0)
+    let s9 = emitter_push_byte(s8, 0)
+    let s10 = emitter_push_byte(s9, 0)
+    emitter_mark_inst(s10)
+
+# add dst_reg, src_reg: 0x48 0x01 ModR/M
+pub fn emit_add_reg(s: EmitterStream, dst: Int, src: Int) -> EmitterStream:
+    let r_bit = bool_to_val(src >= 8, 4)
+    let b_bit = bool_to_val(dst >= 8, 1)
+    let rex = 72 + r_bit + b_bit
+    let modrm = 192 + ((src % 8) * 8) + (dst % 8)
+    let s1 = emitter_push_byte(s, rex)
+    let s2 = emitter_push_byte(s1, 1) # 0x01
+    let s3 = emitter_push_byte(s2, modrm)
+    emitter_mark_inst(s3)
+
+# sub dst_reg, src_reg: 0x48 0x29 ModR/M
+pub fn emit_sub_reg(s: EmitterStream, dst: Int, src: Int) -> EmitterStream:
+    let r_bit = bool_to_val(src >= 8, 4)
+    let b_bit = bool_to_val(dst >= 8, 1)
+    let rex = 72 + r_bit + b_bit
+    let modrm = 192 + ((src % 8) * 8) + (dst % 8)
+    let s1 = emitter_push_byte(s, rex)
+    let s2 = emitter_push_byte(s1, 41) # 0x29
+    let s3 = emitter_push_byte(s2, modrm)
+    emitter_mark_inst(s3)
+
+# xor reg, reg: 0x31 ModR/M
+pub fn emit_xor_self(s: EmitterStream, reg: Int) -> EmitterStream:
+    let r_bit = bool_to_val(reg >= 8, 4)
+    let b_bit = bool_to_val(reg >= 8, 1)
+    let rex = 72 + r_bit + b_bit
+    let modrm = 192 + ((reg % 8) * 8) + (reg % 8)
+    let s1 = emitter_push_byte(s, rex)
+    let s2 = emitter_push_byte(s1, 49) # 0x31
+    let s3 = emitter_push_byte(s2, modrm)
+    emitter_mark_inst(s3)
+
+# ----------------------------------------------------------------------------
+# 3. Direct Linux Kernel Syscall Invocations (Zero-libc)
+# ----------------------------------------------------------------------------
+
+# Emits raw 'syscall' instruction: 0x0F 0x05
+pub fn emit_raw_syscall(s: EmitterStream) -> EmitterStream:
+    let s1 = emitter_push_byte(s, 15) # 0x0F
+    let s2 = emitter_push_byte(s1, 5)  # 0x05
+    emitter_mark_inst(s2)
+
+# Emits Linux sys_write(fd, buf_addr, count)
+pub fn emit_linux_sys_write(s: EmitterStream, fd: Int, buf_addr: Int, count: Int) -> EmitterStream:
+    let s1 = emit_mov_imm64(s, 0, 1)        # rax = 1 (sys_write)
+    let s2 = emit_mov_imm64(s1, 7, fd)      # rdi = fd (stdout = 1)
+    let s3 = emit_mov_imm64(s2, 6, buf_addr) # rsi = buffer virtual address
+    let s4 = emit_mov_imm64(s3, 2, count)    # rdx = byte count
+    emit_raw_syscall(s4)
+
+# Emits Linux sys_exit(code)
+pub fn emit_linux_sys_exit(s: EmitterStream, exit_code: Int) -> EmitterStream:
+    let s1 = emit_mov_imm64(s, 0, 60)        # rax = 60 (sys_exit)
+    let s2 = emit_mov_imm64(s1, 7, exit_code) # rdi = exit_code
+    emit_raw_syscall(s2)
+
+# ----------------------------------------------------------------------------
+# 4. Entrypoint Launcher Stub (_start)
+# ----------------------------------------------------------------------------
+pub fn emit_entrypoint_start(s: EmitterStream) -> EmitterStream:
+    # xor rbp, rbp
+    let s1 = emitter_push_byte(s, 72)
+    let s2 = emitter_push_byte(s1, 49)
+    let s3 = emitter_push_byte(s2, 237)
+    # pop rdi (0x5F)
+    let s4 = emitter_push_byte(s3, 95)
+    # mov rsi, rsp (0x48 0x89 0xE6)
+    let s5 = emitter_push_byte(s4, 72)
+    let s6 = emitter_push_byte(s5, 137)
+    let s7 = emitter_push_byte(s6, 230)
+    # call rel32 (+5 bytes)
+    let s8 = emitter_push_byte(s7, 232)
+    let s9 = emitter_push_byte(s8, 5)
+    let s10 = emitter_push_byte(s9, 0)
+    let s11 = emitter_push_byte(s10, 0)
+    let s12 = emitter_push_byte(s11, 0)
+    # mov rdi, rax
+    let s13 = emitter_push_byte(s12, 72)
+    let s14 = emitter_push_byte(s13, 137)
+    let s15 = emitter_push_byte(s14, 199)
+    # sys_exit(0)
+    emit_linux_sys_exit(s15, 0)

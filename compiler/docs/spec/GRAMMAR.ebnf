@@ -1,6 +1,6 @@
 (* ===========================================================================
    NOVA FORMAL GRAMMAR SPECIFICATION (EBNF)
-   Version: 0.31.00
+   Version: 0.31.02
    Indentation-sensitive grammar: INDENT, DEDENT, NEWLINE are emitted by Lexer.
    =========================================================================== *)
 

@@ -176,7 +176,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             // Progress Bar & Status
             g_hProgressBar = CreateWindowA(PROGRESS_CLASSA, NULL, WS_VISIBLE | WS_CHILD | PBS_SMOOTH,
                                            30, 275, 580, 22, hwnd, (HMENU)IDC_PROGRESS_BAR, NULL, NULL);
-            g_hStatusLabel = CreateWindowA("STATIC", "Ready to install Nova Systems Toolchain v0.31.00",
+            g_hStatusLabel = CreateWindowA("STATIC", "Ready to install Nova Systems Toolchain v0.31.02",
                                            WS_VISIBLE | WS_CHILD,
                                            30, 305, 580, 20, hwnd, (HMENU)IDC_STATUS_LABEL, NULL, NULL);
 
@@ -253,7 +253,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             // Banner Subtitle
             SetTextColor(hdc, RGB(140, 150, 180));
             SelectObject(hdc, g_hNormalFont);
-            TextOutA(hdc, 32, 45, "Genesis v0.31.00 - Industrial-Grade Type-Safe Systems Language", 62);
+            TextOutA(hdc, 32, 45, "Genesis v0.31.02 - Industrial-Grade Type-Safe Systems Language", 62);
 
             EndPaint(hwnd, &ps);
             return 0;
@@ -291,7 +291,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     int posY = (screenH - height) / 2;
 
     g_hwndMain = CreateWindowExA(
-        0, "NovaSetupWizardClass", "Nova Systems Toolchain Setup (v0.31.00)",
+        0, "NovaSetupWizardClass", "Nova Systems Toolchain Setup (v0.31.02)",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         posX, posY, width, height, NULL, NULL, hInstance, NULL
     );

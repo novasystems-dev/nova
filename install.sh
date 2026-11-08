@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==========================================================
-# Nova Distribution Universal Installer (v0.31.00)
+# Nova Distribution Universal Installer (v0.31.02)
 # Supports both:
 # 1. Online one-line install:
 #    curl -fsSL https://raw.githubusercontent.com/novasystems-dev/nova/master/install.sh | bash
@@ -57,7 +57,7 @@ else
     esac
 
     # Resolve latest release tag
-    TAG="v0.31.00"
+    TAG="v0.31.02"
     if command -v curl >/dev/null 2>&1; then
         LATEST_TAG=$(curl -sI https://github.com/novasystems-dev/nova/releases/latest 2>/dev/null | grep -i "^location:" | awk -F'/' '{print $NF}' | tr -d '\r\n' || true)
         if [ -n "$LATEST_TAG" ]; then TAG="$LATEST_TAG"; fi

@@ -1,0 +1,69 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/distributed_raft.nv
+# 100% Pure Nova Native - Raft Distributed Consensus Protocol Engine
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+pub fn role_follower()  -> Int: 0
+pub fn role_candidate() -> Int: 1
+pub fn role_leader()    -> Int: 2
+
+type RaftNode = struct:
+    node_id: Int
+    role: Int
+    current_term: Int
+    voted_for: Int
+    votes_received: Int
+    commit_index: Int
+    last_applied: Int
+    peer_count: Int
+
+pub fn raft_node_init(id: Int, peers: Int) -> RaftNode:
+    RaftNode(id, role_follower(), 0, 0 - 1, 0, 0, 0, peers)
+
+pub fn raft_start_election(node: RaftNode) -> RaftNode:
+    let next_term = node.current_term + 1
+    # Candidate votes for itself
+    RaftNode(node.node_id, role_candidate(), next_term, node.node_id, 1,
+             node.commit_index, node.last_applied, node.peer_count)
+
+type RaftVoteResponse = struct:
+    term: Int
+    vote_granted: Bool
+    responder_id: Int
+
+pub fn raft_handle_vote_request(node: RaftNode, candidate_id: Int, cand_term: Int) -> RaftVoteResponse:
+    if cand_term > node.current_term and (node.voted_for == 0 - 1 or node.voted_for == candidate_id):
+        RaftVoteResponse(cand_term, true, node.node_id)
+    else:
+        RaftVoteResponse(node.current_term, false, node.node_id)
+
+pub fn raft_receive_vote(node: RaftNode) -> RaftNode:
+    let votes = node.votes_received + 1
+    let total_nodes = node.peer_count + 1
+    let quorum = (total_nodes / 2) + 1
+    if votes >= quorum and node.role == role_candidate():
+        RaftNode(node.node_id, role_leader(), node.current_term, node.voted_for,
+                 votes, node.commit_index, node.last_applied, node.peer_count)
+    else:
+        RaftNode(node.node_id, node.role, node.current_term, node.voted_for,
+                 votes, node.commit_index, node.last_applied, node.peer_count)
+
+type RaftLogEntry = struct:
+    index: Int
+    term: Int
+    command_hash: Int
+    is_committed: Bool
+
+pub fn raft_create_entry(index: Int, term: Int, cmd: Int) -> RaftLogEntry:
+    RaftLogEntry(index, term, cmd, false)
+
+pub fn raft_commit_entry(entry: RaftLogEntry) -> RaftLogEntry:
+    RaftLogEntry(entry.index, entry.term, entry.command_hash, true)
+
+pub fn raft_advance_commit(node: RaftNode, new_commit: Int) -> RaftNode:
+    if new_commit > node.commit_index:
+        RaftNode(node.node_id, node.role, node.current_term, node.voted_for,
+                 node.votes_received, new_commit, node.commit_index, node.peer_count)
+    else:
+        node

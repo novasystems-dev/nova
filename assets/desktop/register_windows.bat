@@ -1,6 +1,6 @@
 @echo off
 REM Nova Runtime Desktop Integration Script (Windows)
-REM Part of Nova Programming Language v0.31.00
+REM Part of Nova Programming Language v0.31.02
 echo ==========================================================
 echo   NOVA SYSTEMS - WINDOWS RUNTIME FILE ASSOCIATION (.nova)
 echo ==========================================================

@@ -1,6 +1,6 @@
 # ============================================================================
 # Unit Test: HTTP/2 Binary Frame Protocol
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type Http2Frame = struct:

@@ -35,6 +35,12 @@ pub fn pf_r() -> Int: 4 # Readable
 pub fn pf_rx() -> Int: 5 # Read + Exec (Code segment)
 pub fn pf_rw() -> Int: 6 # Read + Write (Data segment)
 
+# Virtual Memory Layout Constants
+pub fn elf64_base_vaddr() -> Int: 4194304       # 0x400000 (Standard Linux Executable Base)
+pub fn elf64_code_vaddr() -> Int: 4198400       # 0x401000 (Code PT_LOAD virtual address)
+pub fn elf64_data_vaddr() -> Int: 4202496       # 0x402000 (Data PT_LOAD virtual address)
+pub fn elf64_page_size()  -> Int: 4096          # 4KB Page Alignment
+
 type Elf64Header = struct:
     entry_point: Int
     ph_offset: Int
@@ -68,3 +74,17 @@ pub fn elf64_calc_total_size(code_len: Int, data_len: Int) -> Int:
     let headers_size = 64 + (2 * 56)
     let padded_code_offset = 4096
     padded_code_offset + code_len + data_len
+
+type Elf64BinaryImage = struct:
+    entry_point: Int
+    code_size: Int
+    data_size: Int
+    total_file_size: Int
+    is_standalone: Bool
+
+pub fn elf64_assemble_image(code_bytes: Int, data_bytes: Int) -> Elf64BinaryImage:
+    let total = elf64_calc_total_size(code_bytes, data_bytes)
+    Elf64BinaryImage(elf64_code_vaddr(), code_bytes, data_bytes, total, true)
+
+pub fn elf64_verify_image(img: Elf64BinaryImage) -> Bool:
+    (img.entry_point >= elf64_base_vaddr()) and (img.total_file_size >= 4096) and img.is_standalone

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nova Runtime Desktop Integration Script (Linux)
-# Part of Nova Programming Language v0.31.00
+# Part of Nova Programming Language v0.31.02
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

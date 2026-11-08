@@ -1,0 +1,81 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/microcontroller_hal.nv
+# 100% Pure Nova Native - Microcontroller Hardware Abstraction Layer (HAL)
+# Supports: ESP32 (C3/C6/P4), Raspberry Pi Pico (RP2040/RP2350), STM32 Bare-Metal
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+# GPIO Pin Modes
+pub fn pin_mode_input()       -> Int: 0
+pub fn pin_mode_output()      -> Int: 1
+pub fn pin_mode_pullup()      -> Int: 2
+pub fn pin_mode_pulldown()    -> Int: 3
+pub fn pin_mode_analog()      -> Int: 4
+
+type GpioPin = struct:
+    pin_number: Int
+    mode: Int
+    current_level: Int
+    is_active: Bool
+
+pub fn gpio_configure(pin: Int, mode: Int) -> GpioPin:
+    GpioPin(pin, mode, 0, true)
+
+pub fn clamp_level(level: Int) -> Int:
+    if level > 0:
+        1
+    else:
+        0
+
+pub fn gpio_write_digital(pin: GpioPin, level: Int) -> GpioPin:
+    let safe_lvl = clamp_level(level)
+    GpioPin(pin.pin_number, pin.mode, safe_lvl, pin.is_active)
+
+pub fn gpio_read_digital(pin: GpioPin) -> Int:
+    pin.current_level
+
+type SpiBus = struct:
+    bus_id: Int
+    sck_pin: Int
+    mosi_pin: Int
+    miso_pin: Int
+    clock_speed_hz: Int
+    is_master: Bool
+
+pub fn spi_bus_init(bus_id: Int, sck: Int, mosi: Int, miso: Int, baud: Int) -> SpiBus:
+    SpiBus(bus_id, sck, mosi, miso, baud, true)
+
+type I2cBus = struct:
+    bus_id: Int
+    sda_pin: Int
+    scl_pin: Int
+    freq_khz: Int
+    active_devices_count: Int
+
+pub fn i2c_bus_init(bus_id: Int, sda: Int, scl: Int, freq: Int) -> I2cBus:
+    I2cBus(bus_id, sda, scl, freq, 0)
+
+pub fn i2c_scan_device(bus: I2cBus, addr_7bit: Int) -> I2cBus:
+    # Acknowledge check simulation
+    if addr_7bit > 0 and addr_7bit < 128:
+        I2cBus(bus.bus_id, bus.sda_pin, bus.scl_pin, bus.freq_khz, bus.active_devices_count + 1)
+    else:
+        bus
+
+type PwmChannel = struct:
+    channel_id: Int
+    pin: Int
+    frequency_hz: Int
+    duty_cycle_pct: Int
+
+pub fn clamp_duty(duty: Int) -> Int:
+    if duty > 100:
+        100
+    elif duty < 0:
+        0
+    else:
+        duty
+
+pub fn pwm_configure(chan: Int, pin: Int, freq: Int, duty: Int) -> PwmChannel:
+    let safe_duty = clamp_duty(duty)
+    PwmChannel(chan, pin, freq, safe_duty)

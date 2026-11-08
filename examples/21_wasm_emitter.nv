@@ -1,6 +1,6 @@
 # ============================================================================
 # Example 21: Direct WebAssembly (WAT) Code Generation in Pure Nova
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type WasmValType = struct:

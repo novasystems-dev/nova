@@ -1,0 +1,85 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/quantum_computing.nv
+# 100% Pure Nova Native - Quantum State Vector & Quantum Gate Simulator
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+# Complex Number representation (real * 10000, imag * 10000)
+type ComplexQ = struct:
+    re: Int
+    im: Int
+
+pub fn complex_new(re: Int, im: Int) -> ComplexQ:
+    ComplexQ(re, im)
+
+pub fn complex_zero() -> ComplexQ:
+    ComplexQ(0, 0)
+
+pub fn complex_one() -> ComplexQ:
+    ComplexQ(10000, 0)
+
+pub fn complex_add(a: ComplexQ, b: ComplexQ) -> ComplexQ:
+    ComplexQ(a.re + b.re, a.im + b.im)
+
+pub fn complex_sub(a: ComplexQ, b: ComplexQ) -> ComplexQ:
+    ComplexQ(a.re - b.re, a.im - b.im)
+
+pub fn complex_mul(a: ComplexQ, b: ComplexQ) -> ComplexQ:
+    let re_part = ((a.re * b.re) - (a.im * b.im)) / 10000
+    let im_part = ((a.re * b.im) + (a.im * b.re)) / 10000
+    ComplexQ(re_part, im_part)
+
+pub fn complex_norm_sq(a: ComplexQ) -> Int:
+    ((a.re * a.re) + (a.im * a.im)) / 10000
+
+# 2-Qubit State Vector: |00>, |01>, |10>, |11>
+type StateVector2Q = struct:
+    amp00: ComplexQ
+    amp01: ComplexQ
+    amp10: ComplexQ
+    amp11: ComplexQ
+
+pub fn state_2q_init_zero() -> StateVector2Q:
+    StateVector2Q(complex_one(), complex_zero(), complex_zero(), complex_zero())
+
+# Hadamard Gate on Qubit 0: H(|00>) = (|00> + |01>)/√2
+pub fn apply_hadamard_q0(st: StateVector2Q) -> StateVector2Q:
+    # 7071 is 1/√2 * 10000
+    let h = 7071
+    let a00_re = ((st.amp00.re + st.amp01.re) * h) / 10000
+    let a00_im = ((st.amp00.im + st.amp01.im) * h) / 10000
+    let a01_re = ((st.amp00.re - st.amp01.re) * h) / 10000
+    let a01_im = ((st.amp00.im - st.amp01.im) * h) / 10000
+
+    let a10_re = ((st.amp10.re + st.amp11.re) * h) / 10000
+    let a10_im = ((st.amp10.im + st.amp11.im) * h) / 10000
+    let a11_re = ((st.amp10.re - st.amp11.re) * h) / 10000
+    let a11_im = ((st.amp10.im - st.amp11.im) * h) / 10000
+
+    StateVector2Q(ComplexQ(a00_re, a00_im), ComplexQ(a01_re, a01_im),
+                  ComplexQ(a10_re, a10_im), ComplexQ(a11_re, a11_im))
+
+# CNOT Gate with control Qubit 0 and target Qubit 1
+pub fn apply_cnot_q0_control(st: StateVector2Q) -> StateVector2Q:
+    StateVector2Q(st.amp00, st.amp11, st.amp10, st.amp01)
+
+# Pauli-X (Quantum NOT) on Qubit 0
+pub fn apply_pauli_x_q0(st: StateVector2Q) -> StateVector2Q:
+    StateVector2Q(st.amp01, st.amp00, st.amp11, st.amp10)
+
+# Pauli-Z (Phase Flip) on Qubit 0
+pub fn apply_pauli_z_q0(st: StateVector2Q) -> StateVector2Q:
+    let neg_amp01 = ComplexQ(0 - st.amp01.re, 0 - st.amp01.im)
+    let neg_amp11 = ComplexQ(0 - st.amp11.re, 0 - st.amp11.im)
+    StateVector2Q(st.amp00, neg_amp01, st.amp10, neg_amp11)
+
+# Generates maximally entangled Bell State: |Φ+> = (|00> + |11>) / √2
+pub fn create_bell_state_phi_plus() -> StateVector2Q:
+    let s0 = state_2q_init_zero()
+    let s1 = apply_hadamard_q0(s0)
+    apply_cnot_q0_control(s1)
+
+# Returns total probability (must sum to ~10000)
+pub fn state_2q_total_probability(st: StateVector2Q) -> Int:
+    complex_norm_sq(st.amp00) + complex_norm_sq(st.amp01) +
+    complex_norm_sq(st.amp10) + complex_norm_sq(st.amp11)

@@ -1,0 +1,24 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/audio.nv
+# Real-Time Native Audio Engine & Sound Synthesis
+# ============================================================================
+
+pub fn sound_shotgun() -> Int: 1
+pub fn sound_pistol() -> Int: 2
+pub fn sound_imp_roar() -> Int: 3
+pub fn sound_imp_death() -> Int: 4
+pub fn sound_player_pain() -> Int: 5
+pub fn sound_item_pickup() -> Int: 6
+pub fn sound_door() -> Int: 7
+
+pub fn init_audio() -> Bool:
+    audio_init(44100)
+
+pub fn play_sfx(sound_id: Int) -> Bool:
+    audio_play_sfx(sound_id)
+
+pub fn play_music_tick(step: Int) -> Bool:
+    audio_play_music_tick(step)
+
+pub fn close_audio():
+    audio_close()

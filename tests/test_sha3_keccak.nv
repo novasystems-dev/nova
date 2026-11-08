@@ -1,6 +1,6 @@
 # ============================================================================
 # Unit Test: SHA-3 / Keccak-256 Permutation
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type KeccakState = struct:

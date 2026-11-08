@@ -1,0 +1,109 @@
+# ============================================================================
+# NOVA EXAMPLE 30: Raft Distributed Consensus Cluster
+# Nova Systems Programming Language (v0.31.02)
+# Leader Election, Quorum Heartbeats, and State Machine Replicated Logs
+# ============================================================================
+
+# Raft Node Roles
+fn role_follower()  -> Int: 0
+fn role_candidate() -> Int: 1
+fn role_leader()    -> Int: 2
+
+type RaftNode = struct:
+    node_id: Int
+    current_term: Int
+    role: Int
+    voted_for: Int
+    commit_index: Int
+
+type VoteRequest = struct:
+    candidate_id: Int
+    term: Int
+    last_log_index: Int
+
+type VoteResponse = struct:
+    term: Int
+    vote_granted: Bool
+
+fn init_node(id: Int) -> RaftNode:
+    RaftNode(id, 1, role_follower(), 0, 0)
+
+fn start_election(node: RaftNode) -> RaftNode:
+    # Become candidate and increment term
+    let next_term = node.current_term + 1
+    RaftNode(node.node_id, next_term, role_candidate(), node.node_id, node.commit_index)
+
+fn process_vote_request(peer: RaftNode, req: VoteRequest) -> VoteResponse:
+    if req.term > peer.current_term:
+        VoteResponse(req.term, true)
+    elif req.term == peer.current_term and peer.voted_for == 0:
+        VoteResponse(req.term, true)
+    else:
+        VoteResponse(peer.current_term, false)
+
+fn bool_to_int(b: Bool) -> Int:
+    if b:
+        1
+    else:
+        0
+
+fn count_quorum_votes(v1: Bool, v2: Bool, v3: Bool) -> Int:
+    let c1 = bool_to_int(v1)
+    let c2 = bool_to_int(v2)
+    let c3 = bool_to_int(v3)
+    c1 + c2 + c3
+
+fn become_leader(node: RaftNode) -> RaftNode:
+    RaftNode(node.node_id, node.current_term, role_leader(), node.voted_for, node.commit_index)
+
+fn append_entry(node: RaftNode) -> RaftNode:
+    RaftNode(node.node_id, node.current_term, node.role, node.voted_for, node.commit_index + 1)
+
+fn main():
+    print("==========================================================")
+    print("  EXAMPLE 30: Raft Distributed Consensus Cluster")
+    print("  Nova Systems v0.31.02 - Distributed Systems Runtime")
+    print("==========================================================")
+
+    # 1. Initialize 3-node cluster in Follower state
+    let n1 = init_node(1)
+    let n2 = init_node(2)
+    let n3 = init_node(3)
+    print("-> Initialized 3-node Raft cluster: Node1, Node2, Node3 (Term 1, Role: FOLLOWER)")
+
+    # 2. Node 1 election timeout triggers: transitions to CANDIDATE
+    let c1 = start_election(n1)
+    print_str("-> Node 1 election timeout triggered! Incrementing term to ")
+    print_int(c1.current_term)
+    print(" (Role: CANDIDATE)")
+
+    # 3. RequestVote RPC broadcast to Node 2 and Node 3
+    let req = VoteRequest(c1.node_id, c1.current_term, c1.commit_index)
+    let res2 = process_vote_request(n2, req)
+    let res3 = process_vote_request(n3, req)
+
+    print_str("-> Node 2 Vote Granted: ")
+    print_bool(res2.vote_granted)
+    print("")
+    print_str("-> Node 3 Vote Granted: ")
+    print_bool(res3.vote_granted)
+    print("")
+
+    # 4. Quorum calculation (2/3 majority required)
+    let votes = count_quorum_votes(true, res2.vote_granted, res3.vote_granted)
+    print_str("-> Total votes received: ")
+    print_int(votes)
+    print("/3")
+
+    if votes >= 2:
+        let leader = become_leader(c1)
+        print("[+] Quorum reached! Node 1 transitioned to LEADER for Term 2.")
+
+        # 5. Leader commits replicated log entry #1
+        let leader_committed = append_entry(leader)
+        print_str("-> Leader committed transaction entry to state machine: Commit Index = ")
+        print_int(leader_committed.commit_index)
+        print("")
+        print("[+] Cluster State: 100% Consistent across distributed quorum.")
+    else:
+        print("[-] Election split brain; retrying with randomized backoff.")

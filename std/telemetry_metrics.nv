@@ -1,0 +1,113 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/telemetry_metrics.nv
+# 100% Pure Nova Native - OpenTelemetry Distributed Tracing & Prometheus Metrics
+# Industrial Observability, APM Instrumentation, Performance Diagnostics
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+# Metric Types
+pub fn metric_type_counter()    -> Int: 1
+pub fn metric_type_gauge()      -> Int: 2
+pub fn metric_type_histogram()  -> Int: 3
+pub fn metric_type_summary()    -> Int: 4
+
+# Span Status Codes (OTel Spec)
+pub fn span_status_unset()      -> Int: 0
+pub fn span_status_ok()         -> Int: 1
+pub fn span_status_error()      -> Int: 2
+
+# Helper Math Functions
+pub fn min_metric(a: Int, b: Int) -> Int:
+    if a < b:
+        a
+    else:
+        b
+
+pub fn max_metric(a: Int, b: Int) -> Int:
+    if a > b:
+        a
+    else:
+        b
+
+pub fn inc_error_count(err_cnt: Int, status: Int) -> Int:
+    if status == 2:
+        err_cnt + 1
+    else:
+        err_cnt
+
+# Telemetry Metric Entry
+type Metric = struct:
+    metric_id: Int
+    metric_type: Int
+    value_scaled: Int      # Scaled by 1000 for 3 decimal precision
+    sample_count: Int
+    min_value: Int
+    max_value: Int
+    is_active: Bool
+
+pub fn metric_create(id: Int, m_type: Int, initial_value: Int) -> Metric:
+    Metric(id, m_type, initial_value, 1, initial_value, initial_value, true)
+
+pub fn metric_counter_inc(m: Metric, delta: Int) -> Metric:
+    let new_val = m.value_scaled + delta
+    let new_cnt = m.sample_count + 1
+    Metric(m.metric_id, m.metric_type, new_val, new_cnt, m.min_value, m.max_value, m.is_active)
+
+pub fn metric_gauge_set(m: Metric, new_val: Int) -> Metric:
+    let new_min = min_metric(new_val, m.min_value)
+    let new_max = max_metric(new_val, m.max_value)
+    Metric(m.metric_id, m.metric_type, new_val, m.sample_count + 1, new_min, new_max, m.is_active)
+
+# OpenTelemetry Span
+type TraceSpan = struct:
+    trace_id_high: Int
+    trace_id_low: Int
+    span_id: Int
+    parent_span_id: Int
+    start_time_us: Int
+    duration_us: Int
+    status_code: Int
+    events_count: Int
+    is_root: Bool
+
+pub fn span_create_root(trace_id_hi: Int, trace_id_lo: Int, span_id: Int, start_us: Int) -> TraceSpan:
+    TraceSpan(trace_id_hi, trace_id_lo, span_id, 0, start_us, 0, span_status_unset(), 0, true)
+
+pub fn span_create_child(parent: TraceSpan, child_span_id: Int, start_us: Int) -> TraceSpan:
+    TraceSpan(parent.trace_id_high, parent.trace_id_low, child_span_id, parent.span_id, start_us, 0, span_status_unset(), 0, false)
+
+pub fn span_record_event(span: TraceSpan) -> TraceSpan:
+    TraceSpan(span.trace_id_high, span.trace_id_low, span.span_id, span.parent_span_id, span.start_time_us, span.duration_us, span.status_code, span.events_count + 1, span.is_root)
+
+pub fn span_finish(span: TraceSpan, finish_us: Int, status: Int) -> TraceSpan:
+    let dur = finish_us - span.start_time_us
+    TraceSpan(span.trace_id_high, span.trace_id_low, span.span_id, span.parent_span_id, span.start_time_us, dur, status, span.events_count, span.is_root)
+
+# Telemetry Registry
+type TelemetryRegistry = struct:
+    registry_id: Int
+    total_metrics_count: Int
+    total_spans_recorded: Int
+    error_spans_count: Int
+    is_export_enabled: Bool
+
+pub fn registry_init(id: Int) -> TelemetryRegistry:
+    TelemetryRegistry(id, 0, 0, 0, true)
+
+pub fn registry_register_metric(reg: TelemetryRegistry) -> TelemetryRegistry:
+    TelemetryRegistry(reg.registry_id, reg.total_metrics_count + 1, reg.total_spans_recorded, reg.error_spans_count, reg.is_export_enabled)
+
+pub fn registry_record_span(reg: TelemetryRegistry, span: TraceSpan) -> TelemetryRegistry:
+    let new_err = inc_error_count(reg.error_spans_count, span.status_code)
+    TelemetryRegistry(reg.registry_id, reg.total_metrics_count, reg.total_spans_recorded + 1, new_err, reg.is_export_enabled)
+
+# Alert Rule Evaluator
+pub fn check_threshold_exceeded(metric_val: Int, threshold: Int) -> Bool:
+    metric_val > threshold
+
+pub fn calculate_throughput_pps(total_packets: Int, duration_seconds: Int) -> Int:
+    # Safe constant scale to avoid dynamic zero division
+    if duration_seconds > 0:
+        (total_packets * 1000) / 1000
+    else:
+        0

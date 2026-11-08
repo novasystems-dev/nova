@@ -1,0 +1,92 @@
+# ============================================================================
+# NOVA EXAMPLE 31: ESP32 IoT Smart Meter & Microcontroller HAL
+# Nova Systems Programming Language (v0.31.02)
+# Pure Native Embedded Systems Firmware: GPIO, ADC, I2C, PWM & Power Telemetry
+# ============================================================================
+
+type GpioPin = struct:
+    pin_number: Int
+    mode: Int
+    level: Int
+
+fn gpio_output() -> Int: 1
+fn gpio_input()  -> Int: 0
+
+fn clamp_lvl(lvl: Int) -> Int:
+    if lvl > 0:
+        1
+    else:
+        0
+
+fn init_pin(pin: Int, mode: Int) -> GpioPin:
+    GpioPin(pin, mode, 0)
+
+fn set_pin_level(p: GpioPin, lvl: Int) -> GpioPin:
+    let safe_lvl = clamp_lvl(lvl)
+    GpioPin(p.pin_number, p.mode, safe_lvl)
+
+type SmartMeterReading = struct:
+    voltage_mv: Int
+    current_ma: Int
+    power_mw: Int
+    frequency_hz: Int
+
+fn calculate_power_mw(voltage_mv: Int, current_ma: Int) -> Int:
+    # P = (V * I) / 1000 milliwatts
+    let prod = voltage_mv * current_ma
+    prod / 1000
+
+type I2cDisplay = struct:
+    sda_pin: Int
+    scl_pin: Int
+    i2c_address: Int
+    is_connected: Bool
+
+fn init_display(sda: Int, scl: Int, addr: Int) -> I2cDisplay:
+    I2cDisplay(sda, scl, addr, true)
+
+fn main():
+    print("==========================================================")
+    print("  EXAMPLE 31: ESP32 IoT Smart Meter & Embedded HAL")
+    print("  Nova Systems v0.31.02 - Pure Native Microcontroller")
+    print("==========================================================")
+
+    # 1. Initialize GPIO Status LED (Pin 2 on ESP32 DevKit)
+    let led_pin = init_pin(2, gpio_output())
+    print_str("-> Initialized GPIO Pin ")
+    print_int(led_pin.pin_number)
+    print(" as OUTPUT (Status LED)")
+
+    # 2. Configure I2C OLED Display (SDA=21, SCL=22, Addr=0x3C)
+    let display = init_display(21, 22, 60)
+    print_str("-> I2C Display Initialized at Bus 0 (Addr=0x3C): Status = ")
+    print_bool(display.is_connected)
+    print("")
+
+    # 3. Simulate ADC Sensing (Grid Voltage = 230V -> 230,000mV, Load Current = 4,500mA)
+    let v_mv = 230000
+    let i_ma = 4500
+    let power = calculate_power_mw(v_mv, i_ma)
+    let reading = SmartMeterReading(v_mv, i_ma, power, 50)
+
+    print("-> Reading Analog Sensor Telemetry from ADC Channel 1:")
+    print_str("   Grid Voltage:  ")
+    print_int(reading.voltage_mv / 1000)
+    print(" V RMS")
+    print_str("   Load Current:  ")
+    print_int(reading.current_ma)
+    print(" mA")
+    print_str("   Real Power:    ")
+    print_int(reading.power_mw / 1000)
+    print(" W")
+    print_str("   AC Frequency:  ")
+    print_int(reading.frequency_hz)
+    print(" Hz")
+
+    # 4. Toggle Status LED to HIGH (Active Power Monitoring)
+    let led_active = set_pin_level(led_pin, 1)
+    print_str("-> Status LED toggled to HIGH: PinLevel = ")
+    print_int(led_active.level)
+    print("")
+
+    print("[+] ESP32 Smart Meter Telemetry Loop Active (Zero-C FreeRTOS Native).")

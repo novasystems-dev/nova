@@ -1067,10 +1067,18 @@ static void nova_gui_init_gdi(void) {
     g_gdi_init = true;
 }
 
+static int64_t g_last_gui_key = 0;
+
 static LRESULT CALLBACK NovaWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
         case WM_DESTROY:
             PostQuitMessage(0);
+            return 0;
+        case WM_KEYDOWN:
+            g_last_gui_key = (int64_t)wParam;
+            if (wParam == VK_ESCAPE) {
+                PostQuitMessage(0);
+            }
             return 0;
         case WM_PAINT: {
             PAINTSTRUCT ps;
@@ -1157,11 +1165,171 @@ bool nova_gui_window_close(int64_t win_handle) {
     HWND hwnd = (HWND)(intptr_t)win_handle;
     return DestroyWindow(hwnd) != 0;
 }
+
+int64_t nova_gui_get_key(int64_t win_handle) {
+    (void)win_handle;
+    int64_t k = g_last_gui_key;
+    g_last_gui_key = 0;
+    return k;
+}
+
+bool nova_gui_is_key_down(int64_t win_handle, int64_t scancode) {
+    (void)win_handle;
+    int vk = 0;
+    if (scancode == 26) vk = 'W';
+    else if (scancode == 22) vk = 'S';
+    else if (scancode == 4) vk = 'A';
+    else if (scancode == 7) vk = 'D';
+    else if (scancode == 82) vk = VK_UP;
+    else if (scancode == 81) vk = VK_DOWN;
+    else if (scancode == 80) vk = VK_LEFT;
+    else if (scancode == 79) vk = VK_RIGHT;
+    else if (scancode == 44) vk = VK_SPACE;
+    else if (scancode == 41) vk = VK_ESCAPE;
+    else vk = (int)scancode;
+    return (GetAsyncKeyState(vk) & 0x8000) != 0;
+}
+
+bool nova_audio_init(int64_t sample_rate) { (void)sample_rate; return true; }
+bool nova_audio_play_sfx(int64_t sound_id) { (void)sound_id; return true; }
+bool nova_audio_play_music_tick(int64_t step) { (void)step; return true; }
+bool nova_audio_queue_pcm(const int16_t *samples, int64_t num_samples) { (void)samples; (void)num_samples; return true; }
+void nova_audio_close(void) {}
 #else
-// POSIX / Non-Windows Native GUI Stubs (Lightweight & zero external dependency)
-static int64_t g_fake_win_counter = 1000;
+// POSIX / Linux / macOS Native Desktop Windowing Engine
+// Dynamically loads SDL2 / X11 via dlopen when DISPLAY is available.
+// Falls back to lightweight console stubs when running in headless CI environments.
+#include <dlfcn.h>
+
+typedef struct {
+    int x, y, w, h;
+} NovaSdlRect;
+
+typedef union {
+    uint32_t type;
+    uint8_t padding[56];
+} NovaSdlEvent;
+
+typedef struct {
+    void *win;
+    void *ren;
+    int64_t width;
+    int64_t height;
+    bool active;
+} NovaGuiWindowSlot;
+
+#define NOVA_MAX_GUI_SLOTS 16
+static NovaGuiWindowSlot g_nova_gui_slots[NOVA_MAX_GUI_SLOTS];
+
+static void *g_sdl_lib = NULL;
+static bool g_sdl_attempted = false;
+
+static int (*g_sdl_init)(uint32_t) = NULL;
+static void* (*g_sdl_create_window)(const char*, int, int, int, int, uint32_t) = NULL;
+static void* (*g_sdl_create_renderer)(void*, int, uint32_t) = NULL;
+static int (*g_sdl_set_draw_color)(void*, uint8_t, uint8_t, uint8_t, uint8_t) = NULL;
+static int (*g_sdl_clear)(void*) = NULL;
+static int (*g_sdl_fill_rect)(void*, const NovaSdlRect*) = NULL;
+static void (*g_sdl_present)(void*) = NULL;
+static int (*g_sdl_poll_event)(NovaSdlEvent*) = NULL;
+static void (*g_sdl_destroy_ren)(void*) = NULL;
+static void (*g_sdl_destroy_win)(void*) = NULL;
+static void (*g_sdl_quit)(void) = NULL;
+static int (*g_sdl_show_msgbox)(uint32_t, const char*, const char*, void*) = NULL;
+static const uint8_t* (*g_sdl_get_keyboard_state)(int*) = NULL;
+static int64_t g_last_gui_key = 0;
+
+typedef uint32_t NovaSdlAudioDeviceID;
+typedef struct {
+    int freq;
+    uint16_t format;
+    uint8_t channels;
+    uint8_t silence;
+    uint16_t samples;
+    uint16_t padding;
+    uint32_t size;
+    void *callback;
+    void *userdata;
+} NovaSdlAudioSpec;
+
+static int (*g_sdl_init_sub)(uint32_t) = NULL;
+static NovaSdlAudioDeviceID (*g_sdl_open_audio)(const char*, int, const NovaSdlAudioSpec*, NovaSdlAudioSpec*, int) = NULL;
+static void (*g_sdl_pause_audio)(NovaSdlAudioDeviceID, int) = NULL;
+static int (*g_sdl_queue_audio)(NovaSdlAudioDeviceID, const void*, uint32_t) = NULL;
+static uint32_t (*g_sdl_get_queued_audio)(NovaSdlAudioDeviceID) = NULL;
+static void (*g_sdl_clear_queued_audio)(NovaSdlAudioDeviceID) = NULL;
+static void (*g_sdl_close_audio)(NovaSdlAudioDeviceID) = NULL;
+static NovaSdlAudioDeviceID g_nova_audio_device = 0;
+static bool g_nova_audio_initialized = false;
+
+static void nova_init_sdl_symbols(void) {
+    if (g_sdl_attempted) return;
+    g_sdl_attempted = true;
+
+    if (getenv("CI") || getenv("GITHUB_ACTIONS") || getenv("HEADLESS") || (!getenv("DISPLAY") && !getenv("WAYLAND_DISPLAY"))) {
+        return; // Headless environment
+    }
+
+    g_sdl_lib = dlopen("libSDL2-2.0.so.0", RTLD_LAZY);
+    if (!g_sdl_lib) g_sdl_lib = dlopen("libSDL2.so", RTLD_LAZY);
+    if (!g_sdl_lib) g_sdl_lib = dlopen("libSDL2-2.0.dylib", RTLD_LAZY);
+    if (!g_sdl_lib) return;
+
+    g_sdl_init = (int (*)(uint32_t))dlsym(g_sdl_lib, "SDL_Init");
+    g_sdl_create_window = (void* (*)(const char*, int, int, int, int, uint32_t))dlsym(g_sdl_lib, "SDL_CreateWindow");
+    g_sdl_create_renderer = (void* (*)(void*, int, uint32_t))dlsym(g_sdl_lib, "SDL_CreateRenderer");
+    g_sdl_set_draw_color = (int (*)(void*, uint8_t, uint8_t, uint8_t, uint8_t))dlsym(g_sdl_lib, "SDL_SetRenderDrawColor");
+    g_sdl_clear = (int (*)(void*))dlsym(g_sdl_lib, "SDL_RenderClear");
+    g_sdl_fill_rect = (int (*)(void*, const NovaSdlRect*))dlsym(g_sdl_lib, "SDL_RenderFillRect");
+    g_sdl_present = (void (*)(void*))dlsym(g_sdl_lib, "SDL_RenderPresent");
+    g_sdl_poll_event = (int (*)(NovaSdlEvent*))dlsym(g_sdl_lib, "SDL_PollEvent");
+    g_sdl_destroy_ren = (void (*)(void*))dlsym(g_sdl_lib, "SDL_DestroyRenderer");
+    g_sdl_destroy_win = (void (*)(void*))dlsym(g_sdl_lib, "SDL_DestroyWindow");
+    g_sdl_quit = (void (*)(void))dlsym(g_sdl_lib, "SDL_Quit");
+    g_sdl_show_msgbox = (int (*)(uint32_t, const char*, const char*, void*))dlsym(g_sdl_lib, "SDL_ShowSimpleMessageBox");
+    g_sdl_get_keyboard_state = (const uint8_t* (*)(int*))dlsym(g_sdl_lib, "SDL_GetKeyboardState");
+    g_sdl_init_sub = (int (*)(uint32_t))dlsym(g_sdl_lib, "SDL_InitSubSystem");
+    g_sdl_open_audio = (NovaSdlAudioDeviceID (*)(const char*, int, const NovaSdlAudioSpec*, NovaSdlAudioSpec*, int))dlsym(g_sdl_lib, "SDL_OpenAudioDevice");
+    g_sdl_pause_audio = (void (*)(NovaSdlAudioDeviceID, int))dlsym(g_sdl_lib, "SDL_PauseAudioDevice");
+    g_sdl_queue_audio = (int (*)(NovaSdlAudioDeviceID, const void*, uint32_t))dlsym(g_sdl_lib, "SDL_QueueAudio");
+    g_sdl_get_queued_audio = (uint32_t (*)(NovaSdlAudioDeviceID))dlsym(g_sdl_lib, "SDL_GetQueuedAudioSize");
+    g_sdl_clear_queued_audio = (void (*)(NovaSdlAudioDeviceID))dlsym(g_sdl_lib, "SDL_ClearQueuedAudio");
+    g_sdl_close_audio = (void (*)(NovaSdlAudioDeviceID))dlsym(g_sdl_lib, "SDL_CloseAudioDevice");
+
+    if (g_sdl_init) {
+        g_sdl_init(0x00000020); // SDL_INIT_VIDEO
+    }
+}
 
 int64_t nova_gui_window_create(const char *title, int64_t width, int64_t height) {
+    nova_init_sdl_symbols();
+    if (g_sdl_create_window && g_sdl_create_renderer) {
+        for (int i = 0; i < NOVA_MAX_GUI_SLOTS; i++) {
+            if (!g_nova_gui_slots[i].active) {
+                void *win = g_sdl_create_window(
+                    title ? title : "Nova Window",
+                    0x2FFF0000, 0x2FFF0000, // SDL_WINDOWPOS_CENTERED
+                    (int)width, (int)height,
+                    0x00000004 // SDL_WINDOW_SHOWN
+                );
+                if (!win) break;
+                void *ren = g_sdl_create_renderer(win, -1, 0);
+                if (!ren) {
+                    g_sdl_destroy_win(win);
+                    break;
+                }
+                g_nova_gui_slots[i].win = win;
+                g_nova_gui_slots[i].ren = ren;
+                g_nova_gui_slots[i].width = width;
+                g_nova_gui_slots[i].height = height;
+                g_nova_gui_slots[i].active = true;
+                return (int64_t)(i + 1);
+            }
+        }
+    }
+
+    // Headless / fallback output
+    static int64_t g_fake_win_counter = 1000;
     printf("[Nova GUI Window Created] Title: '%s' (%lldx%lld)\n", 
            title ? title : "Nova Window", (long long)width, (long long)height);
     return ++g_fake_win_counter;
@@ -1169,6 +1337,30 @@ int64_t nova_gui_window_create(const char *title, int64_t width, int64_t height)
 
 bool nova_gui_window_poll(int64_t win_handle) {
     if (win_handle <= 0) return false;
+    if (win_handle <= NOVA_MAX_GUI_SLOTS && g_nova_gui_slots[win_handle - 1].active) {
+        int idx = (int)(win_handle - 1);
+        if (g_sdl_poll_event) {
+            NovaSdlEvent ev;
+            while (g_sdl_poll_event(&ev)) {
+                if (ev.type == 0x100) { // SDL_QUIT
+                    g_nova_gui_slots[idx].active = false;
+                    return false;
+                }
+                if (ev.type == 0x300) { // SDL_KEYDOWN
+                    int32_t sym = *(int32_t *)(ev.padding + 20);
+                    g_last_gui_key = (int64_t)sym;
+                    if (sym == 27) { // SDLK_ESCAPE
+                        g_nova_gui_slots[idx].active = false;
+                        return false;
+                    }
+                }
+            }
+        }
+        if (g_sdl_present) {
+            g_sdl_present(g_nova_gui_slots[idx].ren);
+        }
+        return true;
+    }
     return true;
 }
 
@@ -1177,20 +1369,319 @@ bool nova_gui_window_draw_rect(int64_t win_handle, int64_t x, int64_t y, int64_t
     int r = (color_rgba >> 16) & 0xFF;
     int g = (color_rgba >> 8) & 0xFF;
     int b = color_rgba & 0xFF;
+    int a = (color_rgba >> 24) & 0xFF;
+    if (a == 0) a = 255;
+
+    if (win_handle <= NOVA_MAX_GUI_SLOTS && g_nova_gui_slots[win_handle - 1].active) {
+        int idx = (int)(win_handle - 1);
+        if (g_sdl_set_draw_color && g_sdl_fill_rect) {
+            g_sdl_set_draw_color(g_nova_gui_slots[idx].ren, (uint8_t)r, (uint8_t)g, (uint8_t)b, (uint8_t)a);
+            NovaSdlRect rect = {(int)x, (int)y, (int)w, (int)h};
+            g_sdl_fill_rect(g_nova_gui_slots[idx].ren, &rect);
+            return true;
+        }
+    }
+
     printf("[Nova GUI DrawRect] (%lld,%lld) %lldx%lld RGB(%d,%d,%d)\n",
            (long long)x, (long long)y, (long long)w, (long long)h, r, g, b);
     return true;
 }
 
 bool nova_gui_alert(const char *title, const char *message) {
+    if (getenv("CI") || getenv("GITHUB_ACTIONS") || getenv("HEADLESS") || (!getenv("DISPLAY") && !getenv("WAYLAND_DISPLAY"))) {
+        printf("🔔 [Nova GUI Alert] %s: %s\n", title ? title : "Alert", message ? message : "");
+        return true;
+    }
+    nova_init_sdl_symbols();
+    if (g_sdl_show_msgbox) {
+        g_sdl_show_msgbox(0x40, title ? title : "Alert", message ? message : "", NULL);
+        return true;
+    }
     printf("🔔 [Nova GUI Alert] %s: %s\n", title ? title : "Alert", message ? message : "");
     return true;
 }
 
 bool nova_gui_window_close(int64_t win_handle) {
     if (win_handle <= 0) return false;
+    if (win_handle <= NOVA_MAX_GUI_SLOTS && g_nova_gui_slots[win_handle - 1].active) {
+        int idx = (int)(win_handle - 1);
+        if (g_sdl_destroy_ren) g_sdl_destroy_ren(g_nova_gui_slots[idx].ren);
+        if (g_sdl_destroy_win) g_sdl_destroy_win(g_nova_gui_slots[idx].win);
+        g_nova_gui_slots[idx].active = false;
+        return true;
+    }
     printf("[Nova GUI Window Closed] Handle: %lld\n", (long long)win_handle);
     return true;
+}
+
+int64_t nova_gui_get_key(int64_t win_handle) {
+    (void)win_handle;
+    int64_t k = g_last_gui_key;
+    g_last_gui_key = 0;
+    return k;
+}
+
+bool nova_gui_is_key_down(int64_t win_handle, int64_t scancode) {
+    (void)win_handle;
+    if (g_sdl_get_keyboard_state) {
+        const uint8_t *state = g_sdl_get_keyboard_state(NULL);
+        if (state && scancode >= 0 && scancode < 512) {
+            return state[scancode] != 0;
+        }
+    }
+    return false;
+}
+
+bool nova_audio_init(int64_t sample_rate) {
+    if (g_nova_audio_initialized && g_nova_audio_device > 0) return true;
+    if (getenv("CI") || getenv("GITHUB_ACTIONS") || getenv("HEADLESS")) return true;
+
+    nova_init_sdl_symbols();
+    if (!g_sdl_open_audio || !g_sdl_queue_audio) return false;
+
+    if (g_sdl_init_sub) {
+        g_sdl_init_sub(0x00000010); // SDL_INIT_AUDIO
+    }
+
+    NovaSdlAudioSpec want, have;
+    memset(&want, 0, sizeof(want));
+    want.freq = (sample_rate > 0) ? (int)sample_rate : 44100;
+    want.format = 0x8010; // AUDIO_S16SYS
+    want.channels = 1;
+    want.samples = 1024;
+
+    g_nova_audio_device = g_sdl_open_audio(NULL, 0, &want, &have, 0);
+    if (g_nova_audio_device > 0) {
+        g_nova_audio_initialized = true;
+        if (g_sdl_pause_audio) {
+            g_sdl_pause_audio(g_nova_audio_device, 0); // start audio stream
+        }
+        return true;
+    }
+    return false;
+}
+
+bool nova_audio_queue_pcm(const int16_t *samples, int64_t num_samples) {
+    if (!g_nova_audio_initialized || g_nova_audio_device == 0 || !samples || num_samples <= 0) return false;
+    if (g_sdl_queue_audio) {
+        if (g_sdl_get_queued_audio && g_sdl_get_queued_audio(g_nova_audio_device) > 44100 * 2 * 2) {
+            return false;
+        }
+        g_sdl_queue_audio(g_nova_audio_device, samples, (uint32_t)(num_samples * sizeof(int16_t)));
+        return true;
+    }
+    return false;
+}
+
+bool nova_audio_play_sfx(int64_t sound_id) {
+    if (!g_nova_audio_initialized) {
+        nova_audio_init(44100);
+    }
+    if (!g_nova_audio_initialized || g_nova_audio_device == 0) return true;
+
+    #define NOVA_PI 3.14159265358979323846
+    if (sound_id == 1) {
+        // 1. Visceral Doom Double Shotgun Blast + Mechanical Pump
+        int samples = (int)(44100 * 0.45);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double s = 0.0;
+            if (t < 0.25) {
+                double env = exp(-t * 14.0);
+                double freq = 160.0 * exp(-t * 20.0) + 45.0;
+                double wave = sin(2.0 * NOVA_PI * freq * t);
+                double noise = ((rand() % 2000) / 1000.0 - 1.0);
+                s = (wave * 0.6 + noise * 0.5) * env * 28000.0;
+            } else if (t >= 0.28 && t < 0.31) {
+                double ct = t - 0.28;
+                s = sin(2.0 * NOVA_PI * 1200.0 * ct) * exp(-ct * 120.0) * 18000.0;
+            } else if (t >= 0.32 && t < 0.36) {
+                double st = t - 0.32;
+                double noise = ((rand() % 2000) / 1000.0 - 1.0);
+                s = (noise * 0.4 + sin(2.0 * NOVA_PI * 380.0 * st) * 0.3) * 12000.0;
+            } else if (t >= 0.38 && t < 0.42) {
+                double ct = t - 0.38;
+                s = sin(2.0 * NOVA_PI * 1800.0 * ct) * exp(-ct * 100.0) * 22000.0;
+            }
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 2) {
+        // 2. Pistol Gunshot Crack
+        int samples = (int)(44100 * 0.16);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double env = exp(-t * 25.0);
+            double freq = 420.0 * exp(-t * 30.0) + 80.0;
+            double wave = sin(2.0 * NOVA_PI * freq * t);
+            double noise = ((rand() % 2000) / 1000.0 - 1.0);
+            double s = (wave * 0.5 + noise * 0.6) * env * 24000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 3) {
+        // 3. Demon / Imp Roar
+        int samples = (int)(44100 * 0.35);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double env = sin(t / 0.35 * NOVA_PI);
+            double freq = 130.0 + 35.0 * sin(2.0 * NOVA_PI * 18.0 * t);
+            double wave = sin(2.0 * NOVA_PI * freq * t);
+            double noise = ((rand() % 2000) / 1000.0 - 1.0);
+            double s = (wave * 0.7 + noise * 0.35) * env * 22000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 4) {
+        // 4. Demon Death Scream
+        int samples = (int)(44100 * 0.50);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double env = exp(-t * 5.0);
+            double freq = 450.0 * (1.0 - t * 1.8);
+            if (freq < 50.0) freq = 50.0;
+            double wave = sin(2.0 * NOVA_PI * freq * t);
+            double noise = ((rand() % 2000) / 1000.0 - 1.0);
+            double s = (wave * 0.6 + noise * 0.45) * env * 25000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 5) {
+        // 5. Doomguy Pain Grunt ("OOF!")
+        int samples = (int)(44100 * 0.18);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double env = exp(-t * 18.0);
+            double freq = 200.0 * exp(-t * 22.0) + 75.0;
+            double s = sin(2.0 * NOVA_PI * freq * t) * env * 24000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 6) {
+        // 6. Item Pickup Chime (Arpeggio D5 -> F#5 -> A5 -> D6)
+        int samples = (int)(44100 * 0.22);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double freq = 587.33;
+            if (t >= 0.05 && t < 0.10) freq = 739.99;
+            else if (t >= 0.10 && t < 0.15) freq = 880.00;
+            else if (t >= 0.15) freq = 1174.66;
+            double note_t = fmod(t, 0.05);
+            double env = exp(-note_t * 20.0);
+            double s = sin(2.0 * NOVA_PI * freq * t) * env * 18000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    } else if (sound_id == 7) {
+        // 7. Hydraulic Door Open Hiss
+        int samples = (int)(44100 * 0.38);
+        int16_t *buf = (int16_t*)malloc(samples * sizeof(int16_t));
+        if (!buf) return false;
+        for (int i = 0; i < samples; i++) {
+            double t = (double)i / 44100.0;
+            double env = sin(t / 0.38 * NOVA_PI);
+            double noise = ((rand() % 2000) / 1000.0 - 1.0);
+            double hum = sin(2.0 * NOVA_PI * 70.0 * t);
+            double s = (noise * 0.5 + hum * 0.3) * env * 16000.0;
+            if (s > 32767.0) s = 32767.0;
+            if (s < -32768.0) s = -32768.0;
+            buf[i] = (int16_t)s;
+        }
+        bool ok = nova_audio_queue_pcm(buf, samples);
+        free(buf);
+        return ok;
+    }
+    return true;
+}
+
+bool nova_audio_play_music_tick(int64_t step) {
+    if (!g_nova_audio_initialized) {
+        nova_audio_init(44100);
+    }
+    if (!g_nova_audio_initialized || g_nova_audio_device == 0) return true;
+
+    static const double E1M1_FREQS[16] = {
+        82.41, 82.41, 164.81, 82.41,
+        82.41, 146.83, 82.41, 82.41,
+        130.81, 82.41, 82.41, 116.54,
+        82.41, 82.41, 123.47, 130.81
+    };
+
+    int idx = (int)(step % 16);
+    if (idx < 0) idx = 0;
+    double freq = E1M1_FREQS[idx];
+    bool is_accent = (idx == 2 || idx == 5 || idx == 8 || idx == 11 || idx == 14 || idx == 15);
+
+    int samples = 3970; // ~90ms at 44100Hz
+    int16_t buf[3970];
+
+    for (int i = 0; i < samples; i++) {
+        double t = (double)i / 44100.0;
+        double saw = 2.0 * (t * freq - floor(0.5 + t * freq));
+        double sqr = (sin(2.0 * 3.14159265358979323846 * freq * t) > 0.0) ? 1.0 : -1.0;
+        double wave = (saw * 0.6 + sqr * 0.4);
+        double dist = wave * 1.8;
+        if (dist > 1.0) dist = 1.0;
+        if (dist < -1.0) dist = -1.0;
+        double env = is_accent ? exp(-t * 9.0) : exp(-t * 22.0);
+        double s = dist * env * 13000.0;
+
+        if (idx == 4 || idx == 12) {
+            double dt = (double)i / samples;
+            double drum = ((rand() % 2000) / 1000.0 - 1.0) * exp(-dt * 15.0);
+            s += drum * 7000.0;
+        }
+
+        if (s > 32767.0) s = 32767.0;
+        if (s < -32768.0) s = -32768.0;
+        buf[i] = (int16_t)s;
+    }
+
+    return nova_audio_queue_pcm(buf, samples);
+}
+
+void nova_audio_close(void) {
+    if (g_nova_audio_device > 0 && g_sdl_close_audio) {
+        g_sdl_close_audio(g_nova_audio_device);
+        g_nova_audio_device = 0;
+        g_nova_audio_initialized = false;
+    }
 }
 #endif
 

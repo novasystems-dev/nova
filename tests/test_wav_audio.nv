@@ -1,6 +1,6 @@
 # ============================================================================
 # Unit Test: WAV PCM Audio Header & Synthesis
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type WavHeader = struct:

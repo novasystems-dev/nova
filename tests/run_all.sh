@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export NOVA_RUNTIME="$ROOT_DIR/runtime"
+export HEADLESS=1
 mkdir -p /tmp /d/tmp /c/tmp D:/tmp C:/tmp bin 2>/dev/null || true
 
 WIN_LIBS=""
@@ -95,6 +96,7 @@ run_test "Check 26_c_abi_interop.nv" "./bin/novac check examples/26_c_abi_intero
 run_test "Check 27_desktop_gui.nv" "./bin/novac check examples/27_desktop_gui.nv"
 run_test "Check std/ffi.nv" "./bin/novac check std/ffi.nv"
 run_test "Check std/gui.nv" "./bin/novac check std/gui.nv"
+run_test "Check std/audio.nv" "./bin/novac check std/audio.nv"
 run_test "Check compiler/types.nv" "./bin/novac check compiler/types.nv"
 run_test "Check compiler/lexer.nv" "./bin/novac check compiler/lexer.nv"
 run_test "Check compiler/parser.nv" "./bin/novac check compiler/parser.nv"
@@ -197,8 +199,11 @@ run_test "Check std/runtime/sys_linux.nv" "./bin/novac check std/runtime/sys_lin
 run_test "Check std/runtime/perceus_alloc.nv" "./bin/novac check std/runtime/perceus_alloc.nv"
 run_test "Check std/runtime/sys_windows.nv" "./bin/novac check std/runtime/sys_windows.nv"
 run_test "Check compiler/backend/x86_64_enc.nv" "./bin/novac check compiler/backend/x86_64_enc.nv"
+run_test "Check compiler/backend/linear_scan.nv" "./bin/novac check compiler/backend/linear_scan.nv"
+run_test "Check compiler/backend/emitter_x86_64.nv" "./bin/novac check compiler/backend/emitter_x86_64.nv"
 run_test "Check compiler/backend/elf64.nv" "./bin/novac check compiler/backend/elf64.nv"
 run_test "Check compiler/backend/pe.nv" "./bin/novac check compiler/backend/pe.nv"
+run_test "Check compiler/backend/macho64.nv" "./bin/novac check compiler/backend/macho64.nv"
 run_test "Check std/async_runtime.nv" "./bin/novac check std/async_runtime.nv"
 run_test "Check std/colossus_web.nv" "./bin/novac check std/colossus_web.nv"
 run_test "Check std/titan_db.nv" "./bin/novac check std/titan_db.nv"
@@ -213,6 +218,14 @@ run_test "Check std/sql_query_engine.nv" "./bin/novac check std/sql_query_engine
 run_test "Check std/linear_algebra.nv" "./bin/novac check std/linear_algebra.nv"
 run_test "Check std/lockfree_queue.nv" "./bin/novac check std/lockfree_queue.nv"
 run_test "Check std/bytecode_vm.nv" "./bin/novac check std/bytecode_vm.nv"
+run_test "Check std/quantum_computing.nv" "./bin/novac check std/quantum_computing.nv"
+run_test "Check std/neural_transformer.nv" "./bin/novac check std/neural_transformer.nv"
+run_test "Check std/distributed_raft.nv" "./bin/novac check std/distributed_raft.nv"
+run_test "Check std/gpu_vulkan.nv" "./bin/novac check std/gpu_vulkan.nv"
+run_test "Check std/blockchain_evm.nv" "./bin/novac check std/blockchain_evm.nv"
+run_test "Check std/microcontroller_hal.nv" "./bin/novac check std/microcontroller_hal.nv"
+run_test "Check std/compiler_jit.nv" "./bin/novac check std/compiler_jit.nv"
+run_test "Check std/telemetry_metrics.nv" "./bin/novac check std/telemetry_metrics.nv"
 
 # 3. Negative safety tests (Z3 SMT proof rejection)
 run_rejection_test "Reject division by unproven zero (05_bad_division.nv)" "./bin/novac check examples/05_bad_division.nv"
@@ -242,6 +255,11 @@ run_test "Execute 24_wav_audio_synth.out" "./bin/novac run examples/24_wav_audio
 run_test "Execute 25_spatial_kdtree.out" "./bin/novac run examples/25_spatial_kdtree.nv"
 run_test "Execute 26_c_abi_interop.out" "./bin/novac run examples/26_c_abi_interop.nv"
 run_test "Execute 27_desktop_gui.out" "./bin/novac run examples/27_desktop_gui.nv"
+run_test "Execute 28_quantum_teleportation.out" "./bin/novac run examples/28_quantum_teleportation.nv"
+run_test "Execute 29_transformer_llm_inference.out" "./bin/novac run examples/29_transformer_llm_inference.nv"
+run_test "Execute 30_raft_distributed_cluster.out" "./bin/novac run examples/30_raft_distributed_cluster.nv"
+run_test "Execute 31_esp32_iot_smart_meter.out" "./bin/novac run examples/31_esp32_iot_smart_meter.nv"
+run_test "Execute 32_vulkan_compute_particles.out" "./bin/novac run examples/32_vulkan_compute_particles.nv"
 run_test "Execute test_bloom_filter.out" "./bin/novac run tests/test_bloom_filter.nv"
 run_test "Execute test_btree_index.out" "./bin/novac run tests/test_btree_index.nv"
 run_test "Execute test_matrix_algebra.out" "./bin/novac run tests/test_matrix_algebra.nv"
@@ -258,6 +276,8 @@ run_test "Execute test_sha3_keccak.out" "./bin/novac run tests/test_sha3_keccak.
 run_test "Execute test_wav_audio.out" "./bin/novac run tests/test_wav_audio.nv"
 run_test "Execute test_spatial_geometry.out" "./bin/novac run tests/test_spatial_geometry.nv"
 run_test "Execute test_million_scale_ecosystem.out" "./bin/novac run tests/test_million_scale_ecosystem.nv"
+run_test "Execute test_pure_self_hosting_backend.out" "./bin/novac run tests/test_pure_self_hosting_backend.nv"
+run_test "Execute test_v03102_mega_systems.out" "./bin/novac run tests/test_v03102_mega_systems.nv"
 
 # 5. Intermediate Representations & Codegen
 run_test "Dump HIR (--dump-hir)" "./bin/novac --dump-hir examples/01_hello.nv"
@@ -293,7 +313,7 @@ run_test "Interactive REPL evaluation pipeline" "REPL_BIN='./bin/nova-repl'; if 
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nv std/*.nv"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nv std/*.nv"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
-run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.31.00'"
+run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.31.02'"
 run_test "Nova-runner console-hold execution (--hold)" "DOC_BIN='bin/nova-doc'; if [ -f \"\${DOC_BIN}.exe\" ]; then DOC_BIN=\"\${DOC_BIN}.exe\"; fi; echo '' | ./bin/nova-runner --hold \"\$DOC_BIN\" --version | grep -q 'Process exited with code: 0'"
 run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
 run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"

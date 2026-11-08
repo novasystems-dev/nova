@@ -1,0 +1,88 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/blockchain_evm.nv
+# 100% Pure Nova Native - Ethereum Virtual Machine (EVM) Engine
+# Version: 0.31.02 | License: PolyForm Noncommercial 1.0.0 (Nova Systems 2026)
+# ============================================================================
+
+# EVM Opcodes
+pub fn evm_op_stop()   -> Int: 0
+pub fn evm_op_add()    -> Int: 1
+pub fn evm_op_mul()    -> Int: 2
+pub fn evm_op_sub()    -> Int: 3
+pub fn evm_op_div()    -> Int: 4
+pub fn evm_op_mload()  -> Int: 81
+pub fn evm_op_mstore() -> Int: 82
+pub fn evm_op_sload()  -> Int: 84
+pub fn evm_op_sstore() -> Int: 85
+pub fn evm_op_jump()   -> Int: 86
+pub fn evm_op_jumpi()  -> Int: 87
+pub fn evm_op_return() -> Int: 243
+pub fn evm_op_revert() -> Int: 253
+
+# EVM 256-bit Word (represented as high 128-bit and low 128-bit)
+type EvmWord = struct:
+    hi: Int
+    lo: Int
+
+pub fn evm_word_new(hi: Int, lo: Int) -> EvmWord:
+    EvmWord(hi, lo)
+
+pub fn evm_word_zero() -> EvmWord:
+    EvmWord(0, 0)
+
+pub fn evm_word_from_int(val: Int) -> EvmWord:
+    EvmWord(0, val)
+
+pub fn evm_word_add(a: EvmWord, b: EvmWord) -> EvmWord:
+    let sum_lo = a.lo + b.lo
+    let carry = sum_lo / 1000000000
+    let rem_lo = sum_lo % 1000000000
+    let sum_hi = a.hi + b.hi + carry
+    EvmWord(sum_hi, rem_lo)
+
+type EvmState = struct:
+    pc: Int
+    gas_remaining: Int
+    stack_depth: Int
+    memory_size_bytes: Int
+    is_halted: Bool
+    is_reverted: Bool
+
+pub fn evm_state_init(gas_limit: Int) -> EvmState:
+    EvmState(0, gas_limit, 0, 0, false, false)
+
+pub fn evm_charge_gas(st: EvmState, cost: Int) -> EvmState:
+    if st.gas_remaining >= cost:
+        EvmState(st.pc, st.gas_remaining - cost, st.stack_depth, st.memory_size_bytes, st.is_halted, false)
+    else:
+        # Out of Gas: Revert execution
+        EvmState(st.pc, 0, st.stack_depth, st.memory_size_bytes, true, true)
+
+pub fn evm_step_push(st: EvmState) -> EvmState:
+    let s1 = evm_charge_gas(st, 3) # PUSH costs 3 gas
+    if s1.is_reverted:
+        s1
+    else:
+        EvmState(s1.pc + 2, s1.gas_remaining, s1.stack_depth + 1, s1.memory_size_bytes, false, false)
+
+pub fn evm_step_add(st: EvmState) -> EvmState:
+    let s1 = evm_charge_gas(st, 3) # ADD costs 3 gas
+    if s1.is_reverted or s1.stack_depth < 2:
+        EvmState(s1.pc, s1.gas_remaining, s1.stack_depth, s1.memory_size_bytes, true, true)
+    else:
+        # Pops 2, pushes 1 -> stack_depth - 1
+        EvmState(s1.pc + 1, s1.gas_remaining, s1.stack_depth - 1, s1.memory_size_bytes, false, false)
+
+pub fn evm_calc_mem(offset: Int, current_mem: Int) -> Int:
+    if offset + 32 > current_mem:
+        offset + 32
+    else:
+        current_mem
+
+pub fn evm_step_mstore(st: EvmState, offset: Int) -> EvmState:
+    let s1 = evm_charge_gas(st, 6) # MSTORE costs 3 + memory expansion
+    let next_mem = evm_calc_mem(offset, s1.memory_size_bytes)
+    if s1.is_reverted:
+        s1
+    else:
+        EvmState(s1.pc + 1, s1.gas_remaining, s1.stack_depth - 2, next_mem, false, false)

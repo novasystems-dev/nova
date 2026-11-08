@@ -1,6 +1,6 @@
 # ============================================================================
 # Example 23: SHA-3 / Keccak-256 Sponge Function in Pure Nova
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type KeccakState = struct:

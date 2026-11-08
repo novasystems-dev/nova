@@ -1,6 +1,6 @@
 # ============================================================================
 # Example 25: 2D Spatial Partitioning & KD-Tree Engine in Pure Nova
-# Nova Systems Programming Language (v0.31.00)
+# Nova Systems Programming Language (v0.31.02)
 # ============================================================================
 
 type Point2D = struct:

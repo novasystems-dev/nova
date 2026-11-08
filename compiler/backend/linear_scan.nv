@@ -1,0 +1,133 @@
+# ============================================================================
+# NOVAC BACKEND: compiler/backend/linear_scan.nv
+# 100% Pure Nova Native - Linear Scan Register Allocator & Stack Frame Layout
+# Zero External Dependencies - Pure Native AMD64 / AArch64 / RV64 Register Mapping
+# ============================================================================
+
+# Physical AMD64 Register Codes
+# 0: RAX, 1: RCX, 2: RDX, 3: RBX, 4: RSP, 5: RBP, 6: RSI, 7: RDI
+# 8: R8, 9: R9, 10: R10, 11: R11, 12: R12, 13: R13, 14: R14, 15: R15
+
+pub fn reg_rax() -> Int: 0
+pub fn reg_rcx() -> Int: 1
+pub fn reg_rdx() -> Int: 2
+pub fn reg_rbx() -> Int: 3
+pub fn reg_rsp() -> Int: 4
+pub fn reg_rbp() -> Int: 5
+pub fn reg_rsi() -> Int: 6
+pub fn reg_rdi() -> Int: 7
+pub fn reg_r8()  -> Int: 8
+pub fn reg_r9()  -> Int: 9
+pub fn reg_r10() -> Int: 10
+pub fn reg_r11() -> Int: 11
+pub fn reg_r12() -> Int: 12
+pub fn reg_r13() -> Int: 13
+pub fn reg_r14() -> Int: 14
+pub fn reg_r15() -> Int: 15
+
+# Total allocatable general-purpose registers (excluding RSP, RBP)
+pub fn num_allocatable_regs() -> Int: 14
+
+type LiveInterval = struct:
+    vreg_id: Int
+    start_point: Int
+    end_point: Int
+    assigned_reg: Int
+    spill_slot: Int
+    is_spilled: Bool
+
+pub fn interval_new(vreg: Int, start_pt: Int, end_pt: Int) -> LiveInterval:
+    LiveInterval(vreg, start_pt, end_pt, 0 - 1, 0, false)
+
+pub fn interval_assign(it: LiveInterval, phys_reg: Int) -> LiveInterval:
+    LiveInterval(it.vreg_id, it.start_point, it.end_point, phys_reg, 0, false)
+
+pub fn interval_spill(it: LiveInterval, slot: Int) -> LiveInterval:
+    LiveInterval(it.vreg_id, it.start_point, it.end_point, 0 - 1, slot, true)
+
+type RegAllocState = struct:
+    active_count: Int
+    spill_count: Int
+    stack_frame_bytes: Int
+    highest_vreg_seen: Int
+
+pub fn reg_alloc_init() -> RegAllocState:
+    RegAllocState(0, 0, 0, 0)
+
+# Maps an index 0..13 to physical register id
+pub fn index_to_phys_reg(idx: Int) -> Int:
+    if idx == 0:
+        reg_rax()
+    elif idx == 1:
+        reg_rcx()
+    elif idx == 2:
+        reg_rdx()
+    elif idx == 3:
+        reg_rbx()
+    elif idx == 4:
+        reg_rsi()
+    elif idx == 5:
+        reg_rdi()
+    elif idx == 6:
+        reg_r8()
+    elif idx == 7:
+        reg_r9()
+    elif idx == 8:
+        reg_r10()
+    elif idx == 9:
+        reg_r11()
+    elif idx == 10:
+        reg_r12()
+    elif idx == 11:
+        reg_r13()
+    elif idx == 12:
+        reg_r14()
+    elif idx == 13:
+        reg_r15()
+    else:
+        reg_rax()
+
+pub fn max_seen_vreg(vreg: Int, current_seen: Int) -> Int:
+    if vreg > current_seen:
+        vreg
+    else:
+        current_seen
+
+pub fn align_stack_bytes(raw_bytes: Int) -> Int:
+    if raw_bytes % 16 == 0:
+        raw_bytes
+    else:
+        ((raw_bytes / 16) + 1) * 16
+
+# Linear Scan Step: Allocates a register or spills to stack
+pub fn linear_scan_allocate(state: RegAllocState, interval: LiveInterval) -> RegAllocState:
+    let vreg_seen = max_seen_vreg(interval.vreg_id, state.highest_vreg_seen)
+    if state.active_count < num_allocatable_regs():
+        let new_active = state.active_count + 1
+        RegAllocState(new_active, state.spill_count, state.stack_frame_bytes, vreg_seen)
+    else:
+        # Spill to stack
+        let new_spills = state.spill_count + 1
+        let aligned_frame = align_stack_bytes(new_spills * 8)
+        RegAllocState(state.active_count, new_spills, aligned_frame, vreg_seen)
+
+# Calculates stack frame offset for spilled slot
+pub fn get_spill_offset(slot: Int) -> Int:
+    0 - (slot * 8)
+
+# ABI Function Calling Convention (System V AMD64: RDI, RSI, RDX, RCX, R8, R9)
+pub fn get_arg_reg(arg_index: Int) -> Int:
+    if arg_index == 0:
+        reg_rdi()
+    elif arg_index == 1:
+        reg_rsi()
+    elif arg_index == 2:
+        reg_rdx()
+    elif arg_index == 3:
+        reg_rcx()
+    elif arg_index == 4:
+        reg_r8()
+    elif arg_index == 5:
+        reg_r9()
+    else:
+        0 - 1
