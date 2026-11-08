@@ -6,6 +6,10 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#ifdef errno
+#undef errno
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

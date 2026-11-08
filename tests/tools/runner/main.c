@@ -32,9 +32,37 @@ static void print_usage(const char *prog) {
     printf("  analogous to Java's java/javaw runtime environment.\n");
 }
 
+static void append_argument(char *cmd, size_t max_len, int *offset, const char *arg) {
+    int needs_quotes = (strchr(arg, ' ') != NULL || strchr(arg, '\t') != NULL || arg[0] == '\0');
+    if (*offset > 0 && *offset < (int)max_len - 1) {
+        cmd[(*offset)++] = ' ';
+        cmd[*offset] = '\0';
+    }
+    if (needs_quotes) {
+        *offset += snprintf(cmd + *offset, max_len - *offset, "\"%s\"", arg);
+    } else {
+        *offset += snprintf(cmd + *offset, max_len - *offset, "%s", arg);
+    }
+}
+
+static int execute_command(const char *cmd) {
+#ifdef _WIN32
+    if (strchr(cmd, '"') != NULL) {
+        char win_cmd[4096];
+        snprintf(win_cmd, sizeof(win_cmd), "\"%s\"", cmd);
+        return system(win_cmd);
+    } else {
+        return system(cmd);
+    }
+#else
+    return system(cmd);
+#endif
+}
+
 static int run_target_with_hold(const char *target, int argc, char **argv, int start_idx) {
     /* Construct execution command */
-    char cmd[4096];
+    char cmd[4096] = "";
+    int offset = 0;
 #ifdef _WIN32
     char norm_target[4096];
     strncpy(norm_target, target, sizeof(norm_target) - 1);
@@ -42,17 +70,16 @@ static int run_target_with_hold(const char *target, int argc, char **argv, int s
     for (char *p = norm_target; *p; p++) {
         if (*p == '/') *p = '\\';
     }
-    int offset = snprintf(cmd, sizeof(cmd), "\"%s\"", norm_target);
+    append_argument(cmd, sizeof(cmd), &offset, norm_target);
 #else
-    int offset = snprintf(cmd, sizeof(cmd), "\"%s\"", target);
+    append_argument(cmd, sizeof(cmd), &offset, target);
 #endif
     for (int i = start_idx; i < argc; i++) {
-        offset += snprintf(cmd + offset, sizeof(cmd) - offset, " \"%s\"", argv[i]);
-        if (offset >= (int)sizeof(cmd) - 1) break;
+        append_argument(cmd, sizeof(cmd), &offset, argv[i]);
     }
 
     /* Execute target binary */
-    int status = system(cmd);
+    int status = execute_command(cmd);
     int exit_code = 0;
 #ifndef _WIN32
     if (WIFEXITED(status)) {
@@ -160,12 +187,22 @@ int main(int argc, char **argv) {
     }
 
     /* Standard direct in-terminal execution */
-    char cmd[4096];
-    int offset = snprintf(cmd, sizeof(cmd), "\"%s\"", target);
+    char cmd[4096] = "";
+    int offset = 0;
+#ifdef _WIN32
+    char norm_target[4096];
+    strncpy(norm_target, target, sizeof(norm_target) - 1);
+    norm_target[sizeof(norm_target) - 1] = '\0';
+    for (char *p = norm_target; *p; p++) {
+        if (*p == '/') *p = '\\';
+    }
+    append_argument(cmd, sizeof(cmd), &offset, norm_target);
+#else
+    append_argument(cmd, sizeof(cmd), &offset, target);
+#endif
     for (int i = target_idx + 1; i < argc; i++) {
-        offset += snprintf(cmd + offset, sizeof(cmd) - offset, " \"%s\"", argv[i]);
-        if (offset >= (int)sizeof(cmd) - 1) break;
+        append_argument(cmd, sizeof(cmd), &offset, argv[i]);
     }
 
-    return system(cmd);
+    return execute_command(cmd);
 }

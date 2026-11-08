@@ -70,7 +70,7 @@ type LinuxSyscall = struct:
 type LinuxSyscallResult = struct:
     ret_val: Int
     is_error: Bool
-    errno: Int
+    err_code: Int
 
 pub fn make_syscall1(nr: Int, a0: Int) -> LinuxSyscall:
     LinuxSyscall(nr, a0, 0, 0, 0, 0, 0)
