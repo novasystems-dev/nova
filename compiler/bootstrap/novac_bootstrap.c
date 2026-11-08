@@ -116,7 +116,7 @@ void nova_main(void);
 
 void nova_report_banner(void) {
     nova_print_str("=========================================================="); nova_print_newline();
-    nova_print_str("  NOVAC: Nova Systems Compiler (v0.31.02)"); nova_print_newline();
+    nova_print_str("  NOVAC: Nova Systems Compiler (v0.32.12)"); nova_print_newline();
     nova_print_str("  100% Pure Self-Hosted - Direct Native Binary Emission"); nova_print_newline();
     nova_print_str("  Architectures: x86_64, AArch64, RISC-V, WebAssembly"); nova_print_newline();
     nova_print_str("=========================================================="); nova_print_newline();
@@ -142,7 +142,7 @@ int64_t nova_run_compiler_cli(const char * cmd, const char * target) {
 
     if (strcmp(cmd, "version") == 0 || strcmp(cmd, "--version") == 0 || strcmp(cmd, "-v") == 0 || strcmp(cmd, "-V") == 0) {
         nova_report_banner();
-        nova_print_str("novac version 0.31.02 (Self-Hosted Pure Nova / Host Native)"); nova_print_newline();
+        nova_print_str("novac version 0.32.12 (Self-Hosted Pure Nova / Host Native)"); nova_print_newline();
         return 0LL;
     }
 

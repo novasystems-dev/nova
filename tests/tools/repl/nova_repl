@@ -63,7 +63,7 @@ BANNER = r"""
   | |\  | |_| / /  \ \/ / /\ \ |_|
   |_| \_|\___/_/    \__/ /  \_\(_)
 
-  Nova Systems Programming Language v0.31.02
+  Nova Systems Programming Language v0.32.12
   Zero GC | Perceus In-Place Reuse | Refinement Safety
   Type expressions, statements, or ':help' for commands.
   Press Ctrl+D or type ':quit' to exit.

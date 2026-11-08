@@ -1,12 +1,12 @@
 [package]
 name = "nova-system"
-version = "0.31.02"
+version = "0.32.12"
 edition = "2026"
 authors = ["Nova Architecture & Systems Team"]
 description = "Industrial Production-Grade Systems Programming Language"
 
 [dependencies]
-std = "0.31.02"
+std = "0.32.12"
 
 [capabilities]
 unsafe_hardware = true

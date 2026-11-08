@@ -1,6 +1,6 @@
 /*
  * Nova Runtime Desktop Launcher (nova-runner)
- * Part of Nova Programming Language v0.31.02
+ * Part of Nova Programming Language v0.32.12
  * Copyright (c) 2026 Fyew999 / Nova Systems Team. PolyForm Noncommercial 1.0.0.
  */
 
@@ -18,7 +18,7 @@
 #include <sys/wait.h>
 #endif
 
-#define NOVA_RUNNER_VERSION "0.31.02"
+#define NOVA_RUNNER_VERSION "0.32.12"
 
 static void print_usage(const char *prog) {
     printf("Nova Desktop Runtime Launcher v%s\n", NOVA_RUNNER_VERSION);

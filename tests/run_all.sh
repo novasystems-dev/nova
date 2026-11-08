@@ -363,7 +363,7 @@ run_test "Interactive REPL evaluation pipeline" "REPL_BIN='./bin/nova-repl'; if 
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nv std/*.nv"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nv std/*.nv"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
-run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.31.02'"
+run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.32.12'"
 run_test "Nova-runner console-hold execution (--hold)" "DOC_BIN='bin/nova-doc'; if [ -f \"\${DOC_BIN}.exe\" ]; then DOC_BIN=\"\${DOC_BIN}.exe\"; fi; echo '' | ./bin/nova-runner --hold \"\$DOC_BIN\" --version | grep -q 'Process exited with code: 0'"
 run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
 run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"

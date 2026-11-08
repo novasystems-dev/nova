@@ -1,5 +1,5 @@
 # Orbit Pure Nova Package Manager
-# Version 0.31.02 (Java-style modular enterprise support & .nv / .nova convention)
+# Version 0.32.12 (Java-style modular enterprise support & .nv / .nova convention)
 
 fn print_usage():
     print_str("Orbit - Official Package Manager for Nova\n")
@@ -31,7 +31,7 @@ fn orbit_new(name: String) -> Int:
     let cmd_dirs_full = str_concat3(cmd_dirs, name, "/tests\"")
     process_run(cmd_dirs_full)
 
-    let manifest = "[package]\nversion = \"0.31.02\"\nedition = \"2026\"\nauthors = [\"Nova Systems\"]\n\n[dependencies]\n"
+    let manifest = "[package]\nversion = \"0.32.12\"\nedition = \"2026\"\nauthors = [\"Nova Systems\"]\n\n[dependencies]\n"
     let toml_path = str_concat(name, "/Orbit.toml")
     fs_write_string(toml_path, manifest)
 
@@ -149,11 +149,11 @@ fn orbit_update() -> Int:
     orbit_lock()
 
 fn orbit_tree() -> Int:
-    print_str("nova-project v0.31.02\n")
-    print_str("├── std v0.31.02 (built-in)\n")
-    print_str("│   ├── std::perceus v0.31.02\n")
-    print_str("│   └── std::z3_smt v0.31.02\n")
-    print_str("└── runtime v0.31.02 (c99/llvm bare-metal)\n")
+    print_str("nova-project v0.32.12\n")
+    print_str("├── std v0.32.12 (built-in)\n")
+    print_str("│   ├── std::perceus v0.32.12\n")
+    print_str("│   └── std::z3_smt v0.32.12\n")
+    print_str("└── runtime v0.32.12 (c99/llvm bare-metal)\n")
     0
 
 fn orbit_vendor() -> Int:
@@ -195,7 +195,7 @@ fn main():
     elif str_eq(cmd, "audit"):
         print_str("    Auditing dependencies and capabilities... 0 vulnerabilities, 100% verified.\n")
     elif str_eq(cmd, "version"):
-        print_str("orbit 0.31.02 (pure-nova-native x86_64-linux)\n")
+        print_str("orbit 0.32.12 (pure-nova-native x86_64-linux)\n")
     else:
         print_usage()
     0

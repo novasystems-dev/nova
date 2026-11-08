@@ -56,7 +56,7 @@ function Invoke-NovaInstallCore {
 
     if (-not $LocalBinExists) {
         Report-Progress 25 "Fetching prebuilt binary release from GitHub..."
-        $Tag = "v0.31.02"
+        $Tag = "v0.32.12"
         try {
             $Req = [System.Net.WebRequest]::Create("https://github.com/novasystems-dev/nova/releases/latest")
             $Req.AllowAutoRedirect = $false
@@ -66,7 +66,7 @@ function Invoke-NovaInstallCore {
             if ($TagPart) { $Tag = $TagPart }
             $Resp.Close()
         } catch {
-            $Tag = "v0.31.02"
+            $Tag = "v0.32.12"
         }
 
         $ZipUrl = "https://github.com/novasystems-dev/nova/releases/download/$Tag/nova-dev-full-$Tag-windows-x86_64.zip"
@@ -174,7 +174,7 @@ function Show-NovaSetupWizard {
     Add-Type -AssemblyName System.Drawing
 
     $Form = New-Object System.Windows.Forms.Form
-    $Form.Text = "Nova Systems Toolchain Setup (v0.31.02)"
+    $Form.Text = "Nova Systems Toolchain Setup (v0.32.12)"
     $Form.Size = New-Object System.Drawing.Size(680, 520)
     $Form.StartPosition = "CenterScreen"
     $Form.FormBorderStyle = "FixedDialog"
@@ -199,7 +199,7 @@ function Show-NovaSetupWizard {
     $HeaderPanel.Controls.Add($HeaderTitle)
 
     $HeaderSubtitle = New-Object System.Windows.Forms.Label
-    $HeaderSubtitle.Text = "Genesis v0.31.02 - Industrial-Grade Type-Safe Systems Language"
+    $HeaderSubtitle.Text = "Genesis v0.32.12 - Industrial-Grade Type-Safe Systems Language"
     $HeaderSubtitle.ForeColor = [System.Drawing.Color]::FromArgb(150, 160, 190)
     $HeaderSubtitle.Location = New-Object System.Drawing.Point(26, 40)
     $HeaderSubtitle.AutoSize = $true

@@ -25,7 +25,7 @@ pub fn mode_legacy() -> Int: 5
 
 pub fn report_banner():
     print("==========================================================")
-    print("  NOVAC: Nova Systems Compiler (v0.31.02)")
+    print("  NOVAC: Nova Systems Compiler (v0.32.12)")
     print("  100% Pure Self-Hosted - Direct Native Binary Emission")
     print("  Architectures: x86_64, AArch64, RISC-V, WebAssembly")
     print("==========================================================")
@@ -106,7 +106,7 @@ pub fn run_compiler_cli(cmd: String, target: String) -> Int:
         print("✅ Native compilation finished successfully.")
         0
     elif cmd == "version" or cmd == "--version" or cmd == "-v":
-        print("novac version 0.31.02 (100% Pure Self-Hosted Nova / Host Native)")
+        print("novac version 0.32.12 (100% Pure Self-Hosted Nova / Host Native)")
         0
     elif cmd == "help" or cmd == "--help" or cmd == "-h":
         print("Usage:")
