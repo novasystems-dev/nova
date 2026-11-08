@@ -59,7 +59,7 @@ jobs:
         with:
           msystem: UCRT64
           update: false
-          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-z3
+          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-z3 mingw-w64-ucrt-x86_64-python
           path-type: inherit
 
       - name: Export Windows Toolchain to PATH

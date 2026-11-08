@@ -40,7 +40,13 @@ for file in "${BENCH_FILES[@]}"; do
     # Measure execution time
     BIN_NAME="$(basename "$(basename "$file" .nova)" .nv).out"
     TARGET_EXEC="./$BIN_NAME"
-    if [ ! -f "$TARGET_EXEC" ] && [ -f "${TARGET_EXEC}.exe" ]; then
+    if [ -f "${TARGET_EXEC}.exe" ] || [ -f "${BIN_NAME}.exe" ]; then
+        if [ -f "${TARGET_EXEC}.exe" ]; then
+            TARGET_EXEC="${TARGET_EXEC}.exe"
+        else
+            TARGET_EXEC="./${BIN_NAME}.exe"
+        fi
+    elif [ ! -f "$TARGET_EXEC" ] && [ -f "${TARGET_EXEC}.exe" ]; then
         TARGET_EXEC="${TARGET_EXEC}.exe"
     fi
     START_RUN=$(get_time_ms)

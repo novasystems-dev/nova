@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DEFAULT_SOURCE
+#define _DARWIN_C_SOURCE
 #include "nova_rt.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +27,10 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sched.h>
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 #define NOVA_CLOSE_SOCKET(s) close((int)(s))
 #endif
 
@@ -933,9 +938,18 @@ int64_t nova_num_cores(void) {
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return (int64_t)sysinfo.dwNumberOfProcessors;
+#elif defined(__APPLE__)
+    int count = 1;
+    size_t count_len = sizeof(count);
+    sysctlbyname("hw.logicalcpu", &count, &count_len, NULL, 0);
+    return (count > 0) ? (int64_t)count : 1;
 #else
+    #ifdef _SC_NPROCESSORS_ONLN
     long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
     return (nprocs > 0) ? (int64_t)nprocs : 1;
+    #else
+    return 1;
+    #endif
 #endif
 }
 
