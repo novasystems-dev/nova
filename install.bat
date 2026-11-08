@@ -11,6 +11,11 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install.ps1" %*
+:: Launch GUI Setup Wizard by default if no arguments provided
+if "%~1"=="" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "& { & '%~dp0install.ps1' -GUI }"
+) else (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install.ps1" %*
+)
 
 endlocal

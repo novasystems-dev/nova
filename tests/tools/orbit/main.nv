@@ -76,10 +76,14 @@ fn orbit_build() -> Int:
             process_run("cp -f bundle.nova target/release/app.nova 2>/dev/null; cp -f bundle.nova bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null; rm -f bundle.nova bundle.out")
         elif fs_exists("bundle.out"):
             process_run("cp -f bundle.out target/release/app.nova 2>/dev/null; cp -f bundle.out bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null; rm -f bundle.out")
+        elif fs_exists("bundle.out.exe"):
+            process_run("cp -f bundle.out.exe target/release/app.nova.exe 2>/dev/null; cp -f bundle.out.exe bin/app.nova.exe 2>/dev/null; cp -f bundle.out.exe target/release/app.nova 2>/dev/null; cp -f bundle.out.exe bin/app.nova 2>/dev/null; rm -f bundle.out.exe")
         elif fs_exists("main.nova"):
             process_run("cp -f main.nova target/release/app.nova 2>/dev/null; cp -f main.nova bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null")
         elif fs_exists("main.out"):
             process_run("cp -f main.out target/release/app.nova 2>/dev/null; cp -f main.out bin/app.nova 2>/dev/null; chmod +x target/release/app.nova bin/app.nova 2>/dev/null")
+        elif fs_exists("main.out.exe"):
+            process_run("cp -f main.out.exe target/release/app.nova.exe 2>/dev/null; cp -f main.out.exe bin/app.nova.exe 2>/dev/null; cp -f main.out.exe target/release/app.nova 2>/dev/null; cp -f main.out.exe bin/app.nova 2>/dev/null; rm -f main.out.exe")
         print_str("    Finished release [optimized] target(s) -> target/release/app.nova\n")
     else:
         print_str("Error: Build failed\n")

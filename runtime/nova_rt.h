@@ -128,6 +128,52 @@ const char *nova_crypto_sha256(const char *input);
 const char *nova_crypto_sha256_file(const char *path);
 bool nova_crypto_verify_hash(const char *data, const char *expected_hash);
 
+// ============================================================================
+// UNIVERSAL C ABI & FFI RUNTIME PRIMITIVES
+// ============================================================================
+int64_t nova_c_sizeof_int(void);
+int64_t nova_c_sizeof_pointer(void);
+int64_t nova_c_sizeof_double(void);
+int64_t nova_ffi_dlopen(const char *path);
+int64_t nova_ffi_dlsym(int64_t handle, const char *symbol);
+bool nova_ffi_dlclose(int64_t handle);
+int64_t nova_c_malloc(int64_t bytes);
+bool nova_c_free(int64_t ptr);
+bool nova_c_memcpy(int64_t dest, int64_t src, int64_t bytes);
+bool nova_c_memset(int64_t dest, int64_t val, int64_t bytes);
+
+// ============================================================================
+// SUPER-RUNTIME: PERCEUS V2 SLAB ALLOCATOR & PAGE MANAGEMENT
+// ============================================================================
+void *nova_slab_alloc(size_t size);
+void nova_slab_free(void *ptr, size_t size);
+void *nova_page_alloc(size_t bytes);
+void nova_page_free(void *ptr, size_t bytes);
+
+// ============================================================================
+// SUPER-RUNTIME: WORK-STEALING CONCURRENCY & MULTI-CORE SCHEDULER
+// ============================================================================
+int64_t nova_num_cores(void);
+void nova_task_pool_init(int64_t num_workers);
+void nova_task_spawn(void (*task_func)(void *), void *arg);
+void nova_task_yield(void);
+void nova_task_wait_all(void);
+
+// ============================================================================
+// SUPER-RUNTIME: VECTOR ACCELERATION & FAST HASHING (xxHash64 & SIMD)
+// ============================================================================
+double nova_simd_dot_product(const double *a, const double *b, int64_t n);
+uint64_t nova_fast_hash64(const void *data, size_t len);
+
+// ============================================================================
+// SUPER-RUNTIME: NATIVE DESKTOP GUI WINDOWING (std/gui)
+// ============================================================================
+int64_t nova_gui_window_create(const char *title, int64_t width, int64_t height);
+bool nova_gui_window_poll(int64_t win_handle);
+bool nova_gui_window_draw_rect(int64_t win_handle, int64_t x, int64_t y, int64_t w, int64_t h, int64_t color_rgba);
+bool nova_gui_alert(const char *title, const char *message);
+bool nova_gui_window_close(int64_t win_handle);
+
 // Panic handler
 void nova_panic(const char *msg, const char *file, int line);
 

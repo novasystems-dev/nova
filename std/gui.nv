@@ -1,0 +1,56 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/gui.nv
+# 100% Pure Nova Native - Lightweight Cross-Platform GUI Windowing & 2D Graphics
+# Zero external heavy frameworks: Direct OS Win32 / POSIX integration
+# ============================================================================
+
+type ColorRGBA = struct:
+    r: Int
+    g: Int
+    b: Int
+    a: Int
+
+pub fn rgb(r: Int, g: Int, b: Int) -> ColorRGBA:
+    ColorRGBA(r, g, b, 255)
+
+pub fn rgba(r: Int, g: Int, b: Int, a: Int) -> ColorRGBA:
+    ColorRGBA(r, g, b, a)
+
+pub fn color_to_u32(c: ColorRGBA) -> Int:
+    (c.a * 16777216) + (c.r * 65536) + (c.g * 256) + c.b
+
+type Window = struct:
+    handle: Int
+    title: String
+    width: Int
+    height: Int
+    is_open: Bool
+
+pub fn window_create(title: String, width: Int, height: Int) -> Window:
+    let h = nova_gui_window_create(title, width, height)
+    Window(h, title, width, height, h != 0)
+
+pub fn window_poll(win: Window) -> Window:
+    if not win.is_open:
+        win
+    else:
+        let active = nova_gui_window_poll(win.handle)
+        Window(win.handle, win.title, win.width, win.height, active)
+
+pub fn window_draw_rect(win: Window, x: Int, y: Int, w: Int, h: Int, color: ColorRGBA) -> Window:
+    if not win.is_open:
+        win
+    else:
+        let c = color_to_u32(color)
+        let _ = nova_gui_window_draw_rect(win.handle, x, y, w, h, c)
+        win
+
+pub fn window_alert(title: String, message: String) -> Bool:
+    nova_gui_alert(title, message)
+
+pub fn window_close(win: Window) -> Window:
+    if win.is_open:
+        let _ = nova_gui_window_close(win.handle)
+        Window(0, win.title, win.width, win.height, false)
+    else:
+        win

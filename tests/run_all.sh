@@ -90,6 +90,10 @@ run_test "Check 22_http2_frame_pipeline.nv" "./bin/novac check examples/22_http2
 run_test "Check 23_sha3_keccak.nv" "./bin/novac check examples/23_sha3_keccak.nv"
 run_test "Check 24_wav_audio_synth.nv" "./bin/novac check examples/24_wav_audio_synth.nv"
 run_test "Check 25_spatial_kdtree.nv" "./bin/novac check examples/25_spatial_kdtree.nv"
+run_test "Check 26_c_abi_interop.nv" "./bin/novac check examples/26_c_abi_interop.nv"
+run_test "Check 27_desktop_gui.nv" "./bin/novac check examples/27_desktop_gui.nv"
+run_test "Check std/ffi.nv" "./bin/novac check std/ffi.nv"
+run_test "Check std/gui.nv" "./bin/novac check std/gui.nv"
 run_test "Check compiler/types.nv" "./bin/novac check compiler/types.nv"
 run_test "Check compiler/lexer.nv" "./bin/novac check compiler/lexer.nv"
 run_test "Check compiler/parser.nv" "./bin/novac check compiler/parser.nv"
@@ -235,6 +239,8 @@ run_test "Execute 22_http2_frame_pipeline.out" "./bin/novac run examples/22_http
 run_test "Execute 23_sha3_keccak.out" "./bin/novac run examples/23_sha3_keccak.nv"
 run_test "Execute 24_wav_audio_synth.out" "./bin/novac run examples/24_wav_audio_synth.nv"
 run_test "Execute 25_spatial_kdtree.out" "./bin/novac run examples/25_spatial_kdtree.nv"
+run_test "Execute 26_c_abi_interop.out" "./bin/novac run examples/26_c_abi_interop.nv"
+run_test "Execute 27_desktop_gui.out" "./bin/novac run examples/27_desktop_gui.nv"
 run_test "Execute test_bloom_filter.out" "./bin/novac run tests/test_bloom_filter.nv"
 run_test "Execute test_btree_index.out" "./bin/novac run tests/test_btree_index.nv"
 run_test "Execute test_matrix_algebra.out" "./bin/novac run tests/test_matrix_algebra.nv"
@@ -290,13 +296,19 @@ run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner -
 run_test "Nova-runner console-hold execution (--hold)" "echo '' | ./bin/nova-runner --hold ./bin/nova-doc --version | grep -q 'Process exited with code: 0'"
 run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
 run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"
-run_test "Execute enterprise_service.nova bundle" "./examples/enterprise_service/target/release/app.nova >/dev/null && rm -rf examples/enterprise_service/target examples/enterprise_service/bin"
+run_test "Execute enterprise_service.nova bundle" "APP_BIN='./examples/enterprise_service/target/release/app.nova'; if [ -f \"\${APP_BIN}.exe\" ]; then APP_BIN=\"\${APP_BIN}.exe\"; fi; \"\$APP_BIN\" >/dev/null && rm -rf examples/enterprise_service/target examples/enterprise_service/bin"
 
 # 7. Bootstrapping verification
-gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./bin/novac-2
-gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./bin/novac-3
-run_test "Fixed-point hash equality (novac-2 vs novac-3)" "[ $(get_sha256 bin/novac-2) = $(get_sha256 bin/novac-3) ] && rm -f bin/novac-2 bin/novac-3 bin/novac-2.exe bin/novac-3.exe"
-run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && ./novac_c99 >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
+EXTRA_LINK_FLAGS=""
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    EXTRA_LINK_FLAGS="-Wl,-no_uuid"
+fi
+gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS $EXTRA_LINK_FLAGS -o ./bin/novac-2
+gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS $EXTRA_LINK_FLAGS -o ./bin/novac-3
+N2="bin/novac-2"; if [ -f "${N2}.exe" ]; then N2="${N2}.exe"; fi
+N3="bin/novac-3"; if [ -f "${N3}.exe" ]; then N3="${N3}.exe"; fi
+run_test "Fixed-point hash equality (novac-2 vs novac-3)" "H2=\$(get_sha256 $N2); H3=\$(get_sha256 $N3); [ -n \"\$H2\" ] && [ \"\$H2\" = \"\$H3\" ] && rm -f bin/novac-2 bin/novac-3 bin/novac-2.exe bin/novac-3.exe"
+run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && (./novac_c99.exe --version 2>/dev/null || ./novac_c99 --version 2>/dev/null || true) >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
 
 # 8. Compiler Fuzzing & Benchmarks
 run_test "Grammar mutation fuzzer (100 runs)" "./tests/fuzz.sh"

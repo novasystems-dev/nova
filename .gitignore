@@ -16,6 +16,7 @@ dist/
 !runtime/nova_rt.c
 !compiler/bootstrap/novac_bootstrap.c
 !tests/tools/**/*.c
+!assets/**/*.c
 *.ll
 *.bc
 *.s

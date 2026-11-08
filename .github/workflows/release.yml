@@ -198,7 +198,7 @@ jobs:
 
           chmod +x tests/tools/orbit/orbit* tests/tools/docgen/nova_doc* bin/* 2>/dev/null || true
 
-      - name: Run Verification Test Suite (117 Tests)
+      - name: Run Verification Test Suite (207 Tests)
         run: |
           export PATH="$GITHUB_WORKSPACE/bin:$PATH"
           export NOVAC_BIN="$GITHUB_WORKSPACE/bin/novac"

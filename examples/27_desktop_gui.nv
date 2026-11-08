@@ -1,0 +1,75 @@
+# ============================================================================
+# NOVA EXAMPLE 27: Native Desktop GUI & Super-Runtime
+# Demonstrates:
+# - Zero-dependency cross-platform native windowing (Win32 / POSIX)
+# - RGBA color primitives and canvas rectangle drawing
+# - Event loop polling and alert dialogs
+# ============================================================================
+
+type ColorRGBA = struct:
+    r: Int
+    g: Int
+    b: Int
+    a: Int
+
+pub fn make_rgb(r: Int, g: Int, b: Int) -> ColorRGBA:
+    ColorRGBA(r, g, b, 255)
+
+pub fn color_to_u32(c: ColorRGBA) -> Int:
+    (c.a * 16777216) + (c.r * 65536) + (c.g * 256) + c.b
+
+pub fn main():
+    print("==========================================================")
+    print("  NOVA SUPER-RUNTIME - NATIVE DESKTOP GUI DEMO")
+    print("==========================================================")
+
+    # 1. Create a native desktop window
+    let title = "Nova Systems - Super-Runtime Window"
+    let width = 640
+    let height = 480
+    let win_handle = gui_window_create(title, width, height)
+
+    if win_handle == 0:
+        print("[-] Failed to create native window.")
+    else:
+        print_str("[+] Window handle acquired successfully: 0x")
+        print_int(win_handle)
+        print("")
+
+        # 2. Draw colorful UI components on window canvas
+        # Nova Coral accent color: #EAA2AC (RGBA 234, 162, 172, 255)
+        let coral = make_rgb(234, 162, 172)
+        let dark_slate = make_rgb(26, 27, 38)
+        let cyan = make_rgb(122, 162, 247)
+
+        # Draw background panel
+        let bg_color = color_to_u32(dark_slate)
+        let _d1 = gui_window_draw_rect(win_handle, 0, 0, width, height, bg_color)
+
+        # Draw decorative banner header
+        let coral_color = color_to_u32(coral)
+        let _d2 = gui_window_draw_rect(win_handle, 20, 20, 600, 60, coral_color)
+
+        # Draw interior content cards
+        let cyan_color = color_to_u32(cyan)
+        let _d3 = gui_window_draw_rect(win_handle, 40, 100, 260, 320, cyan_color)
+        let _d4 = gui_window_draw_rect(win_handle, 340, 100, 260, 320, coral_color)
+
+        # 3. Poll window message loop for a frame
+        let is_active = gui_window_poll(win_handle)
+        print_str("[+] Event loop poll status: ")
+        print_bool(is_active)
+        print("")
+
+        # 4. Trigger native desktop alert dialog
+        let alert_ok = gui_alert("Nova Systems", "Nova Super-Runtime Native Window is alive!")
+        print_str("[+] Native alert dispatch status: ")
+        print_bool(alert_ok)
+        print("")
+
+        # 5. Cleanly destroy and close window
+        let closed = gui_window_close(win_handle)
+        print_str("[+] Window closed status: ")
+        print_bool(closed)
+        print("")
+        print("🎉 Native Desktop GUI demonstration finished successfully.")

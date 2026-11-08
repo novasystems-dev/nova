@@ -50,6 +50,8 @@ cp -L bin/nova-fmt "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-lint "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-doc "$FULL_DIR/bin/" 2>/dev/null || true
 cp -L bin/nova-doc.exe "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-runner "$FULL_DIR/bin/" 2>/dev/null || true
+cp -L bin/nova-runner.exe "$FULL_DIR/bin/" 2>/dev/null || true
 
 # Explicit fallback from tests/tools/ if bin/ symlinks failed on Windows
 if [ ! -f "$FULL_DIR/bin/orbit" ] && [ ! -f "$FULL_DIR/bin/orbit.exe" ]; then
