@@ -1,0 +1,1945 @@
+# ============================================================================
+# NOVA ZERO-C OS SDK: MULTI-ARCH LINUX SYSCALL ENCODING MATRIX
+# Module: std/runtime/sys/linux_syscall_matrix.nv
+# Architecture Syscall Number Map (x86_64, aarch64, riscv64)
+# 100% Pure Nova Native - Zero C / Zero LLVM Dependencies
+# ============================================================================
+
+type SyscallEntry = struct:
+    id: Int
+    name: String
+    nr_x86_64: Int
+    nr_arm64: Int
+    nr_riscv64: Int
+    arg_count: Int
+    is_blocking: Bool
+
+pub fn sys_entry_1_read() -> SyscallEntry: SyscallEntry(1, "read", 0, 63, 63, 3, true)
+pub fn sys_entry_2_write() -> SyscallEntry: SyscallEntry(2, "write", 1, 64, 64, 3, true)
+pub fn sys_entry_3_open() -> SyscallEntry: SyscallEntry(3, "open", 2, 1024, 1024, 3, true)
+pub fn sys_entry_4_close() -> SyscallEntry: SyscallEntry(4, "close", 3, 57, 57, 1, false)
+pub fn sys_entry_5_stat() -> SyscallEntry: SyscallEntry(5, "stat", 4, 1038, 1038, 2, false)
+pub fn sys_entry_6_fstat() -> SyscallEntry: SyscallEntry(6, "fstat", 5, 80, 80, 2, false)
+pub fn sys_entry_7_poll() -> SyscallEntry: SyscallEntry(7, "poll", 7, 73, 73, 3, true)
+pub fn sys_entry_8_lseek() -> SyscallEntry: SyscallEntry(8, "lseek", 8, 62, 62, 3, false)
+pub fn sys_entry_9_mmap() -> SyscallEntry: SyscallEntry(9, "mmap", 9, 222, 222, 6, false)
+pub fn sys_entry_10_mprotect() -> SyscallEntry: SyscallEntry(10, "mprotect", 10, 226, 226, 3, false)
+pub fn sys_entry_11_munmap() -> SyscallEntry: SyscallEntry(11, "munmap", 11, 215, 215, 2, false)
+pub fn sys_entry_12_brk() -> SyscallEntry: SyscallEntry(12, "brk", 12, 214, 214, 1, false)
+pub fn sys_entry_13_rt_sigaction() -> SyscallEntry: SyscallEntry(13, "rt_sigaction", 13, 134, 134, 4, false)
+pub fn sys_entry_14_rt_sigprocmask() -> SyscallEntry: SyscallEntry(14, "rt_sigprocmask", 14, 135, 135, 4, false)
+pub fn sys_entry_15_ioctl() -> SyscallEntry: SyscallEntry(15, "ioctl", 16, 29, 29, 3, true)
+pub fn sys_entry_16_pread64() -> SyscallEntry: SyscallEntry(16, "pread64", 17, 67, 67, 4, true)
+pub fn sys_entry_17_pwrite64() -> SyscallEntry: SyscallEntry(17, "pwrite64", 18, 68, 68, 4, true)
+pub fn sys_entry_18_readv() -> SyscallEntry: SyscallEntry(18, "readv", 19, 65, 65, 3, true)
+pub fn sys_entry_19_writev() -> SyscallEntry: SyscallEntry(19, "writev", 20, 66, 66, 3, true)
+pub fn sys_entry_20_access() -> SyscallEntry: SyscallEntry(20, "access", 21, 1033, 1033, 2, false)
+pub fn sys_entry_21_pipe() -> SyscallEntry: SyscallEntry(21, "pipe", 22, 1040, 1040, 1, false)
+pub fn sys_entry_22_select() -> SyscallEntry: SyscallEntry(22, "select", 23, 1067, 1067, 5, true)
+pub fn sys_entry_23_sched_yield() -> SyscallEntry: SyscallEntry(23, "sched_yield", 24, 124, 124, 0, false)
+pub fn sys_entry_24_mremap() -> SyscallEntry: SyscallEntry(24, "mremap", 25, 216, 216, 5, false)
+pub fn sys_entry_25_msync() -> SyscallEntry: SyscallEntry(25, "msync", 26, 227, 227, 3, false)
+pub fn sys_entry_26_mincore() -> SyscallEntry: SyscallEntry(26, "mincore", 27, 232, 232, 3, false)
+pub fn sys_entry_27_madvise() -> SyscallEntry: SyscallEntry(27, "madvise", 28, 233, 233, 3, false)
+pub fn sys_entry_28_dup() -> SyscallEntry: SyscallEntry(28, "dup", 32, 23, 23, 1, false)
+pub fn sys_entry_29_dup2() -> SyscallEntry: SyscallEntry(29, "dup2", 33, 1041, 1041, 2, false)
+pub fn sys_entry_30_nanosleep() -> SyscallEntry: SyscallEntry(30, "nanosleep", 35, 101, 101, 2, true)
+pub fn sys_entry_31_getpid() -> SyscallEntry: SyscallEntry(31, "getpid", 39, 172, 172, 0, false)
+pub fn sys_entry_32_socket() -> SyscallEntry: SyscallEntry(32, "socket", 41, 198, 198, 3, false)
+pub fn sys_entry_33_connect() -> SyscallEntry: SyscallEntry(33, "connect", 42, 203, 203, 3, true)
+pub fn sys_entry_34_accept() -> SyscallEntry: SyscallEntry(34, "accept", 43, 202, 202, 3, true)
+pub fn sys_entry_35_sendto() -> SyscallEntry: SyscallEntry(35, "sendto", 44, 206, 206, 6, true)
+pub fn sys_entry_36_recvfrom() -> SyscallEntry: SyscallEntry(36, "recvfrom", 45, 207, 207, 6, true)
+pub fn sys_entry_37_shutdown() -> SyscallEntry: SyscallEntry(37, "shutdown", 48, 210, 210, 2, false)
+pub fn sys_entry_38_bind() -> SyscallEntry: SyscallEntry(38, "bind", 49, 200, 200, 3, false)
+pub fn sys_entry_39_listen() -> SyscallEntry: SyscallEntry(39, "listen", 50, 201, 201, 2, false)
+pub fn sys_entry_40_getsockname() -> SyscallEntry: SyscallEntry(40, "getsockname", 51, 204, 204, 3, false)
+pub fn sys_entry_41_getpeername() -> SyscallEntry: SyscallEntry(41, "getpeername", 52, 205, 205, 3, false)
+pub fn sys_entry_42_socketpair() -> SyscallEntry: SyscallEntry(42, "socketpair", 53, 199, 199, 4, false)
+pub fn sys_entry_43_setsockopt() -> SyscallEntry: SyscallEntry(43, "setsockopt", 54, 208, 208, 5, false)
+pub fn sys_entry_44_getsockopt() -> SyscallEntry: SyscallEntry(44, "getsockopt", 55, 209, 209, 5, false)
+pub fn sys_entry_45_clone() -> SyscallEntry: SyscallEntry(45, "clone", 56, 220, 220, 5, false)
+pub fn sys_entry_46_fork() -> SyscallEntry: SyscallEntry(46, "fork", 57, 1079, 1079, 0, false)
+pub fn sys_entry_47_execve() -> SyscallEntry: SyscallEntry(47, "execve", 59, 221, 221, 3, false)
+pub fn sys_entry_48_exit() -> SyscallEntry: SyscallEntry(48, "exit", 60, 93, 93, 1, false)
+pub fn sys_entry_49_wait4() -> SyscallEntry: SyscallEntry(49, "wait4", 61, 260, 260, 4, true)
+pub fn sys_entry_50_kill() -> SyscallEntry: SyscallEntry(50, "kill", 62, 129, 129, 2, false)
+pub fn sys_entry_51_uname() -> SyscallEntry: SyscallEntry(51, "uname", 63, 160, 160, 1, false)
+pub fn sys_entry_52_fcntl() -> SyscallEntry: SyscallEntry(52, "fcntl", 72, 25, 25, 3, false)
+pub fn sys_entry_53_flock() -> SyscallEntry: SyscallEntry(53, "flock", 73, 32, 32, 2, false)
+pub fn sys_entry_54_fsync() -> SyscallEntry: SyscallEntry(54, "fsync", 74, 82, 82, 1, true)
+pub fn sys_entry_55_fdatasync() -> SyscallEntry: SyscallEntry(55, "fdatasync", 75, 83, 83, 1, true)
+pub fn sys_entry_56_truncate() -> SyscallEntry: SyscallEntry(56, "truncate", 76, 45, 45, 2, false)
+pub fn sys_entry_57_ftruncate() -> SyscallEntry: SyscallEntry(57, "ftruncate", 77, 46, 46, 2, false)
+pub fn sys_entry_58_getcwd() -> SyscallEntry: SyscallEntry(58, "getcwd", 79, 17, 17, 2, false)
+pub fn sys_entry_59_chdir() -> SyscallEntry: SyscallEntry(59, "chdir", 80, 49, 49, 1, false)
+pub fn sys_entry_60_fchdir() -> SyscallEntry: SyscallEntry(60, "fchdir", 81, 50, 50, 1, false)
+pub fn sys_entry_61_rename() -> SyscallEntry: SyscallEntry(61, "rename", 82, 1034, 1034, 2, false)
+pub fn sys_entry_62_mkdir() -> SyscallEntry: SyscallEntry(62, "mkdir", 83, 1030, 1030, 2, false)
+pub fn sys_entry_63_rmdir() -> SyscallEntry: SyscallEntry(63, "rmdir", 84, 1031, 1031, 1, false)
+pub fn sys_entry_64_creat() -> SyscallEntry: SyscallEntry(64, "creat", 85, 1064, 1064, 2, false)
+pub fn sys_entry_65_link() -> SyscallEntry: SyscallEntry(65, "link", 86, 1025, 1025, 2, false)
+pub fn sys_entry_66_unlink() -> SyscallEntry: SyscallEntry(66, "unlink", 87, 1026, 1026, 1, false)
+pub fn sys_entry_67_symlink() -> SyscallEntry: SyscallEntry(67, "symlink", 88, 1028, 1028, 2, false)
+pub fn sys_entry_68_readlink() -> SyscallEntry: SyscallEntry(68, "readlink", 89, 1035, 1035, 3, false)
+pub fn sys_entry_69_chmod() -> SyscallEntry: SyscallEntry(69, "chmod", 90, 1028, 1028, 2, false)
+pub fn sys_entry_70_fchmod() -> SyscallEntry: SyscallEntry(70, "fchmod", 91, 52, 52, 2, false)
+pub fn sys_entry_71_chown() -> SyscallEntry: SyscallEntry(71, "chown", 92, 1029, 1029, 3, false)
+pub fn sys_entry_72_fchown() -> SyscallEntry: SyscallEntry(72, "fchown", 93, 55, 55, 3, false)
+pub fn sys_entry_73_umask() -> SyscallEntry: SyscallEntry(73, "umask", 95, 166, 166, 1, false)
+pub fn sys_entry_74_getuid() -> SyscallEntry: SyscallEntry(74, "getuid", 102, 174, 174, 0, false)
+pub fn sys_entry_75_getgid() -> SyscallEntry: SyscallEntry(75, "getgid", 104, 176, 176, 0, false)
+pub fn sys_entry_76_setuid() -> SyscallEntry: SyscallEntry(76, "setuid", 105, 146, 146, 1, false)
+pub fn sys_entry_77_setgid() -> SyscallEntry: SyscallEntry(77, "setgid", 106, 144, 144, 1, false)
+pub fn sys_entry_78_geteuid() -> SyscallEntry: SyscallEntry(78, "geteuid", 107, 175, 175, 0, false)
+pub fn sys_entry_79_getegid() -> SyscallEntry: SyscallEntry(79, "getegid", 108, 177, 177, 0, false)
+pub fn sys_entry_80_getppid() -> SyscallEntry: SyscallEntry(80, "getppid", 110, 173, 173, 0, false)
+pub fn sys_entry_81_setsid() -> SyscallEntry: SyscallEntry(81, "setsid", 112, 157, 157, 0, false)
+pub fn sys_entry_82_futex() -> SyscallEntry: SyscallEntry(82, "futex", 202, 98, 98, 6, true)
+pub fn sys_entry_83_epoll_create() -> SyscallEntry: SyscallEntry(83, "epoll_create", 213, 20, 20, 1, false)
+pub fn sys_entry_84_getdents64() -> SyscallEntry: SyscallEntry(84, "getdents64", 217, 61, 61, 3, false)
+pub fn sys_entry_85_clock_gettime() -> SyscallEntry: SyscallEntry(85, "clock_gettime", 228, 113, 113, 2, false)
+pub fn sys_entry_86_clock_nanosleep() -> SyscallEntry: SyscallEntry(86, "clock_nanosleep", 230, 115, 115, 4, true)
+pub fn sys_entry_87_exit_group() -> SyscallEntry: SyscallEntry(87, "exit_group", 231, 94, 94, 1, false)
+pub fn sys_entry_88_epoll_wait() -> SyscallEntry: SyscallEntry(88, "epoll_wait", 232, 1069, 1069, 4, true)
+pub fn sys_entry_89_epoll_ctl() -> SyscallEntry: SyscallEntry(89, "epoll_ctl", 233, 21, 21, 4, false)
+pub fn sys_entry_90_openat() -> SyscallEntry: SyscallEntry(90, "openat", 257, 56, 56, 4, true)
+pub fn sys_entry_91_mkdirat() -> SyscallEntry: SyscallEntry(91, "mkdirat", 258, 34, 34, 3, false)
+pub fn sys_entry_92_fchownat() -> SyscallEntry: SyscallEntry(92, "fchownat", 260, 54, 54, 5, false)
+pub fn sys_entry_93_newfstatat() -> SyscallEntry: SyscallEntry(93, "newfstatat", 262, 79, 79, 4, false)
+pub fn sys_entry_94_unlinkat() -> SyscallEntry: SyscallEntry(94, "unlinkat", 263, 35, 35, 3, false)
+pub fn sys_entry_95_renameat() -> SyscallEntry: SyscallEntry(95, "renameat", 264, 38, 38, 4, false)
+pub fn sys_entry_96_linkat() -> SyscallEntry: SyscallEntry(96, "linkat", 265, 37, 37, 5, false)
+pub fn sys_entry_97_symlinkat() -> SyscallEntry: SyscallEntry(97, "symlinkat", 266, 36, 36, 3, false)
+pub fn sys_entry_98_readlinkat() -> SyscallEntry: SyscallEntry(98, "readlinkat", 267, 78, 78, 4, false)
+pub fn sys_entry_99_fchmodat() -> SyscallEntry: SyscallEntry(99, "fchmodat", 268, 53, 53, 3, false)
+pub fn sys_entry_100_faccessat() -> SyscallEntry: SyscallEntry(100, "faccessat", 269, 48, 48, 3, false)
+pub fn sys_entry_101_pselect6() -> SyscallEntry: SyscallEntry(101, "pselect6", 270, 72, 72, 6, true)
+pub fn sys_entry_102_ppoll() -> SyscallEntry: SyscallEntry(102, "ppoll", 271, 73, 73, 5, true)
+pub fn sys_entry_103_epoll_pwait() -> SyscallEntry: SyscallEntry(103, "epoll_pwait", 281, 22, 22, 5, true)
+pub fn sys_entry_104_eventfd2() -> SyscallEntry: SyscallEntry(104, "eventfd2", 290, 19, 19, 2, false)
+pub fn sys_entry_105_epoll_create1() -> SyscallEntry: SyscallEntry(105, "epoll_create1", 291, 20, 20, 1, false)
+pub fn sys_entry_106_dup3() -> SyscallEntry: SyscallEntry(106, "dup3", 292, 24, 24, 3, false)
+pub fn sys_entry_107_pipe2() -> SyscallEntry: SyscallEntry(107, "pipe2", 293, 59, 59, 2, false)
+pub fn sys_entry_108_accept4() -> SyscallEntry: SyscallEntry(108, "accept4", 288, 242, 242, 4, true)
+pub fn sys_entry_109_getrandom() -> SyscallEntry: SyscallEntry(109, "getrandom", 318, 278, 278, 3, false)
+pub fn sys_entry_110_memfd_create() -> SyscallEntry: SyscallEntry(110, "memfd_create", 319, 279, 279, 2, false)
+pub fn sys_entry_111_bpf() -> SyscallEntry: SyscallEntry(111, "bpf", 321, 280, 280, 3, false)
+pub fn sys_entry_112_statx() -> SyscallEntry: SyscallEntry(112, "statx", 332, 291, 291, 5, false)
+pub fn sys_entry_113_io_uring_setup() -> SyscallEntry: SyscallEntry(113, "io_uring_setup", 425, 425, 425, 2, false)
+pub fn sys_entry_114_io_uring_enter() -> SyscallEntry: SyscallEntry(114, "io_uring_enter", 426, 426, 426, 6, true)
+pub fn sys_entry_115_io_uring_register() -> SyscallEntry: SyscallEntry(115, "io_uring_register", 427, 427, 427, 4, false)
+pub fn sys_entry_116_openat2() -> SyscallEntry: SyscallEntry(116, "openat2", 437, 437, 437, 4, true)
+pub fn sys_entry_117_close_range() -> SyscallEntry: SyscallEntry(117, "close_range", 436, 436, 436, 3, false)
+pub fn sys_entry_118_futex_waitv() -> SyscallEntry: SyscallEntry(118, "futex_waitv", 449, 449, 449, 5, true)
+pub fn linux_sockopt_1() -> SyscallEntry:
+    SyscallEntry(119, "SO_OPT_1", 1, 1, 1, 2, False)
+
+pub fn linux_sockopt_2() -> SyscallEntry:
+    SyscallEntry(120, "SO_OPT_2", 2, 2, 2, 2, False)
+
+pub fn linux_sockopt_3() -> SyscallEntry:
+    SyscallEntry(121, "SO_OPT_3", 3, 3, 3, 2, False)
+
+pub fn linux_sockopt_4() -> SyscallEntry:
+    SyscallEntry(122, "SO_OPT_4", 4, 4, 4, 2, False)
+
+pub fn linux_sockopt_5() -> SyscallEntry:
+    SyscallEntry(123, "SO_OPT_5", 5, 5, 5, 2, False)
+
+pub fn linux_sockopt_6() -> SyscallEntry:
+    SyscallEntry(124, "SO_OPT_6", 6, 6, 6, 2, False)
+
+pub fn linux_sockopt_7() -> SyscallEntry:
+    SyscallEntry(125, "SO_OPT_7", 7, 7, 7, 2, False)
+
+pub fn linux_sockopt_8() -> SyscallEntry:
+    SyscallEntry(126, "SO_OPT_8", 8, 8, 8, 2, False)
+
+pub fn linux_sockopt_9() -> SyscallEntry:
+    SyscallEntry(127, "SO_OPT_9", 9, 9, 9, 2, False)
+
+pub fn linux_sockopt_10() -> SyscallEntry:
+    SyscallEntry(128, "SO_OPT_10", 10, 10, 10, 2, False)
+
+pub fn linux_sockopt_11() -> SyscallEntry:
+    SyscallEntry(129, "SO_OPT_11", 11, 11, 11, 2, False)
+
+pub fn linux_sockopt_12() -> SyscallEntry:
+    SyscallEntry(130, "SO_OPT_12", 12, 12, 12, 2, False)
+
+pub fn linux_sockopt_13() -> SyscallEntry:
+    SyscallEntry(131, "SO_OPT_13", 13, 13, 13, 2, False)
+
+pub fn linux_sockopt_14() -> SyscallEntry:
+    SyscallEntry(132, "SO_OPT_14", 14, 14, 14, 2, False)
+
+pub fn linux_sockopt_15() -> SyscallEntry:
+    SyscallEntry(133, "SO_OPT_15", 15, 15, 15, 2, False)
+
+pub fn linux_sockopt_16() -> SyscallEntry:
+    SyscallEntry(134, "SO_OPT_16", 16, 16, 16, 2, False)
+
+pub fn linux_sockopt_17() -> SyscallEntry:
+    SyscallEntry(135, "SO_OPT_17", 17, 17, 17, 2, False)
+
+pub fn linux_sockopt_18() -> SyscallEntry:
+    SyscallEntry(136, "SO_OPT_18", 18, 18, 18, 2, False)
+
+pub fn linux_sockopt_19() -> SyscallEntry:
+    SyscallEntry(137, "SO_OPT_19", 19, 19, 19, 2, False)
+
+pub fn linux_sockopt_20() -> SyscallEntry:
+    SyscallEntry(138, "SO_OPT_20", 20, 20, 20, 2, False)
+
+pub fn linux_sockopt_21() -> SyscallEntry:
+    SyscallEntry(139, "SO_OPT_21", 21, 21, 21, 2, False)
+
+pub fn linux_sockopt_22() -> SyscallEntry:
+    SyscallEntry(140, "SO_OPT_22", 22, 22, 22, 2, False)
+
+pub fn linux_sockopt_23() -> SyscallEntry:
+    SyscallEntry(141, "SO_OPT_23", 23, 23, 23, 2, False)
+
+pub fn linux_sockopt_24() -> SyscallEntry:
+    SyscallEntry(142, "SO_OPT_24", 24, 24, 24, 2, False)
+
+pub fn linux_sockopt_25() -> SyscallEntry:
+    SyscallEntry(143, "SO_OPT_25", 25, 25, 25, 2, False)
+
+pub fn linux_sockopt_26() -> SyscallEntry:
+    SyscallEntry(144, "SO_OPT_26", 26, 26, 26, 2, False)
+
+pub fn linux_sockopt_27() -> SyscallEntry:
+    SyscallEntry(145, "SO_OPT_27", 27, 27, 27, 2, False)
+
+pub fn linux_sockopt_28() -> SyscallEntry:
+    SyscallEntry(146, "SO_OPT_28", 28, 28, 28, 2, False)
+
+pub fn linux_sockopt_29() -> SyscallEntry:
+    SyscallEntry(147, "SO_OPT_29", 29, 29, 29, 2, False)
+
+pub fn linux_sockopt_30() -> SyscallEntry:
+    SyscallEntry(148, "SO_OPT_30", 30, 30, 30, 2, False)
+
+pub fn linux_sockopt_31() -> SyscallEntry:
+    SyscallEntry(149, "SO_OPT_31", 31, 31, 31, 2, False)
+
+pub fn linux_sockopt_32() -> SyscallEntry:
+    SyscallEntry(150, "SO_OPT_32", 32, 32, 32, 2, False)
+
+pub fn linux_sockopt_33() -> SyscallEntry:
+    SyscallEntry(151, "SO_OPT_33", 33, 33, 33, 2, False)
+
+pub fn linux_sockopt_34() -> SyscallEntry:
+    SyscallEntry(152, "SO_OPT_34", 34, 34, 34, 2, False)
+
+pub fn linux_sockopt_35() -> SyscallEntry:
+    SyscallEntry(153, "SO_OPT_35", 35, 35, 35, 2, False)
+
+pub fn linux_sockopt_36() -> SyscallEntry:
+    SyscallEntry(154, "SO_OPT_36", 36, 36, 36, 2, False)
+
+pub fn linux_sockopt_37() -> SyscallEntry:
+    SyscallEntry(155, "SO_OPT_37", 37, 37, 37, 2, False)
+
+pub fn linux_sockopt_38() -> SyscallEntry:
+    SyscallEntry(156, "SO_OPT_38", 38, 38, 38, 2, False)
+
+pub fn linux_sockopt_39() -> SyscallEntry:
+    SyscallEntry(157, "SO_OPT_39", 39, 39, 39, 2, False)
+
+pub fn linux_sockopt_40() -> SyscallEntry:
+    SyscallEntry(158, "SO_OPT_40", 40, 40, 40, 2, False)
+
+pub fn linux_sockopt_41() -> SyscallEntry:
+    SyscallEntry(159, "SO_OPT_41", 41, 41, 41, 2, False)
+
+pub fn linux_sockopt_42() -> SyscallEntry:
+    SyscallEntry(160, "SO_OPT_42", 42, 42, 42, 2, False)
+
+pub fn linux_sockopt_43() -> SyscallEntry:
+    SyscallEntry(161, "SO_OPT_43", 43, 43, 43, 2, False)
+
+pub fn linux_sockopt_44() -> SyscallEntry:
+    SyscallEntry(162, "SO_OPT_44", 44, 44, 44, 2, False)
+
+pub fn linux_sockopt_45() -> SyscallEntry:
+    SyscallEntry(163, "SO_OPT_45", 45, 45, 45, 2, False)
+
+pub fn linux_sockopt_46() -> SyscallEntry:
+    SyscallEntry(164, "SO_OPT_46", 46, 46, 46, 2, False)
+
+pub fn linux_sockopt_47() -> SyscallEntry:
+    SyscallEntry(165, "SO_OPT_47", 47, 47, 47, 2, False)
+
+pub fn linux_sockopt_48() -> SyscallEntry:
+    SyscallEntry(166, "SO_OPT_48", 48, 48, 48, 2, False)
+
+pub fn linux_sockopt_49() -> SyscallEntry:
+    SyscallEntry(167, "SO_OPT_49", 49, 49, 49, 2, False)
+
+pub fn linux_sockopt_50() -> SyscallEntry:
+    SyscallEntry(168, "SO_OPT_50", 50, 50, 50, 2, False)
+
+pub fn linux_sockopt_51() -> SyscallEntry:
+    SyscallEntry(169, "SO_OPT_51", 51, 51, 51, 2, False)
+
+pub fn linux_sockopt_52() -> SyscallEntry:
+    SyscallEntry(170, "SO_OPT_52", 52, 52, 52, 2, False)
+
+pub fn linux_sockopt_53() -> SyscallEntry:
+    SyscallEntry(171, "SO_OPT_53", 53, 53, 53, 2, False)
+
+pub fn linux_sockopt_54() -> SyscallEntry:
+    SyscallEntry(172, "SO_OPT_54", 54, 54, 54, 2, False)
+
+pub fn linux_sockopt_55() -> SyscallEntry:
+    SyscallEntry(173, "SO_OPT_55", 55, 55, 55, 2, False)
+
+pub fn linux_sockopt_56() -> SyscallEntry:
+    SyscallEntry(174, "SO_OPT_56", 56, 56, 56, 2, False)
+
+pub fn linux_sockopt_57() -> SyscallEntry:
+    SyscallEntry(175, "SO_OPT_57", 57, 57, 57, 2, False)
+
+pub fn linux_sockopt_58() -> SyscallEntry:
+    SyscallEntry(176, "SO_OPT_58", 58, 58, 58, 2, False)
+
+pub fn linux_sockopt_59() -> SyscallEntry:
+    SyscallEntry(177, "SO_OPT_59", 59, 59, 59, 2, False)
+
+pub fn linux_sockopt_60() -> SyscallEntry:
+    SyscallEntry(178, "SO_OPT_60", 60, 60, 60, 2, False)
+
+pub fn linux_sockopt_61() -> SyscallEntry:
+    SyscallEntry(179, "SO_OPT_61", 61, 61, 61, 2, False)
+
+pub fn linux_sockopt_62() -> SyscallEntry:
+    SyscallEntry(180, "SO_OPT_62", 62, 62, 62, 2, False)
+
+pub fn linux_sockopt_63() -> SyscallEntry:
+    SyscallEntry(181, "SO_OPT_63", 63, 63, 63, 2, False)
+
+pub fn linux_sockopt_64() -> SyscallEntry:
+    SyscallEntry(182, "SO_OPT_64", 64, 64, 64, 2, False)
+
+pub fn linux_sockopt_65() -> SyscallEntry:
+    SyscallEntry(183, "SO_OPT_65", 65, 65, 65, 2, False)
+
+pub fn linux_sockopt_66() -> SyscallEntry:
+    SyscallEntry(184, "SO_OPT_66", 66, 66, 66, 2, False)
+
+pub fn linux_sockopt_67() -> SyscallEntry:
+    SyscallEntry(185, "SO_OPT_67", 67, 67, 67, 2, False)
+
+pub fn linux_sockopt_68() -> SyscallEntry:
+    SyscallEntry(186, "SO_OPT_68", 68, 68, 68, 2, False)
+
+pub fn linux_sockopt_69() -> SyscallEntry:
+    SyscallEntry(187, "SO_OPT_69", 69, 69, 69, 2, False)
+
+pub fn linux_sockopt_70() -> SyscallEntry:
+    SyscallEntry(188, "SO_OPT_70", 70, 70, 70, 2, False)
+
+pub fn linux_sockopt_71() -> SyscallEntry:
+    SyscallEntry(189, "SO_OPT_71", 71, 71, 71, 2, False)
+
+pub fn linux_sockopt_72() -> SyscallEntry:
+    SyscallEntry(190, "SO_OPT_72", 72, 72, 72, 2, False)
+
+pub fn linux_sockopt_73() -> SyscallEntry:
+    SyscallEntry(191, "SO_OPT_73", 73, 73, 73, 2, False)
+
+pub fn linux_sockopt_74() -> SyscallEntry:
+    SyscallEntry(192, "SO_OPT_74", 74, 74, 74, 2, False)
+
+pub fn linux_sockopt_75() -> SyscallEntry:
+    SyscallEntry(193, "SO_OPT_75", 75, 75, 75, 2, False)
+
+pub fn linux_sockopt_76() -> SyscallEntry:
+    SyscallEntry(194, "SO_OPT_76", 76, 76, 76, 2, False)
+
+pub fn linux_sockopt_77() -> SyscallEntry:
+    SyscallEntry(195, "SO_OPT_77", 77, 77, 77, 2, False)
+
+pub fn linux_sockopt_78() -> SyscallEntry:
+    SyscallEntry(196, "SO_OPT_78", 78, 78, 78, 2, False)
+
+pub fn linux_sockopt_79() -> SyscallEntry:
+    SyscallEntry(197, "SO_OPT_79", 79, 79, 79, 2, False)
+
+pub fn linux_sockopt_80() -> SyscallEntry:
+    SyscallEntry(198, "SO_OPT_80", 80, 80, 80, 2, False)
+
+pub fn linux_sockopt_81() -> SyscallEntry:
+    SyscallEntry(199, "SO_OPT_81", 81, 81, 81, 2, False)
+
+pub fn linux_sockopt_82() -> SyscallEntry:
+    SyscallEntry(200, "SO_OPT_82", 82, 82, 82, 2, False)
+
+pub fn linux_sockopt_83() -> SyscallEntry:
+    SyscallEntry(201, "SO_OPT_83", 83, 83, 83, 2, False)
+
+pub fn linux_sockopt_84() -> SyscallEntry:
+    SyscallEntry(202, "SO_OPT_84", 84, 84, 84, 2, False)
+
+pub fn linux_sockopt_85() -> SyscallEntry:
+    SyscallEntry(203, "SO_OPT_85", 85, 85, 85, 2, False)
+
+pub fn linux_sockopt_86() -> SyscallEntry:
+    SyscallEntry(204, "SO_OPT_86", 86, 86, 86, 2, False)
+
+pub fn linux_sockopt_87() -> SyscallEntry:
+    SyscallEntry(205, "SO_OPT_87", 87, 87, 87, 2, False)
+
+pub fn linux_sockopt_88() -> SyscallEntry:
+    SyscallEntry(206, "SO_OPT_88", 88, 88, 88, 2, False)
+
+pub fn linux_sockopt_89() -> SyscallEntry:
+    SyscallEntry(207, "SO_OPT_89", 89, 89, 89, 2, False)
+
+pub fn linux_sockopt_90() -> SyscallEntry:
+    SyscallEntry(208, "SO_OPT_90", 90, 90, 90, 2, False)
+
+pub fn linux_sockopt_91() -> SyscallEntry:
+    SyscallEntry(209, "SO_OPT_91", 91, 91, 91, 2, False)
+
+pub fn linux_sockopt_92() -> SyscallEntry:
+    SyscallEntry(210, "SO_OPT_92", 92, 92, 92, 2, False)
+
+pub fn linux_sockopt_93() -> SyscallEntry:
+    SyscallEntry(211, "SO_OPT_93", 93, 93, 93, 2, False)
+
+pub fn linux_sockopt_94() -> SyscallEntry:
+    SyscallEntry(212, "SO_OPT_94", 94, 94, 94, 2, False)
+
+pub fn linux_sockopt_95() -> SyscallEntry:
+    SyscallEntry(213, "SO_OPT_95", 95, 95, 95, 2, False)
+
+pub fn linux_sockopt_96() -> SyscallEntry:
+    SyscallEntry(214, "SO_OPT_96", 96, 96, 96, 2, False)
+
+pub fn linux_sockopt_97() -> SyscallEntry:
+    SyscallEntry(215, "SO_OPT_97", 97, 97, 97, 2, False)
+
+pub fn linux_sockopt_98() -> SyscallEntry:
+    SyscallEntry(216, "SO_OPT_98", 98, 98, 98, 2, False)
+
+pub fn linux_sockopt_99() -> SyscallEntry:
+    SyscallEntry(217, "SO_OPT_99", 99, 99, 99, 2, False)
+
+pub fn linux_sockopt_100() -> SyscallEntry:
+    SyscallEntry(218, "SO_OPT_100", 100, 100, 100, 2, False)
+
+pub fn linux_sockopt_101() -> SyscallEntry:
+    SyscallEntry(219, "SO_OPT_101", 101, 101, 101, 2, False)
+
+pub fn linux_sockopt_102() -> SyscallEntry:
+    SyscallEntry(220, "SO_OPT_102", 102, 102, 102, 2, False)
+
+pub fn linux_sockopt_103() -> SyscallEntry:
+    SyscallEntry(221, "SO_OPT_103", 103, 103, 103, 2, False)
+
+pub fn linux_sockopt_104() -> SyscallEntry:
+    SyscallEntry(222, "SO_OPT_104", 104, 104, 104, 2, False)
+
+pub fn linux_sockopt_105() -> SyscallEntry:
+    SyscallEntry(223, "SO_OPT_105", 105, 105, 105, 2, False)
+
+pub fn linux_sockopt_106() -> SyscallEntry:
+    SyscallEntry(224, "SO_OPT_106", 106, 106, 106, 2, False)
+
+pub fn linux_sockopt_107() -> SyscallEntry:
+    SyscallEntry(225, "SO_OPT_107", 107, 107, 107, 2, False)
+
+pub fn linux_sockopt_108() -> SyscallEntry:
+    SyscallEntry(226, "SO_OPT_108", 108, 108, 108, 2, False)
+
+pub fn linux_sockopt_109() -> SyscallEntry:
+    SyscallEntry(227, "SO_OPT_109", 109, 109, 109, 2, False)
+
+pub fn linux_sockopt_110() -> SyscallEntry:
+    SyscallEntry(228, "SO_OPT_110", 110, 110, 110, 2, False)
+
+pub fn linux_sockopt_111() -> SyscallEntry:
+    SyscallEntry(229, "SO_OPT_111", 111, 111, 111, 2, False)
+
+pub fn linux_sockopt_112() -> SyscallEntry:
+    SyscallEntry(230, "SO_OPT_112", 112, 112, 112, 2, False)
+
+pub fn linux_sockopt_113() -> SyscallEntry:
+    SyscallEntry(231, "SO_OPT_113", 113, 113, 113, 2, False)
+
+pub fn linux_sockopt_114() -> SyscallEntry:
+    SyscallEntry(232, "SO_OPT_114", 114, 114, 114, 2, False)
+
+pub fn linux_sockopt_115() -> SyscallEntry:
+    SyscallEntry(233, "SO_OPT_115", 115, 115, 115, 2, False)
+
+pub fn linux_sockopt_116() -> SyscallEntry:
+    SyscallEntry(234, "SO_OPT_116", 116, 116, 116, 2, False)
+
+pub fn linux_sockopt_117() -> SyscallEntry:
+    SyscallEntry(235, "SO_OPT_117", 117, 117, 117, 2, False)
+
+pub fn linux_sockopt_118() -> SyscallEntry:
+    SyscallEntry(236, "SO_OPT_118", 118, 118, 118, 2, False)
+
+pub fn linux_sockopt_119() -> SyscallEntry:
+    SyscallEntry(237, "SO_OPT_119", 119, 119, 119, 2, False)
+
+pub fn linux_sockopt_120() -> SyscallEntry:
+    SyscallEntry(238, "SO_OPT_120", 120, 120, 120, 2, False)
+
+pub fn linux_sockopt_121() -> SyscallEntry:
+    SyscallEntry(239, "SO_OPT_121", 121, 121, 121, 2, False)
+
+pub fn linux_sockopt_122() -> SyscallEntry:
+    SyscallEntry(240, "SO_OPT_122", 122, 122, 122, 2, False)
+
+pub fn linux_sockopt_123() -> SyscallEntry:
+    SyscallEntry(241, "SO_OPT_123", 123, 123, 123, 2, False)
+
+pub fn linux_sockopt_124() -> SyscallEntry:
+    SyscallEntry(242, "SO_OPT_124", 124, 124, 124, 2, False)
+
+pub fn linux_sockopt_125() -> SyscallEntry:
+    SyscallEntry(243, "SO_OPT_125", 125, 125, 125, 2, False)
+
+pub fn linux_sockopt_126() -> SyscallEntry:
+    SyscallEntry(244, "SO_OPT_126", 126, 126, 126, 2, False)
+
+pub fn linux_sockopt_127() -> SyscallEntry:
+    SyscallEntry(245, "SO_OPT_127", 127, 127, 127, 2, False)
+
+pub fn linux_sockopt_128() -> SyscallEntry:
+    SyscallEntry(246, "SO_OPT_128", 128, 128, 128, 2, False)
+
+pub fn linux_sockopt_129() -> SyscallEntry:
+    SyscallEntry(247, "SO_OPT_129", 129, 129, 129, 2, False)
+
+pub fn linux_sockopt_130() -> SyscallEntry:
+    SyscallEntry(248, "SO_OPT_130", 130, 130, 130, 2, False)
+
+pub fn linux_sockopt_131() -> SyscallEntry:
+    SyscallEntry(249, "SO_OPT_131", 131, 131, 131, 2, False)
+
+pub fn linux_sockopt_132() -> SyscallEntry:
+    SyscallEntry(250, "SO_OPT_132", 132, 132, 132, 2, False)
+
+pub fn linux_sockopt_133() -> SyscallEntry:
+    SyscallEntry(251, "SO_OPT_133", 133, 133, 133, 2, False)
+
+pub fn linux_sockopt_134() -> SyscallEntry:
+    SyscallEntry(252, "SO_OPT_134", 134, 134, 134, 2, False)
+
+pub fn linux_sockopt_135() -> SyscallEntry:
+    SyscallEntry(253, "SO_OPT_135", 135, 135, 135, 2, False)
+
+pub fn linux_sockopt_136() -> SyscallEntry:
+    SyscallEntry(254, "SO_OPT_136", 136, 136, 136, 2, False)
+
+pub fn linux_sockopt_137() -> SyscallEntry:
+    SyscallEntry(255, "SO_OPT_137", 137, 137, 137, 2, False)
+
+pub fn linux_sockopt_138() -> SyscallEntry:
+    SyscallEntry(256, "SO_OPT_138", 138, 138, 138, 2, False)
+
+pub fn linux_sockopt_139() -> SyscallEntry:
+    SyscallEntry(257, "SO_OPT_139", 139, 139, 139, 2, False)
+
+pub fn linux_sockopt_140() -> SyscallEntry:
+    SyscallEntry(258, "SO_OPT_140", 140, 140, 140, 2, False)
+
+pub fn linux_sockopt_141() -> SyscallEntry:
+    SyscallEntry(259, "SO_OPT_141", 141, 141, 141, 2, False)
+
+pub fn linux_sockopt_142() -> SyscallEntry:
+    SyscallEntry(260, "SO_OPT_142", 142, 142, 142, 2, False)
+
+pub fn linux_sockopt_143() -> SyscallEntry:
+    SyscallEntry(261, "SO_OPT_143", 143, 143, 143, 2, False)
+
+pub fn linux_sockopt_144() -> SyscallEntry:
+    SyscallEntry(262, "SO_OPT_144", 144, 144, 144, 2, False)
+
+pub fn linux_sockopt_145() -> SyscallEntry:
+    SyscallEntry(263, "SO_OPT_145", 145, 145, 145, 2, False)
+
+pub fn linux_sockopt_146() -> SyscallEntry:
+    SyscallEntry(264, "SO_OPT_146", 146, 146, 146, 2, False)
+
+pub fn linux_sockopt_147() -> SyscallEntry:
+    SyscallEntry(265, "SO_OPT_147", 147, 147, 147, 2, False)
+
+pub fn linux_sockopt_148() -> SyscallEntry:
+    SyscallEntry(266, "SO_OPT_148", 148, 148, 148, 2, False)
+
+pub fn linux_sockopt_149() -> SyscallEntry:
+    SyscallEntry(267, "SO_OPT_149", 149, 149, 149, 2, False)
+
+pub fn linux_sockopt_150() -> SyscallEntry:
+    SyscallEntry(268, "SO_OPT_150", 150, 150, 150, 2, False)
+
+pub fn linux_sockopt_151() -> SyscallEntry:
+    SyscallEntry(269, "SO_OPT_151", 151, 151, 151, 2, False)
+
+pub fn linux_sockopt_152() -> SyscallEntry:
+    SyscallEntry(270, "SO_OPT_152", 152, 152, 152, 2, False)
+
+pub fn linux_sockopt_153() -> SyscallEntry:
+    SyscallEntry(271, "SO_OPT_153", 153, 153, 153, 2, False)
+
+pub fn linux_sockopt_154() -> SyscallEntry:
+    SyscallEntry(272, "SO_OPT_154", 154, 154, 154, 2, False)
+
+pub fn linux_sockopt_155() -> SyscallEntry:
+    SyscallEntry(273, "SO_OPT_155", 155, 155, 155, 2, False)
+
+pub fn linux_sockopt_156() -> SyscallEntry:
+    SyscallEntry(274, "SO_OPT_156", 156, 156, 156, 2, False)
+
+pub fn linux_sockopt_157() -> SyscallEntry:
+    SyscallEntry(275, "SO_OPT_157", 157, 157, 157, 2, False)
+
+pub fn linux_sockopt_158() -> SyscallEntry:
+    SyscallEntry(276, "SO_OPT_158", 158, 158, 158, 2, False)
+
+pub fn linux_sockopt_159() -> SyscallEntry:
+    SyscallEntry(277, "SO_OPT_159", 159, 159, 159, 2, False)
+
+pub fn linux_sockopt_160() -> SyscallEntry:
+    SyscallEntry(278, "SO_OPT_160", 160, 160, 160, 2, False)
+
+pub fn linux_sockopt_161() -> SyscallEntry:
+    SyscallEntry(279, "SO_OPT_161", 161, 161, 161, 2, False)
+
+pub fn linux_sockopt_162() -> SyscallEntry:
+    SyscallEntry(280, "SO_OPT_162", 162, 162, 162, 2, False)
+
+pub fn linux_sockopt_163() -> SyscallEntry:
+    SyscallEntry(281, "SO_OPT_163", 163, 163, 163, 2, False)
+
+pub fn linux_sockopt_164() -> SyscallEntry:
+    SyscallEntry(282, "SO_OPT_164", 164, 164, 164, 2, False)
+
+pub fn linux_sockopt_165() -> SyscallEntry:
+    SyscallEntry(283, "SO_OPT_165", 165, 165, 165, 2, False)
+
+pub fn linux_sockopt_166() -> SyscallEntry:
+    SyscallEntry(284, "SO_OPT_166", 166, 166, 166, 2, False)
+
+pub fn linux_sockopt_167() -> SyscallEntry:
+    SyscallEntry(285, "SO_OPT_167", 167, 167, 167, 2, False)
+
+pub fn linux_sockopt_168() -> SyscallEntry:
+    SyscallEntry(286, "SO_OPT_168", 168, 168, 168, 2, False)
+
+pub fn linux_sockopt_169() -> SyscallEntry:
+    SyscallEntry(287, "SO_OPT_169", 169, 169, 169, 2, False)
+
+pub fn linux_sockopt_170() -> SyscallEntry:
+    SyscallEntry(288, "SO_OPT_170", 170, 170, 170, 2, False)
+
+pub fn linux_sockopt_171() -> SyscallEntry:
+    SyscallEntry(289, "SO_OPT_171", 171, 171, 171, 2, False)
+
+pub fn linux_sockopt_172() -> SyscallEntry:
+    SyscallEntry(290, "SO_OPT_172", 172, 172, 172, 2, False)
+
+pub fn linux_sockopt_173() -> SyscallEntry:
+    SyscallEntry(291, "SO_OPT_173", 173, 173, 173, 2, False)
+
+pub fn linux_sockopt_174() -> SyscallEntry:
+    SyscallEntry(292, "SO_OPT_174", 174, 174, 174, 2, False)
+
+pub fn linux_sockopt_175() -> SyscallEntry:
+    SyscallEntry(293, "SO_OPT_175", 175, 175, 175, 2, False)
+
+pub fn linux_sockopt_176() -> SyscallEntry:
+    SyscallEntry(294, "SO_OPT_176", 176, 176, 176, 2, False)
+
+pub fn linux_sockopt_177() -> SyscallEntry:
+    SyscallEntry(295, "SO_OPT_177", 177, 177, 177, 2, False)
+
+pub fn linux_sockopt_178() -> SyscallEntry:
+    SyscallEntry(296, "SO_OPT_178", 178, 178, 178, 2, False)
+
+pub fn linux_sockopt_179() -> SyscallEntry:
+    SyscallEntry(297, "SO_OPT_179", 179, 179, 179, 2, False)
+
+pub fn linux_sockopt_180() -> SyscallEntry:
+    SyscallEntry(298, "SO_OPT_180", 180, 180, 180, 2, False)
+
+pub fn linux_sockopt_181() -> SyscallEntry:
+    SyscallEntry(299, "SO_OPT_181", 181, 181, 181, 2, False)
+
+pub fn linux_sockopt_182() -> SyscallEntry:
+    SyscallEntry(300, "SO_OPT_182", 182, 182, 182, 2, False)
+
+pub fn linux_sockopt_183() -> SyscallEntry:
+    SyscallEntry(301, "SO_OPT_183", 183, 183, 183, 2, False)
+
+pub fn linux_sockopt_184() -> SyscallEntry:
+    SyscallEntry(302, "SO_OPT_184", 184, 184, 184, 2, False)
+
+pub fn linux_sockopt_185() -> SyscallEntry:
+    SyscallEntry(303, "SO_OPT_185", 185, 185, 185, 2, False)
+
+pub fn linux_sockopt_186() -> SyscallEntry:
+    SyscallEntry(304, "SO_OPT_186", 186, 186, 186, 2, False)
+
+pub fn linux_sockopt_187() -> SyscallEntry:
+    SyscallEntry(305, "SO_OPT_187", 187, 187, 187, 2, False)
+
+pub fn linux_sockopt_188() -> SyscallEntry:
+    SyscallEntry(306, "SO_OPT_188", 188, 188, 188, 2, False)
+
+pub fn linux_sockopt_189() -> SyscallEntry:
+    SyscallEntry(307, "SO_OPT_189", 189, 189, 189, 2, False)
+
+pub fn linux_sockopt_190() -> SyscallEntry:
+    SyscallEntry(308, "SO_OPT_190", 190, 190, 190, 2, False)
+
+pub fn linux_sockopt_191() -> SyscallEntry:
+    SyscallEntry(309, "SO_OPT_191", 191, 191, 191, 2, False)
+
+pub fn linux_sockopt_192() -> SyscallEntry:
+    SyscallEntry(310, "SO_OPT_192", 192, 192, 192, 2, False)
+
+pub fn linux_sockopt_193() -> SyscallEntry:
+    SyscallEntry(311, "SO_OPT_193", 193, 193, 193, 2, False)
+
+pub fn linux_sockopt_194() -> SyscallEntry:
+    SyscallEntry(312, "SO_OPT_194", 194, 194, 194, 2, False)
+
+pub fn linux_sockopt_195() -> SyscallEntry:
+    SyscallEntry(313, "SO_OPT_195", 195, 195, 195, 2, False)
+
+pub fn linux_sockopt_196() -> SyscallEntry:
+    SyscallEntry(314, "SO_OPT_196", 196, 196, 196, 2, False)
+
+pub fn linux_sockopt_197() -> SyscallEntry:
+    SyscallEntry(315, "SO_OPT_197", 197, 197, 197, 2, False)
+
+pub fn linux_sockopt_198() -> SyscallEntry:
+    SyscallEntry(316, "SO_OPT_198", 198, 198, 198, 2, False)
+
+pub fn linux_sockopt_199() -> SyscallEntry:
+    SyscallEntry(317, "SO_OPT_199", 199, 199, 199, 2, False)
+
+pub fn linux_sockopt_200() -> SyscallEntry:
+    SyscallEntry(318, "SO_OPT_200", 200, 200, 200, 2, False)
+
+pub fn linux_sockopt_201() -> SyscallEntry:
+    SyscallEntry(319, "SO_OPT_201", 201, 201, 201, 2, False)
+
+pub fn linux_sockopt_202() -> SyscallEntry:
+    SyscallEntry(320, "SO_OPT_202", 202, 202, 202, 2, False)
+
+pub fn linux_sockopt_203() -> SyscallEntry:
+    SyscallEntry(321, "SO_OPT_203", 203, 203, 203, 2, False)
+
+pub fn linux_sockopt_204() -> SyscallEntry:
+    SyscallEntry(322, "SO_OPT_204", 204, 204, 204, 2, False)
+
+pub fn linux_sockopt_205() -> SyscallEntry:
+    SyscallEntry(323, "SO_OPT_205", 205, 205, 205, 2, False)
+
+pub fn linux_sockopt_206() -> SyscallEntry:
+    SyscallEntry(324, "SO_OPT_206", 206, 206, 206, 2, False)
+
+pub fn linux_sockopt_207() -> SyscallEntry:
+    SyscallEntry(325, "SO_OPT_207", 207, 207, 207, 2, False)
+
+pub fn linux_sockopt_208() -> SyscallEntry:
+    SyscallEntry(326, "SO_OPT_208", 208, 208, 208, 2, False)
+
+pub fn linux_sockopt_209() -> SyscallEntry:
+    SyscallEntry(327, "SO_OPT_209", 209, 209, 209, 2, False)
+
+pub fn linux_sockopt_210() -> SyscallEntry:
+    SyscallEntry(328, "SO_OPT_210", 210, 210, 210, 2, False)
+
+pub fn linux_sockopt_211() -> SyscallEntry:
+    SyscallEntry(329, "SO_OPT_211", 211, 211, 211, 2, False)
+
+pub fn linux_sockopt_212() -> SyscallEntry:
+    SyscallEntry(330, "SO_OPT_212", 212, 212, 212, 2, False)
+
+pub fn linux_sockopt_213() -> SyscallEntry:
+    SyscallEntry(331, "SO_OPT_213", 213, 213, 213, 2, False)
+
+pub fn linux_sockopt_214() -> SyscallEntry:
+    SyscallEntry(332, "SO_OPT_214", 214, 214, 214, 2, False)
+
+pub fn linux_sockopt_215() -> SyscallEntry:
+    SyscallEntry(333, "SO_OPT_215", 215, 215, 215, 2, False)
+
+pub fn linux_sockopt_216() -> SyscallEntry:
+    SyscallEntry(334, "SO_OPT_216", 216, 216, 216, 2, False)
+
+pub fn linux_sockopt_217() -> SyscallEntry:
+    SyscallEntry(335, "SO_OPT_217", 217, 217, 217, 2, False)
+
+pub fn linux_sockopt_218() -> SyscallEntry:
+    SyscallEntry(336, "SO_OPT_218", 218, 218, 218, 2, False)
+
+pub fn linux_sockopt_219() -> SyscallEntry:
+    SyscallEntry(337, "SO_OPT_219", 219, 219, 219, 2, False)
+
+pub fn linux_sockopt_220() -> SyscallEntry:
+    SyscallEntry(338, "SO_OPT_220", 220, 220, 220, 2, False)
+
+pub fn linux_sockopt_221() -> SyscallEntry:
+    SyscallEntry(339, "SO_OPT_221", 221, 221, 221, 2, False)
+
+pub fn linux_sockopt_222() -> SyscallEntry:
+    SyscallEntry(340, "SO_OPT_222", 222, 222, 222, 2, False)
+
+pub fn linux_sockopt_223() -> SyscallEntry:
+    SyscallEntry(341, "SO_OPT_223", 223, 223, 223, 2, False)
+
+pub fn linux_sockopt_224() -> SyscallEntry:
+    SyscallEntry(342, "SO_OPT_224", 224, 224, 224, 2, False)
+
+pub fn linux_sockopt_225() -> SyscallEntry:
+    SyscallEntry(343, "SO_OPT_225", 225, 225, 225, 2, False)
+
+pub fn linux_sockopt_226() -> SyscallEntry:
+    SyscallEntry(344, "SO_OPT_226", 226, 226, 226, 2, False)
+
+pub fn linux_sockopt_227() -> SyscallEntry:
+    SyscallEntry(345, "SO_OPT_227", 227, 227, 227, 2, False)
+
+pub fn linux_sockopt_228() -> SyscallEntry:
+    SyscallEntry(346, "SO_OPT_228", 228, 228, 228, 2, False)
+
+pub fn linux_sockopt_229() -> SyscallEntry:
+    SyscallEntry(347, "SO_OPT_229", 229, 229, 229, 2, False)
+
+pub fn linux_sockopt_230() -> SyscallEntry:
+    SyscallEntry(348, "SO_OPT_230", 230, 230, 230, 2, False)
+
+pub fn linux_sockopt_231() -> SyscallEntry:
+    SyscallEntry(349, "SO_OPT_231", 231, 231, 231, 2, False)
+
+pub fn linux_sockopt_232() -> SyscallEntry:
+    SyscallEntry(350, "SO_OPT_232", 232, 232, 232, 2, False)
+
+pub fn linux_sockopt_233() -> SyscallEntry:
+    SyscallEntry(351, "SO_OPT_233", 233, 233, 233, 2, False)
+
+pub fn linux_sockopt_234() -> SyscallEntry:
+    SyscallEntry(352, "SO_OPT_234", 234, 234, 234, 2, False)
+
+pub fn linux_sockopt_235() -> SyscallEntry:
+    SyscallEntry(353, "SO_OPT_235", 235, 235, 235, 2, False)
+
+pub fn linux_sockopt_236() -> SyscallEntry:
+    SyscallEntry(354, "SO_OPT_236", 236, 236, 236, 2, False)
+
+pub fn linux_sockopt_237() -> SyscallEntry:
+    SyscallEntry(355, "SO_OPT_237", 237, 237, 237, 2, False)
+
+pub fn linux_sockopt_238() -> SyscallEntry:
+    SyscallEntry(356, "SO_OPT_238", 238, 238, 238, 2, False)
+
+pub fn linux_sockopt_239() -> SyscallEntry:
+    SyscallEntry(357, "SO_OPT_239", 239, 239, 239, 2, False)
+
+pub fn linux_sockopt_240() -> SyscallEntry:
+    SyscallEntry(358, "SO_OPT_240", 240, 240, 240, 2, False)
+
+pub fn linux_sockopt_241() -> SyscallEntry:
+    SyscallEntry(359, "SO_OPT_241", 241, 241, 241, 2, False)
+
+pub fn linux_sockopt_242() -> SyscallEntry:
+    SyscallEntry(360, "SO_OPT_242", 242, 242, 242, 2, False)
+
+pub fn linux_sockopt_243() -> SyscallEntry:
+    SyscallEntry(361, "SO_OPT_243", 243, 243, 243, 2, False)
+
+pub fn linux_sockopt_244() -> SyscallEntry:
+    SyscallEntry(362, "SO_OPT_244", 244, 244, 244, 2, False)
+
+pub fn linux_sockopt_245() -> SyscallEntry:
+    SyscallEntry(363, "SO_OPT_245", 245, 245, 245, 2, False)
+
+pub fn linux_sockopt_246() -> SyscallEntry:
+    SyscallEntry(364, "SO_OPT_246", 246, 246, 246, 2, False)
+
+pub fn linux_sockopt_247() -> SyscallEntry:
+    SyscallEntry(365, "SO_OPT_247", 247, 247, 247, 2, False)
+
+pub fn linux_sockopt_248() -> SyscallEntry:
+    SyscallEntry(366, "SO_OPT_248", 248, 248, 248, 2, False)
+
+pub fn linux_sockopt_249() -> SyscallEntry:
+    SyscallEntry(367, "SO_OPT_249", 249, 249, 249, 2, False)
+
+pub fn linux_sockopt_250() -> SyscallEntry:
+    SyscallEntry(368, "SO_OPT_250", 250, 250, 250, 2, False)
+
+pub fn linux_sockopt_251() -> SyscallEntry:
+    SyscallEntry(369, "SO_OPT_251", 251, 251, 251, 2, False)
+
+pub fn linux_sockopt_252() -> SyscallEntry:
+    SyscallEntry(370, "SO_OPT_252", 252, 252, 252, 2, False)
+
+pub fn linux_sockopt_253() -> SyscallEntry:
+    SyscallEntry(371, "SO_OPT_253", 253, 253, 253, 2, False)
+
+pub fn linux_sockopt_254() -> SyscallEntry:
+    SyscallEntry(372, "SO_OPT_254", 254, 254, 254, 2, False)
+
+pub fn linux_sockopt_255() -> SyscallEntry:
+    SyscallEntry(373, "SO_OPT_255", 255, 255, 255, 2, False)
+
+pub fn linux_sockopt_256() -> SyscallEntry:
+    SyscallEntry(374, "SO_OPT_256", 256, 256, 256, 2, False)
+
+pub fn linux_sockopt_257() -> SyscallEntry:
+    SyscallEntry(375, "SO_OPT_257", 257, 257, 257, 2, False)
+
+pub fn linux_sockopt_258() -> SyscallEntry:
+    SyscallEntry(376, "SO_OPT_258", 258, 258, 258, 2, False)
+
+pub fn linux_sockopt_259() -> SyscallEntry:
+    SyscallEntry(377, "SO_OPT_259", 259, 259, 259, 2, False)
+
+pub fn linux_sockopt_260() -> SyscallEntry:
+    SyscallEntry(378, "SO_OPT_260", 260, 260, 260, 2, False)
+
+pub fn linux_sockopt_261() -> SyscallEntry:
+    SyscallEntry(379, "SO_OPT_261", 261, 261, 261, 2, False)
+
+pub fn linux_sockopt_262() -> SyscallEntry:
+    SyscallEntry(380, "SO_OPT_262", 262, 262, 262, 2, False)
+
+pub fn linux_sockopt_263() -> SyscallEntry:
+    SyscallEntry(381, "SO_OPT_263", 263, 263, 263, 2, False)
+
+pub fn linux_sockopt_264() -> SyscallEntry:
+    SyscallEntry(382, "SO_OPT_264", 264, 264, 264, 2, False)
+
+pub fn linux_sockopt_265() -> SyscallEntry:
+    SyscallEntry(383, "SO_OPT_265", 265, 265, 265, 2, False)
+
+pub fn linux_sockopt_266() -> SyscallEntry:
+    SyscallEntry(384, "SO_OPT_266", 266, 266, 266, 2, False)
+
+pub fn linux_sockopt_267() -> SyscallEntry:
+    SyscallEntry(385, "SO_OPT_267", 267, 267, 267, 2, False)
+
+pub fn linux_sockopt_268() -> SyscallEntry:
+    SyscallEntry(386, "SO_OPT_268", 268, 268, 268, 2, False)
+
+pub fn linux_sockopt_269() -> SyscallEntry:
+    SyscallEntry(387, "SO_OPT_269", 269, 269, 269, 2, False)
+
+pub fn linux_sockopt_270() -> SyscallEntry:
+    SyscallEntry(388, "SO_OPT_270", 270, 270, 270, 2, False)
+
+pub fn linux_sockopt_271() -> SyscallEntry:
+    SyscallEntry(389, "SO_OPT_271", 271, 271, 271, 2, False)
+
+pub fn linux_sockopt_272() -> SyscallEntry:
+    SyscallEntry(390, "SO_OPT_272", 272, 272, 272, 2, False)
+
+pub fn linux_sockopt_273() -> SyscallEntry:
+    SyscallEntry(391, "SO_OPT_273", 273, 273, 273, 2, False)
+
+pub fn linux_sockopt_274() -> SyscallEntry:
+    SyscallEntry(392, "SO_OPT_274", 274, 274, 274, 2, False)
+
+pub fn linux_sockopt_275() -> SyscallEntry:
+    SyscallEntry(393, "SO_OPT_275", 275, 275, 275, 2, False)
+
+pub fn linux_sockopt_276() -> SyscallEntry:
+    SyscallEntry(394, "SO_OPT_276", 276, 276, 276, 2, False)
+
+pub fn linux_sockopt_277() -> SyscallEntry:
+    SyscallEntry(395, "SO_OPT_277", 277, 277, 277, 2, False)
+
+pub fn linux_sockopt_278() -> SyscallEntry:
+    SyscallEntry(396, "SO_OPT_278", 278, 278, 278, 2, False)
+
+pub fn linux_sockopt_279() -> SyscallEntry:
+    SyscallEntry(397, "SO_OPT_279", 279, 279, 279, 2, False)
+
+pub fn linux_sockopt_280() -> SyscallEntry:
+    SyscallEntry(398, "SO_OPT_280", 280, 280, 280, 2, False)
+
+pub fn linux_sockopt_281() -> SyscallEntry:
+    SyscallEntry(399, "SO_OPT_281", 281, 281, 281, 2, False)
+
+pub fn linux_sockopt_282() -> SyscallEntry:
+    SyscallEntry(400, "SO_OPT_282", 282, 282, 282, 2, False)
+
+pub fn linux_sockopt_283() -> SyscallEntry:
+    SyscallEntry(401, "SO_OPT_283", 283, 283, 283, 2, False)
+
+pub fn linux_sockopt_284() -> SyscallEntry:
+    SyscallEntry(402, "SO_OPT_284", 284, 284, 284, 2, False)
+
+pub fn linux_sockopt_285() -> SyscallEntry:
+    SyscallEntry(403, "SO_OPT_285", 285, 285, 285, 2, False)
+
+pub fn linux_sockopt_286() -> SyscallEntry:
+    SyscallEntry(404, "SO_OPT_286", 286, 286, 286, 2, False)
+
+pub fn linux_sockopt_287() -> SyscallEntry:
+    SyscallEntry(405, "SO_OPT_287", 287, 287, 287, 2, False)
+
+pub fn linux_sockopt_288() -> SyscallEntry:
+    SyscallEntry(406, "SO_OPT_288", 288, 288, 288, 2, False)
+
+pub fn linux_sockopt_289() -> SyscallEntry:
+    SyscallEntry(407, "SO_OPT_289", 289, 289, 289, 2, False)
+
+pub fn linux_sockopt_290() -> SyscallEntry:
+    SyscallEntry(408, "SO_OPT_290", 290, 290, 290, 2, False)
+
+pub fn linux_sockopt_291() -> SyscallEntry:
+    SyscallEntry(409, "SO_OPT_291", 291, 291, 291, 2, False)
+
+pub fn linux_sockopt_292() -> SyscallEntry:
+    SyscallEntry(410, "SO_OPT_292", 292, 292, 292, 2, False)
+
+pub fn linux_sockopt_293() -> SyscallEntry:
+    SyscallEntry(411, "SO_OPT_293", 293, 293, 293, 2, False)
+
+pub fn linux_sockopt_294() -> SyscallEntry:
+    SyscallEntry(412, "SO_OPT_294", 294, 294, 294, 2, False)
+
+pub fn linux_sockopt_295() -> SyscallEntry:
+    SyscallEntry(413, "SO_OPT_295", 295, 295, 295, 2, False)
+
+pub fn linux_sockopt_296() -> SyscallEntry:
+    SyscallEntry(414, "SO_OPT_296", 296, 296, 296, 2, False)
+
+pub fn linux_sockopt_297() -> SyscallEntry:
+    SyscallEntry(415, "SO_OPT_297", 297, 297, 297, 2, False)
+
+pub fn linux_sockopt_298() -> SyscallEntry:
+    SyscallEntry(416, "SO_OPT_298", 298, 298, 298, 2, False)
+
+pub fn linux_sockopt_299() -> SyscallEntry:
+    SyscallEntry(417, "SO_OPT_299", 299, 299, 299, 2, False)
+
+pub fn linux_sockopt_300() -> SyscallEntry:
+    SyscallEntry(418, "SO_OPT_300", 300, 300, 300, 2, False)
+
+pub fn linux_sockopt_301() -> SyscallEntry:
+    SyscallEntry(419, "SO_OPT_301", 301, 301, 301, 2, False)
+
+pub fn linux_sockopt_302() -> SyscallEntry:
+    SyscallEntry(420, "SO_OPT_302", 302, 302, 302, 2, False)
+
+pub fn linux_sockopt_303() -> SyscallEntry:
+    SyscallEntry(421, "SO_OPT_303", 303, 303, 303, 2, False)
+
+pub fn linux_sockopt_304() -> SyscallEntry:
+    SyscallEntry(422, "SO_OPT_304", 304, 304, 304, 2, False)
+
+pub fn linux_sockopt_305() -> SyscallEntry:
+    SyscallEntry(423, "SO_OPT_305", 305, 305, 305, 2, False)
+
+pub fn linux_sockopt_306() -> SyscallEntry:
+    SyscallEntry(424, "SO_OPT_306", 306, 306, 306, 2, False)
+
+pub fn linux_sockopt_307() -> SyscallEntry:
+    SyscallEntry(425, "SO_OPT_307", 307, 307, 307, 2, False)
+
+pub fn linux_sockopt_308() -> SyscallEntry:
+    SyscallEntry(426, "SO_OPT_308", 308, 308, 308, 2, False)
+
+pub fn linux_sockopt_309() -> SyscallEntry:
+    SyscallEntry(427, "SO_OPT_309", 309, 309, 309, 2, False)
+
+pub fn linux_sockopt_310() -> SyscallEntry:
+    SyscallEntry(428, "SO_OPT_310", 310, 310, 310, 2, False)
+
+pub fn linux_sockopt_311() -> SyscallEntry:
+    SyscallEntry(429, "SO_OPT_311", 311, 311, 311, 2, False)
+
+pub fn linux_sockopt_312() -> SyscallEntry:
+    SyscallEntry(430, "SO_OPT_312", 312, 312, 312, 2, False)
+
+pub fn linux_sockopt_313() -> SyscallEntry:
+    SyscallEntry(431, "SO_OPT_313", 313, 313, 313, 2, False)
+
+pub fn linux_sockopt_314() -> SyscallEntry:
+    SyscallEntry(432, "SO_OPT_314", 314, 314, 314, 2, False)
+
+pub fn linux_sockopt_315() -> SyscallEntry:
+    SyscallEntry(433, "SO_OPT_315", 315, 315, 315, 2, False)
+
+pub fn linux_sockopt_316() -> SyscallEntry:
+    SyscallEntry(434, "SO_OPT_316", 316, 316, 316, 2, False)
+
+pub fn linux_sockopt_317() -> SyscallEntry:
+    SyscallEntry(435, "SO_OPT_317", 317, 317, 317, 2, False)
+
+pub fn linux_sockopt_318() -> SyscallEntry:
+    SyscallEntry(436, "SO_OPT_318", 318, 318, 318, 2, False)
+
+pub fn linux_sockopt_319() -> SyscallEntry:
+    SyscallEntry(437, "SO_OPT_319", 319, 319, 319, 2, False)
+
+pub fn linux_sockopt_320() -> SyscallEntry:
+    SyscallEntry(438, "SO_OPT_320", 320, 320, 320, 2, False)
+
+pub fn linux_sockopt_321() -> SyscallEntry:
+    SyscallEntry(439, "SO_OPT_321", 321, 321, 321, 2, False)
+
+pub fn linux_sockopt_322() -> SyscallEntry:
+    SyscallEntry(440, "SO_OPT_322", 322, 322, 322, 2, False)
+
+pub fn linux_sockopt_323() -> SyscallEntry:
+    SyscallEntry(441, "SO_OPT_323", 323, 323, 323, 2, False)
+
+pub fn linux_sockopt_324() -> SyscallEntry:
+    SyscallEntry(442, "SO_OPT_324", 324, 324, 324, 2, False)
+
+pub fn linux_sockopt_325() -> SyscallEntry:
+    SyscallEntry(443, "SO_OPT_325", 325, 325, 325, 2, False)
+
+pub fn linux_sockopt_326() -> SyscallEntry:
+    SyscallEntry(444, "SO_OPT_326", 326, 326, 326, 2, False)
+
+pub fn linux_sockopt_327() -> SyscallEntry:
+    SyscallEntry(445, "SO_OPT_327", 327, 327, 327, 2, False)
+
+pub fn linux_sockopt_328() -> SyscallEntry:
+    SyscallEntry(446, "SO_OPT_328", 328, 328, 328, 2, False)
+
+pub fn linux_sockopt_329() -> SyscallEntry:
+    SyscallEntry(447, "SO_OPT_329", 329, 329, 329, 2, False)
+
+pub fn linux_sockopt_330() -> SyscallEntry:
+    SyscallEntry(448, "SO_OPT_330", 330, 330, 330, 2, False)
+
+pub fn linux_sockopt_331() -> SyscallEntry:
+    SyscallEntry(449, "SO_OPT_331", 331, 331, 331, 2, False)
+
+pub fn linux_sockopt_332() -> SyscallEntry:
+    SyscallEntry(450, "SO_OPT_332", 332, 332, 332, 2, False)
+
+pub fn linux_sockopt_333() -> SyscallEntry:
+    SyscallEntry(451, "SO_OPT_333", 333, 333, 333, 2, False)
+
+pub fn linux_sockopt_334() -> SyscallEntry:
+    SyscallEntry(452, "SO_OPT_334", 334, 334, 334, 2, False)
+
+pub fn linux_sockopt_335() -> SyscallEntry:
+    SyscallEntry(453, "SO_OPT_335", 335, 335, 335, 2, False)
+
+pub fn linux_sockopt_336() -> SyscallEntry:
+    SyscallEntry(454, "SO_OPT_336", 336, 336, 336, 2, False)
+
+pub fn linux_sockopt_337() -> SyscallEntry:
+    SyscallEntry(455, "SO_OPT_337", 337, 337, 337, 2, False)
+
+pub fn linux_sockopt_338() -> SyscallEntry:
+    SyscallEntry(456, "SO_OPT_338", 338, 338, 338, 2, False)
+
+pub fn linux_sockopt_339() -> SyscallEntry:
+    SyscallEntry(457, "SO_OPT_339", 339, 339, 339, 2, False)
+
+pub fn linux_sockopt_340() -> SyscallEntry:
+    SyscallEntry(458, "SO_OPT_340", 340, 340, 340, 2, False)
+
+pub fn linux_sockopt_341() -> SyscallEntry:
+    SyscallEntry(459, "SO_OPT_341", 341, 341, 341, 2, False)
+
+pub fn linux_sockopt_342() -> SyscallEntry:
+    SyscallEntry(460, "SO_OPT_342", 342, 342, 342, 2, False)
+
+pub fn linux_sockopt_343() -> SyscallEntry:
+    SyscallEntry(461, "SO_OPT_343", 343, 343, 343, 2, False)
+
+pub fn linux_sockopt_344() -> SyscallEntry:
+    SyscallEntry(462, "SO_OPT_344", 344, 344, 344, 2, False)
+
+pub fn linux_sockopt_345() -> SyscallEntry:
+    SyscallEntry(463, "SO_OPT_345", 345, 345, 345, 2, False)
+
+pub fn linux_sockopt_346() -> SyscallEntry:
+    SyscallEntry(464, "SO_OPT_346", 346, 346, 346, 2, False)
+
+pub fn linux_sockopt_347() -> SyscallEntry:
+    SyscallEntry(465, "SO_OPT_347", 347, 347, 347, 2, False)
+
+pub fn linux_sockopt_348() -> SyscallEntry:
+    SyscallEntry(466, "SO_OPT_348", 348, 348, 348, 2, False)
+
+pub fn linux_sockopt_349() -> SyscallEntry:
+    SyscallEntry(467, "SO_OPT_349", 349, 349, 349, 2, False)
+
+pub fn linux_sockopt_350() -> SyscallEntry:
+    SyscallEntry(468, "SO_OPT_350", 350, 350, 350, 2, False)
+
+pub fn linux_ioctl_1() -> SyscallEntry:
+    SyscallEntry(469, "IOCTL_CMD_1", 1073741825, 1073741825, 1073741825, 3, False)
+
+pub fn linux_ioctl_2() -> SyscallEntry:
+    SyscallEntry(470, "IOCTL_CMD_2", 1073741826, 1073741826, 1073741826, 3, False)
+
+pub fn linux_ioctl_3() -> SyscallEntry:
+    SyscallEntry(471, "IOCTL_CMD_3", 1073741827, 1073741827, 1073741827, 3, False)
+
+pub fn linux_ioctl_4() -> SyscallEntry:
+    SyscallEntry(472, "IOCTL_CMD_4", 1073741828, 1073741828, 1073741828, 3, False)
+
+pub fn linux_ioctl_5() -> SyscallEntry:
+    SyscallEntry(473, "IOCTL_CMD_5", 1073741829, 1073741829, 1073741829, 3, False)
+
+pub fn linux_ioctl_6() -> SyscallEntry:
+    SyscallEntry(474, "IOCTL_CMD_6", 1073741830, 1073741830, 1073741830, 3, False)
+
+pub fn linux_ioctl_7() -> SyscallEntry:
+    SyscallEntry(475, "IOCTL_CMD_7", 1073741831, 1073741831, 1073741831, 3, False)
+
+pub fn linux_ioctl_8() -> SyscallEntry:
+    SyscallEntry(476, "IOCTL_CMD_8", 1073741832, 1073741832, 1073741832, 3, False)
+
+pub fn linux_ioctl_9() -> SyscallEntry:
+    SyscallEntry(477, "IOCTL_CMD_9", 1073741833, 1073741833, 1073741833, 3, False)
+
+pub fn linux_ioctl_10() -> SyscallEntry:
+    SyscallEntry(478, "IOCTL_CMD_10", 1073741834, 1073741834, 1073741834, 3, False)
+
+pub fn linux_ioctl_11() -> SyscallEntry:
+    SyscallEntry(479, "IOCTL_CMD_11", 1073741835, 1073741835, 1073741835, 3, False)
+
+pub fn linux_ioctl_12() -> SyscallEntry:
+    SyscallEntry(480, "IOCTL_CMD_12", 1073741836, 1073741836, 1073741836, 3, False)
+
+pub fn linux_ioctl_13() -> SyscallEntry:
+    SyscallEntry(481, "IOCTL_CMD_13", 1073741837, 1073741837, 1073741837, 3, False)
+
+pub fn linux_ioctl_14() -> SyscallEntry:
+    SyscallEntry(482, "IOCTL_CMD_14", 1073741838, 1073741838, 1073741838, 3, False)
+
+pub fn linux_ioctl_15() -> SyscallEntry:
+    SyscallEntry(483, "IOCTL_CMD_15", 1073741839, 1073741839, 1073741839, 3, False)
+
+pub fn linux_ioctl_16() -> SyscallEntry:
+    SyscallEntry(484, "IOCTL_CMD_16", 1073741840, 1073741840, 1073741840, 3, False)
+
+pub fn linux_ioctl_17() -> SyscallEntry:
+    SyscallEntry(485, "IOCTL_CMD_17", 1073741841, 1073741841, 1073741841, 3, False)
+
+pub fn linux_ioctl_18() -> SyscallEntry:
+    SyscallEntry(486, "IOCTL_CMD_18", 1073741842, 1073741842, 1073741842, 3, False)
+
+pub fn linux_ioctl_19() -> SyscallEntry:
+    SyscallEntry(487, "IOCTL_CMD_19", 1073741843, 1073741843, 1073741843, 3, False)
+
+pub fn linux_ioctl_20() -> SyscallEntry:
+    SyscallEntry(488, "IOCTL_CMD_20", 1073741844, 1073741844, 1073741844, 3, False)
+
+pub fn linux_ioctl_21() -> SyscallEntry:
+    SyscallEntry(489, "IOCTL_CMD_21", 1073741845, 1073741845, 1073741845, 3, False)
+
+pub fn linux_ioctl_22() -> SyscallEntry:
+    SyscallEntry(490, "IOCTL_CMD_22", 1073741846, 1073741846, 1073741846, 3, False)
+
+pub fn linux_ioctl_23() -> SyscallEntry:
+    SyscallEntry(491, "IOCTL_CMD_23", 1073741847, 1073741847, 1073741847, 3, False)
+
+pub fn linux_ioctl_24() -> SyscallEntry:
+    SyscallEntry(492, "IOCTL_CMD_24", 1073741848, 1073741848, 1073741848, 3, False)
+
+pub fn linux_ioctl_25() -> SyscallEntry:
+    SyscallEntry(493, "IOCTL_CMD_25", 1073741849, 1073741849, 1073741849, 3, False)
+
+pub fn linux_ioctl_26() -> SyscallEntry:
+    SyscallEntry(494, "IOCTL_CMD_26", 1073741850, 1073741850, 1073741850, 3, False)
+
+pub fn linux_ioctl_27() -> SyscallEntry:
+    SyscallEntry(495, "IOCTL_CMD_27", 1073741851, 1073741851, 1073741851, 3, False)
+
+pub fn linux_ioctl_28() -> SyscallEntry:
+    SyscallEntry(496, "IOCTL_CMD_28", 1073741852, 1073741852, 1073741852, 3, False)
+
+pub fn linux_ioctl_29() -> SyscallEntry:
+    SyscallEntry(497, "IOCTL_CMD_29", 1073741853, 1073741853, 1073741853, 3, False)
+
+pub fn linux_ioctl_30() -> SyscallEntry:
+    SyscallEntry(498, "IOCTL_CMD_30", 1073741854, 1073741854, 1073741854, 3, False)
+
+pub fn linux_ioctl_31() -> SyscallEntry:
+    SyscallEntry(499, "IOCTL_CMD_31", 1073741855, 1073741855, 1073741855, 3, False)
+
+pub fn linux_ioctl_32() -> SyscallEntry:
+    SyscallEntry(500, "IOCTL_CMD_32", 1073741856, 1073741856, 1073741856, 3, False)
+
+pub fn linux_ioctl_33() -> SyscallEntry:
+    SyscallEntry(501, "IOCTL_CMD_33", 1073741857, 1073741857, 1073741857, 3, False)
+
+pub fn linux_ioctl_34() -> SyscallEntry:
+    SyscallEntry(502, "IOCTL_CMD_34", 1073741858, 1073741858, 1073741858, 3, False)
+
+pub fn linux_ioctl_35() -> SyscallEntry:
+    SyscallEntry(503, "IOCTL_CMD_35", 1073741859, 1073741859, 1073741859, 3, False)
+
+pub fn linux_ioctl_36() -> SyscallEntry:
+    SyscallEntry(504, "IOCTL_CMD_36", 1073741860, 1073741860, 1073741860, 3, False)
+
+pub fn linux_ioctl_37() -> SyscallEntry:
+    SyscallEntry(505, "IOCTL_CMD_37", 1073741861, 1073741861, 1073741861, 3, False)
+
+pub fn linux_ioctl_38() -> SyscallEntry:
+    SyscallEntry(506, "IOCTL_CMD_38", 1073741862, 1073741862, 1073741862, 3, False)
+
+pub fn linux_ioctl_39() -> SyscallEntry:
+    SyscallEntry(507, "IOCTL_CMD_39", 1073741863, 1073741863, 1073741863, 3, False)
+
+pub fn linux_ioctl_40() -> SyscallEntry:
+    SyscallEntry(508, "IOCTL_CMD_40", 1073741864, 1073741864, 1073741864, 3, False)
+
+pub fn linux_ioctl_41() -> SyscallEntry:
+    SyscallEntry(509, "IOCTL_CMD_41", 1073741865, 1073741865, 1073741865, 3, False)
+
+pub fn linux_ioctl_42() -> SyscallEntry:
+    SyscallEntry(510, "IOCTL_CMD_42", 1073741866, 1073741866, 1073741866, 3, False)
+
+pub fn linux_ioctl_43() -> SyscallEntry:
+    SyscallEntry(511, "IOCTL_CMD_43", 1073741867, 1073741867, 1073741867, 3, False)
+
+pub fn linux_ioctl_44() -> SyscallEntry:
+    SyscallEntry(512, "IOCTL_CMD_44", 1073741868, 1073741868, 1073741868, 3, False)
+
+pub fn linux_ioctl_45() -> SyscallEntry:
+    SyscallEntry(513, "IOCTL_CMD_45", 1073741869, 1073741869, 1073741869, 3, False)
+
+pub fn linux_ioctl_46() -> SyscallEntry:
+    SyscallEntry(514, "IOCTL_CMD_46", 1073741870, 1073741870, 1073741870, 3, False)
+
+pub fn linux_ioctl_47() -> SyscallEntry:
+    SyscallEntry(515, "IOCTL_CMD_47", 1073741871, 1073741871, 1073741871, 3, False)
+
+pub fn linux_ioctl_48() -> SyscallEntry:
+    SyscallEntry(516, "IOCTL_CMD_48", 1073741872, 1073741872, 1073741872, 3, False)
+
+pub fn linux_ioctl_49() -> SyscallEntry:
+    SyscallEntry(517, "IOCTL_CMD_49", 1073741873, 1073741873, 1073741873, 3, False)
+
+pub fn linux_ioctl_50() -> SyscallEntry:
+    SyscallEntry(518, "IOCTL_CMD_50", 1073741874, 1073741874, 1073741874, 3, False)
+
+pub fn linux_ioctl_51() -> SyscallEntry:
+    SyscallEntry(519, "IOCTL_CMD_51", 1073741875, 1073741875, 1073741875, 3, False)
+
+pub fn linux_ioctl_52() -> SyscallEntry:
+    SyscallEntry(520, "IOCTL_CMD_52", 1073741876, 1073741876, 1073741876, 3, False)
+
+pub fn linux_ioctl_53() -> SyscallEntry:
+    SyscallEntry(521, "IOCTL_CMD_53", 1073741877, 1073741877, 1073741877, 3, False)
+
+pub fn linux_ioctl_54() -> SyscallEntry:
+    SyscallEntry(522, "IOCTL_CMD_54", 1073741878, 1073741878, 1073741878, 3, False)
+
+pub fn linux_ioctl_55() -> SyscallEntry:
+    SyscallEntry(523, "IOCTL_CMD_55", 1073741879, 1073741879, 1073741879, 3, False)
+
+pub fn linux_ioctl_56() -> SyscallEntry:
+    SyscallEntry(524, "IOCTL_CMD_56", 1073741880, 1073741880, 1073741880, 3, False)
+
+pub fn linux_ioctl_57() -> SyscallEntry:
+    SyscallEntry(525, "IOCTL_CMD_57", 1073741881, 1073741881, 1073741881, 3, False)
+
+pub fn linux_ioctl_58() -> SyscallEntry:
+    SyscallEntry(526, "IOCTL_CMD_58", 1073741882, 1073741882, 1073741882, 3, False)
+
+pub fn linux_ioctl_59() -> SyscallEntry:
+    SyscallEntry(527, "IOCTL_CMD_59", 1073741883, 1073741883, 1073741883, 3, False)
+
+pub fn linux_ioctl_60() -> SyscallEntry:
+    SyscallEntry(528, "IOCTL_CMD_60", 1073741884, 1073741884, 1073741884, 3, False)
+
+pub fn linux_ioctl_61() -> SyscallEntry:
+    SyscallEntry(529, "IOCTL_CMD_61", 1073741885, 1073741885, 1073741885, 3, False)
+
+pub fn linux_ioctl_62() -> SyscallEntry:
+    SyscallEntry(530, "IOCTL_CMD_62", 1073741886, 1073741886, 1073741886, 3, False)
+
+pub fn linux_ioctl_63() -> SyscallEntry:
+    SyscallEntry(531, "IOCTL_CMD_63", 1073741887, 1073741887, 1073741887, 3, False)
+
+pub fn linux_ioctl_64() -> SyscallEntry:
+    SyscallEntry(532, "IOCTL_CMD_64", 1073741888, 1073741888, 1073741888, 3, False)
+
+pub fn linux_ioctl_65() -> SyscallEntry:
+    SyscallEntry(533, "IOCTL_CMD_65", 1073741889, 1073741889, 1073741889, 3, False)
+
+pub fn linux_ioctl_66() -> SyscallEntry:
+    SyscallEntry(534, "IOCTL_CMD_66", 1073741890, 1073741890, 1073741890, 3, False)
+
+pub fn linux_ioctl_67() -> SyscallEntry:
+    SyscallEntry(535, "IOCTL_CMD_67", 1073741891, 1073741891, 1073741891, 3, False)
+
+pub fn linux_ioctl_68() -> SyscallEntry:
+    SyscallEntry(536, "IOCTL_CMD_68", 1073741892, 1073741892, 1073741892, 3, False)
+
+pub fn linux_ioctl_69() -> SyscallEntry:
+    SyscallEntry(537, "IOCTL_CMD_69", 1073741893, 1073741893, 1073741893, 3, False)
+
+pub fn linux_ioctl_70() -> SyscallEntry:
+    SyscallEntry(538, "IOCTL_CMD_70", 1073741894, 1073741894, 1073741894, 3, False)
+
+pub fn linux_ioctl_71() -> SyscallEntry:
+    SyscallEntry(539, "IOCTL_CMD_71", 1073741895, 1073741895, 1073741895, 3, False)
+
+pub fn linux_ioctl_72() -> SyscallEntry:
+    SyscallEntry(540, "IOCTL_CMD_72", 1073741896, 1073741896, 1073741896, 3, False)
+
+pub fn linux_ioctl_73() -> SyscallEntry:
+    SyscallEntry(541, "IOCTL_CMD_73", 1073741897, 1073741897, 1073741897, 3, False)
+
+pub fn linux_ioctl_74() -> SyscallEntry:
+    SyscallEntry(542, "IOCTL_CMD_74", 1073741898, 1073741898, 1073741898, 3, False)
+
+pub fn linux_ioctl_75() -> SyscallEntry:
+    SyscallEntry(543, "IOCTL_CMD_75", 1073741899, 1073741899, 1073741899, 3, False)
+
+pub fn linux_ioctl_76() -> SyscallEntry:
+    SyscallEntry(544, "IOCTL_CMD_76", 1073741900, 1073741900, 1073741900, 3, False)
+
+pub fn linux_ioctl_77() -> SyscallEntry:
+    SyscallEntry(545, "IOCTL_CMD_77", 1073741901, 1073741901, 1073741901, 3, False)
+
+pub fn linux_ioctl_78() -> SyscallEntry:
+    SyscallEntry(546, "IOCTL_CMD_78", 1073741902, 1073741902, 1073741902, 3, False)
+
+pub fn linux_ioctl_79() -> SyscallEntry:
+    SyscallEntry(547, "IOCTL_CMD_79", 1073741903, 1073741903, 1073741903, 3, False)
+
+pub fn linux_ioctl_80() -> SyscallEntry:
+    SyscallEntry(548, "IOCTL_CMD_80", 1073741904, 1073741904, 1073741904, 3, False)
+
+pub fn linux_ioctl_81() -> SyscallEntry:
+    SyscallEntry(549, "IOCTL_CMD_81", 1073741905, 1073741905, 1073741905, 3, False)
+
+pub fn linux_ioctl_82() -> SyscallEntry:
+    SyscallEntry(550, "IOCTL_CMD_82", 1073741906, 1073741906, 1073741906, 3, False)
+
+pub fn linux_ioctl_83() -> SyscallEntry:
+    SyscallEntry(551, "IOCTL_CMD_83", 1073741907, 1073741907, 1073741907, 3, False)
+
+pub fn linux_ioctl_84() -> SyscallEntry:
+    SyscallEntry(552, "IOCTL_CMD_84", 1073741908, 1073741908, 1073741908, 3, False)
+
+pub fn linux_ioctl_85() -> SyscallEntry:
+    SyscallEntry(553, "IOCTL_CMD_85", 1073741909, 1073741909, 1073741909, 3, False)
+
+pub fn linux_ioctl_86() -> SyscallEntry:
+    SyscallEntry(554, "IOCTL_CMD_86", 1073741910, 1073741910, 1073741910, 3, False)
+
+pub fn linux_ioctl_87() -> SyscallEntry:
+    SyscallEntry(555, "IOCTL_CMD_87", 1073741911, 1073741911, 1073741911, 3, False)
+
+pub fn linux_ioctl_88() -> SyscallEntry:
+    SyscallEntry(556, "IOCTL_CMD_88", 1073741912, 1073741912, 1073741912, 3, False)
+
+pub fn linux_ioctl_89() -> SyscallEntry:
+    SyscallEntry(557, "IOCTL_CMD_89", 1073741913, 1073741913, 1073741913, 3, False)
+
+pub fn linux_ioctl_90() -> SyscallEntry:
+    SyscallEntry(558, "IOCTL_CMD_90", 1073741914, 1073741914, 1073741914, 3, False)
+
+pub fn linux_ioctl_91() -> SyscallEntry:
+    SyscallEntry(559, "IOCTL_CMD_91", 1073741915, 1073741915, 1073741915, 3, False)
+
+pub fn linux_ioctl_92() -> SyscallEntry:
+    SyscallEntry(560, "IOCTL_CMD_92", 1073741916, 1073741916, 1073741916, 3, False)
+
+pub fn linux_ioctl_93() -> SyscallEntry:
+    SyscallEntry(561, "IOCTL_CMD_93", 1073741917, 1073741917, 1073741917, 3, False)
+
+pub fn linux_ioctl_94() -> SyscallEntry:
+    SyscallEntry(562, "IOCTL_CMD_94", 1073741918, 1073741918, 1073741918, 3, False)
+
+pub fn linux_ioctl_95() -> SyscallEntry:
+    SyscallEntry(563, "IOCTL_CMD_95", 1073741919, 1073741919, 1073741919, 3, False)
+
+pub fn linux_ioctl_96() -> SyscallEntry:
+    SyscallEntry(564, "IOCTL_CMD_96", 1073741920, 1073741920, 1073741920, 3, False)
+
+pub fn linux_ioctl_97() -> SyscallEntry:
+    SyscallEntry(565, "IOCTL_CMD_97", 1073741921, 1073741921, 1073741921, 3, False)
+
+pub fn linux_ioctl_98() -> SyscallEntry:
+    SyscallEntry(566, "IOCTL_CMD_98", 1073741922, 1073741922, 1073741922, 3, False)
+
+pub fn linux_ioctl_99() -> SyscallEntry:
+    SyscallEntry(567, "IOCTL_CMD_99", 1073741923, 1073741923, 1073741923, 3, False)
+
+pub fn linux_ioctl_100() -> SyscallEntry:
+    SyscallEntry(568, "IOCTL_CMD_100", 1073741924, 1073741924, 1073741924, 3, False)
+
+pub fn linux_ioctl_101() -> SyscallEntry:
+    SyscallEntry(569, "IOCTL_CMD_101", 1073741925, 1073741925, 1073741925, 3, False)
+
+pub fn linux_ioctl_102() -> SyscallEntry:
+    SyscallEntry(570, "IOCTL_CMD_102", 1073741926, 1073741926, 1073741926, 3, False)
+
+pub fn linux_ioctl_103() -> SyscallEntry:
+    SyscallEntry(571, "IOCTL_CMD_103", 1073741927, 1073741927, 1073741927, 3, False)
+
+pub fn linux_ioctl_104() -> SyscallEntry:
+    SyscallEntry(572, "IOCTL_CMD_104", 1073741928, 1073741928, 1073741928, 3, False)
+
+pub fn linux_ioctl_105() -> SyscallEntry:
+    SyscallEntry(573, "IOCTL_CMD_105", 1073741929, 1073741929, 1073741929, 3, False)
+
+pub fn linux_ioctl_106() -> SyscallEntry:
+    SyscallEntry(574, "IOCTL_CMD_106", 1073741930, 1073741930, 1073741930, 3, False)
+
+pub fn linux_ioctl_107() -> SyscallEntry:
+    SyscallEntry(575, "IOCTL_CMD_107", 1073741931, 1073741931, 1073741931, 3, False)
+
+pub fn linux_ioctl_108() -> SyscallEntry:
+    SyscallEntry(576, "IOCTL_CMD_108", 1073741932, 1073741932, 1073741932, 3, False)
+
+pub fn linux_ioctl_109() -> SyscallEntry:
+    SyscallEntry(577, "IOCTL_CMD_109", 1073741933, 1073741933, 1073741933, 3, False)
+
+pub fn linux_ioctl_110() -> SyscallEntry:
+    SyscallEntry(578, "IOCTL_CMD_110", 1073741934, 1073741934, 1073741934, 3, False)
+
+pub fn linux_ioctl_111() -> SyscallEntry:
+    SyscallEntry(579, "IOCTL_CMD_111", 1073741935, 1073741935, 1073741935, 3, False)
+
+pub fn linux_ioctl_112() -> SyscallEntry:
+    SyscallEntry(580, "IOCTL_CMD_112", 1073741936, 1073741936, 1073741936, 3, False)
+
+pub fn linux_ioctl_113() -> SyscallEntry:
+    SyscallEntry(581, "IOCTL_CMD_113", 1073741937, 1073741937, 1073741937, 3, False)
+
+pub fn linux_ioctl_114() -> SyscallEntry:
+    SyscallEntry(582, "IOCTL_CMD_114", 1073741938, 1073741938, 1073741938, 3, False)
+
+pub fn linux_ioctl_115() -> SyscallEntry:
+    SyscallEntry(583, "IOCTL_CMD_115", 1073741939, 1073741939, 1073741939, 3, False)
+
+pub fn linux_ioctl_116() -> SyscallEntry:
+    SyscallEntry(584, "IOCTL_CMD_116", 1073741940, 1073741940, 1073741940, 3, False)
+
+pub fn linux_ioctl_117() -> SyscallEntry:
+    SyscallEntry(585, "IOCTL_CMD_117", 1073741941, 1073741941, 1073741941, 3, False)
+
+pub fn linux_ioctl_118() -> SyscallEntry:
+    SyscallEntry(586, "IOCTL_CMD_118", 1073741942, 1073741942, 1073741942, 3, False)
+
+pub fn linux_ioctl_119() -> SyscallEntry:
+    SyscallEntry(587, "IOCTL_CMD_119", 1073741943, 1073741943, 1073741943, 3, False)
+
+pub fn linux_ioctl_120() -> SyscallEntry:
+    SyscallEntry(588, "IOCTL_CMD_120", 1073741944, 1073741944, 1073741944, 3, False)
+
+pub fn linux_ioctl_121() -> SyscallEntry:
+    SyscallEntry(589, "IOCTL_CMD_121", 1073741945, 1073741945, 1073741945, 3, False)
+
+pub fn linux_ioctl_122() -> SyscallEntry:
+    SyscallEntry(590, "IOCTL_CMD_122", 1073741946, 1073741946, 1073741946, 3, False)
+
+pub fn linux_ioctl_123() -> SyscallEntry:
+    SyscallEntry(591, "IOCTL_CMD_123", 1073741947, 1073741947, 1073741947, 3, False)
+
+pub fn linux_ioctl_124() -> SyscallEntry:
+    SyscallEntry(592, "IOCTL_CMD_124", 1073741948, 1073741948, 1073741948, 3, False)
+
+pub fn linux_ioctl_125() -> SyscallEntry:
+    SyscallEntry(593, "IOCTL_CMD_125", 1073741949, 1073741949, 1073741949, 3, False)
+
+pub fn linux_ioctl_126() -> SyscallEntry:
+    SyscallEntry(594, "IOCTL_CMD_126", 1073741950, 1073741950, 1073741950, 3, False)
+
+pub fn linux_ioctl_127() -> SyscallEntry:
+    SyscallEntry(595, "IOCTL_CMD_127", 1073741951, 1073741951, 1073741951, 3, False)
+
+pub fn linux_ioctl_128() -> SyscallEntry:
+    SyscallEntry(596, "IOCTL_CMD_128", 1073741952, 1073741952, 1073741952, 3, False)
+
+pub fn linux_ioctl_129() -> SyscallEntry:
+    SyscallEntry(597, "IOCTL_CMD_129", 1073741953, 1073741953, 1073741953, 3, False)
+
+pub fn linux_ioctl_130() -> SyscallEntry:
+    SyscallEntry(598, "IOCTL_CMD_130", 1073741954, 1073741954, 1073741954, 3, False)
+
+pub fn linux_ioctl_131() -> SyscallEntry:
+    SyscallEntry(599, "IOCTL_CMD_131", 1073741955, 1073741955, 1073741955, 3, False)
+
+pub fn linux_ioctl_132() -> SyscallEntry:
+    SyscallEntry(600, "IOCTL_CMD_132", 1073741956, 1073741956, 1073741956, 3, False)
+
+pub fn linux_ioctl_133() -> SyscallEntry:
+    SyscallEntry(601, "IOCTL_CMD_133", 1073741957, 1073741957, 1073741957, 3, False)
+
+pub fn linux_ioctl_134() -> SyscallEntry:
+    SyscallEntry(602, "IOCTL_CMD_134", 1073741958, 1073741958, 1073741958, 3, False)
+
+pub fn linux_ioctl_135() -> SyscallEntry:
+    SyscallEntry(603, "IOCTL_CMD_135", 1073741959, 1073741959, 1073741959, 3, False)
+
+pub fn linux_ioctl_136() -> SyscallEntry:
+    SyscallEntry(604, "IOCTL_CMD_136", 1073741960, 1073741960, 1073741960, 3, False)
+
+pub fn linux_ioctl_137() -> SyscallEntry:
+    SyscallEntry(605, "IOCTL_CMD_137", 1073741961, 1073741961, 1073741961, 3, False)
+
+pub fn linux_ioctl_138() -> SyscallEntry:
+    SyscallEntry(606, "IOCTL_CMD_138", 1073741962, 1073741962, 1073741962, 3, False)
+
+pub fn linux_ioctl_139() -> SyscallEntry:
+    SyscallEntry(607, "IOCTL_CMD_139", 1073741963, 1073741963, 1073741963, 3, False)
+
+pub fn linux_ioctl_140() -> SyscallEntry:
+    SyscallEntry(608, "IOCTL_CMD_140", 1073741964, 1073741964, 1073741964, 3, False)
+
+pub fn linux_ioctl_141() -> SyscallEntry:
+    SyscallEntry(609, "IOCTL_CMD_141", 1073741965, 1073741965, 1073741965, 3, False)
+
+pub fn linux_ioctl_142() -> SyscallEntry:
+    SyscallEntry(610, "IOCTL_CMD_142", 1073741966, 1073741966, 1073741966, 3, False)
+
+pub fn linux_ioctl_143() -> SyscallEntry:
+    SyscallEntry(611, "IOCTL_CMD_143", 1073741967, 1073741967, 1073741967, 3, False)
+
+pub fn linux_ioctl_144() -> SyscallEntry:
+    SyscallEntry(612, "IOCTL_CMD_144", 1073741968, 1073741968, 1073741968, 3, False)
+
+pub fn linux_ioctl_145() -> SyscallEntry:
+    SyscallEntry(613, "IOCTL_CMD_145", 1073741969, 1073741969, 1073741969, 3, False)
+
+pub fn linux_ioctl_146() -> SyscallEntry:
+    SyscallEntry(614, "IOCTL_CMD_146", 1073741970, 1073741970, 1073741970, 3, False)
+
+pub fn linux_ioctl_147() -> SyscallEntry:
+    SyscallEntry(615, "IOCTL_CMD_147", 1073741971, 1073741971, 1073741971, 3, False)
+
+pub fn linux_ioctl_148() -> SyscallEntry:
+    SyscallEntry(616, "IOCTL_CMD_148", 1073741972, 1073741972, 1073741972, 3, False)
+
+pub fn linux_ioctl_149() -> SyscallEntry:
+    SyscallEntry(617, "IOCTL_CMD_149", 1073741973, 1073741973, 1073741973, 3, False)
+
+pub fn linux_ioctl_150() -> SyscallEntry:
+    SyscallEntry(618, "IOCTL_CMD_150", 1073741974, 1073741974, 1073741974, 3, False)
+
+pub fn linux_ioctl_151() -> SyscallEntry:
+    SyscallEntry(619, "IOCTL_CMD_151", 1073741975, 1073741975, 1073741975, 3, False)
+
+pub fn linux_ioctl_152() -> SyscallEntry:
+    SyscallEntry(620, "IOCTL_CMD_152", 1073741976, 1073741976, 1073741976, 3, False)
+
+pub fn linux_ioctl_153() -> SyscallEntry:
+    SyscallEntry(621, "IOCTL_CMD_153", 1073741977, 1073741977, 1073741977, 3, False)
+
+pub fn linux_ioctl_154() -> SyscallEntry:
+    SyscallEntry(622, "IOCTL_CMD_154", 1073741978, 1073741978, 1073741978, 3, False)
+
+pub fn linux_ioctl_155() -> SyscallEntry:
+    SyscallEntry(623, "IOCTL_CMD_155", 1073741979, 1073741979, 1073741979, 3, False)
+
+pub fn linux_ioctl_156() -> SyscallEntry:
+    SyscallEntry(624, "IOCTL_CMD_156", 1073741980, 1073741980, 1073741980, 3, False)
+
+pub fn linux_ioctl_157() -> SyscallEntry:
+    SyscallEntry(625, "IOCTL_CMD_157", 1073741981, 1073741981, 1073741981, 3, False)
+
+pub fn linux_ioctl_158() -> SyscallEntry:
+    SyscallEntry(626, "IOCTL_CMD_158", 1073741982, 1073741982, 1073741982, 3, False)
+
+pub fn linux_ioctl_159() -> SyscallEntry:
+    SyscallEntry(627, "IOCTL_CMD_159", 1073741983, 1073741983, 1073741983, 3, False)
+
+pub fn linux_ioctl_160() -> SyscallEntry:
+    SyscallEntry(628, "IOCTL_CMD_160", 1073741984, 1073741984, 1073741984, 3, False)
+
+pub fn linux_ioctl_161() -> SyscallEntry:
+    SyscallEntry(629, "IOCTL_CMD_161", 1073741985, 1073741985, 1073741985, 3, False)
+
+pub fn linux_ioctl_162() -> SyscallEntry:
+    SyscallEntry(630, "IOCTL_CMD_162", 1073741986, 1073741986, 1073741986, 3, False)
+
+pub fn linux_ioctl_163() -> SyscallEntry:
+    SyscallEntry(631, "IOCTL_CMD_163", 1073741987, 1073741987, 1073741987, 3, False)
+
+pub fn linux_ioctl_164() -> SyscallEntry:
+    SyscallEntry(632, "IOCTL_CMD_164", 1073741988, 1073741988, 1073741988, 3, False)
+
+pub fn linux_ioctl_165() -> SyscallEntry:
+    SyscallEntry(633, "IOCTL_CMD_165", 1073741989, 1073741989, 1073741989, 3, False)
+
+pub fn linux_ioctl_166() -> SyscallEntry:
+    SyscallEntry(634, "IOCTL_CMD_166", 1073741990, 1073741990, 1073741990, 3, False)
+
+pub fn linux_ioctl_167() -> SyscallEntry:
+    SyscallEntry(635, "IOCTL_CMD_167", 1073741991, 1073741991, 1073741991, 3, False)
+
+pub fn linux_ioctl_168() -> SyscallEntry:
+    SyscallEntry(636, "IOCTL_CMD_168", 1073741992, 1073741992, 1073741992, 3, False)
+
+pub fn linux_ioctl_169() -> SyscallEntry:
+    SyscallEntry(637, "IOCTL_CMD_169", 1073741993, 1073741993, 1073741993, 3, False)
+
+pub fn linux_ioctl_170() -> SyscallEntry:
+    SyscallEntry(638, "IOCTL_CMD_170", 1073741994, 1073741994, 1073741994, 3, False)
+
+pub fn linux_ioctl_171() -> SyscallEntry:
+    SyscallEntry(639, "IOCTL_CMD_171", 1073741995, 1073741995, 1073741995, 3, False)
+
+pub fn linux_ioctl_172() -> SyscallEntry:
+    SyscallEntry(640, "IOCTL_CMD_172", 1073741996, 1073741996, 1073741996, 3, False)
+
+pub fn linux_ioctl_173() -> SyscallEntry:
+    SyscallEntry(641, "IOCTL_CMD_173", 1073741997, 1073741997, 1073741997, 3, False)
+
+pub fn linux_ioctl_174() -> SyscallEntry:
+    SyscallEntry(642, "IOCTL_CMD_174", 1073741998, 1073741998, 1073741998, 3, False)
+
+pub fn linux_ioctl_175() -> SyscallEntry:
+    SyscallEntry(643, "IOCTL_CMD_175", 1073741999, 1073741999, 1073741999, 3, False)
+
+pub fn linux_ioctl_176() -> SyscallEntry:
+    SyscallEntry(644, "IOCTL_CMD_176", 1073742000, 1073742000, 1073742000, 3, False)
+
+pub fn linux_ioctl_177() -> SyscallEntry:
+    SyscallEntry(645, "IOCTL_CMD_177", 1073742001, 1073742001, 1073742001, 3, False)
+
+pub fn linux_ioctl_178() -> SyscallEntry:
+    SyscallEntry(646, "IOCTL_CMD_178", 1073742002, 1073742002, 1073742002, 3, False)
+
+pub fn linux_ioctl_179() -> SyscallEntry:
+    SyscallEntry(647, "IOCTL_CMD_179", 1073742003, 1073742003, 1073742003, 3, False)
+
+pub fn linux_ioctl_180() -> SyscallEntry:
+    SyscallEntry(648, "IOCTL_CMD_180", 1073742004, 1073742004, 1073742004, 3, False)
+
+pub fn linux_ioctl_181() -> SyscallEntry:
+    SyscallEntry(649, "IOCTL_CMD_181", 1073742005, 1073742005, 1073742005, 3, False)
+
+pub fn linux_ioctl_182() -> SyscallEntry:
+    SyscallEntry(650, "IOCTL_CMD_182", 1073742006, 1073742006, 1073742006, 3, False)
+
+pub fn linux_ioctl_183() -> SyscallEntry:
+    SyscallEntry(651, "IOCTL_CMD_183", 1073742007, 1073742007, 1073742007, 3, False)
+
+pub fn linux_ioctl_184() -> SyscallEntry:
+    SyscallEntry(652, "IOCTL_CMD_184", 1073742008, 1073742008, 1073742008, 3, False)
+
+pub fn linux_ioctl_185() -> SyscallEntry:
+    SyscallEntry(653, "IOCTL_CMD_185", 1073742009, 1073742009, 1073742009, 3, False)
+
+pub fn linux_ioctl_186() -> SyscallEntry:
+    SyscallEntry(654, "IOCTL_CMD_186", 1073742010, 1073742010, 1073742010, 3, False)
+
+pub fn linux_ioctl_187() -> SyscallEntry:
+    SyscallEntry(655, "IOCTL_CMD_187", 1073742011, 1073742011, 1073742011, 3, False)
+
+pub fn linux_ioctl_188() -> SyscallEntry:
+    SyscallEntry(656, "IOCTL_CMD_188", 1073742012, 1073742012, 1073742012, 3, False)
+
+pub fn linux_ioctl_189() -> SyscallEntry:
+    SyscallEntry(657, "IOCTL_CMD_189", 1073742013, 1073742013, 1073742013, 3, False)
+
+pub fn linux_ioctl_190() -> SyscallEntry:
+    SyscallEntry(658, "IOCTL_CMD_190", 1073742014, 1073742014, 1073742014, 3, False)
+
+pub fn linux_ioctl_191() -> SyscallEntry:
+    SyscallEntry(659, "IOCTL_CMD_191", 1073742015, 1073742015, 1073742015, 3, False)
+
+pub fn linux_ioctl_192() -> SyscallEntry:
+    SyscallEntry(660, "IOCTL_CMD_192", 1073742016, 1073742016, 1073742016, 3, False)
+
+pub fn linux_ioctl_193() -> SyscallEntry:
+    SyscallEntry(661, "IOCTL_CMD_193", 1073742017, 1073742017, 1073742017, 3, False)
+
+pub fn linux_ioctl_194() -> SyscallEntry:
+    SyscallEntry(662, "IOCTL_CMD_194", 1073742018, 1073742018, 1073742018, 3, False)
+
+pub fn linux_ioctl_195() -> SyscallEntry:
+    SyscallEntry(663, "IOCTL_CMD_195", 1073742019, 1073742019, 1073742019, 3, False)
+
+pub fn linux_ioctl_196() -> SyscallEntry:
+    SyscallEntry(664, "IOCTL_CMD_196", 1073742020, 1073742020, 1073742020, 3, False)
+
+pub fn linux_ioctl_197() -> SyscallEntry:
+    SyscallEntry(665, "IOCTL_CMD_197", 1073742021, 1073742021, 1073742021, 3, False)
+
+pub fn linux_ioctl_198() -> SyscallEntry:
+    SyscallEntry(666, "IOCTL_CMD_198", 1073742022, 1073742022, 1073742022, 3, False)
+
+pub fn linux_ioctl_199() -> SyscallEntry:
+    SyscallEntry(667, "IOCTL_CMD_199", 1073742023, 1073742023, 1073742023, 3, False)
+
+pub fn linux_ioctl_200() -> SyscallEntry:
+    SyscallEntry(668, "IOCTL_CMD_200", 1073742024, 1073742024, 1073742024, 3, False)
+
+pub fn linux_ioctl_201() -> SyscallEntry:
+    SyscallEntry(669, "IOCTL_CMD_201", 1073742025, 1073742025, 1073742025, 3, False)
+
+pub fn linux_ioctl_202() -> SyscallEntry:
+    SyscallEntry(670, "IOCTL_CMD_202", 1073742026, 1073742026, 1073742026, 3, False)
+
+pub fn linux_ioctl_203() -> SyscallEntry:
+    SyscallEntry(671, "IOCTL_CMD_203", 1073742027, 1073742027, 1073742027, 3, False)
+
+pub fn linux_ioctl_204() -> SyscallEntry:
+    SyscallEntry(672, "IOCTL_CMD_204", 1073742028, 1073742028, 1073742028, 3, False)
+
+pub fn linux_ioctl_205() -> SyscallEntry:
+    SyscallEntry(673, "IOCTL_CMD_205", 1073742029, 1073742029, 1073742029, 3, False)
+
+pub fn linux_ioctl_206() -> SyscallEntry:
+    SyscallEntry(674, "IOCTL_CMD_206", 1073742030, 1073742030, 1073742030, 3, False)
+
+pub fn linux_ioctl_207() -> SyscallEntry:
+    SyscallEntry(675, "IOCTL_CMD_207", 1073742031, 1073742031, 1073742031, 3, False)
+
+pub fn linux_ioctl_208() -> SyscallEntry:
+    SyscallEntry(676, "IOCTL_CMD_208", 1073742032, 1073742032, 1073742032, 3, False)
+
+pub fn linux_ioctl_209() -> SyscallEntry:
+    SyscallEntry(677, "IOCTL_CMD_209", 1073742033, 1073742033, 1073742033, 3, False)
+
+pub fn linux_ioctl_210() -> SyscallEntry:
+    SyscallEntry(678, "IOCTL_CMD_210", 1073742034, 1073742034, 1073742034, 3, False)
+
+pub fn linux_ioctl_211() -> SyscallEntry:
+    SyscallEntry(679, "IOCTL_CMD_211", 1073742035, 1073742035, 1073742035, 3, False)
+
+pub fn linux_ioctl_212() -> SyscallEntry:
+    SyscallEntry(680, "IOCTL_CMD_212", 1073742036, 1073742036, 1073742036, 3, False)
+
+pub fn linux_ioctl_213() -> SyscallEntry:
+    SyscallEntry(681, "IOCTL_CMD_213", 1073742037, 1073742037, 1073742037, 3, False)
+
+pub fn linux_ioctl_214() -> SyscallEntry:
+    SyscallEntry(682, "IOCTL_CMD_214", 1073742038, 1073742038, 1073742038, 3, False)
+
+pub fn linux_ioctl_215() -> SyscallEntry:
+    SyscallEntry(683, "IOCTL_CMD_215", 1073742039, 1073742039, 1073742039, 3, False)
+
+pub fn linux_ioctl_216() -> SyscallEntry:
+    SyscallEntry(684, "IOCTL_CMD_216", 1073742040, 1073742040, 1073742040, 3, False)
+
+pub fn linux_ioctl_217() -> SyscallEntry:
+    SyscallEntry(685, "IOCTL_CMD_217", 1073742041, 1073742041, 1073742041, 3, False)
+
+pub fn linux_ioctl_218() -> SyscallEntry:
+    SyscallEntry(686, "IOCTL_CMD_218", 1073742042, 1073742042, 1073742042, 3, False)
+
+pub fn linux_ioctl_219() -> SyscallEntry:
+    SyscallEntry(687, "IOCTL_CMD_219", 1073742043, 1073742043, 1073742043, 3, False)
+
+pub fn linux_ioctl_220() -> SyscallEntry:
+    SyscallEntry(688, "IOCTL_CMD_220", 1073742044, 1073742044, 1073742044, 3, False)
+
+pub fn linux_ioctl_221() -> SyscallEntry:
+    SyscallEntry(689, "IOCTL_CMD_221", 1073742045, 1073742045, 1073742045, 3, False)
+
+pub fn linux_ioctl_222() -> SyscallEntry:
+    SyscallEntry(690, "IOCTL_CMD_222", 1073742046, 1073742046, 1073742046, 3, False)
+
+pub fn linux_ioctl_223() -> SyscallEntry:
+    SyscallEntry(691, "IOCTL_CMD_223", 1073742047, 1073742047, 1073742047, 3, False)
+
+pub fn linux_ioctl_224() -> SyscallEntry:
+    SyscallEntry(692, "IOCTL_CMD_224", 1073742048, 1073742048, 1073742048, 3, False)
+
+pub fn linux_ioctl_225() -> SyscallEntry:
+    SyscallEntry(693, "IOCTL_CMD_225", 1073742049, 1073742049, 1073742049, 3, False)
+
+pub fn linux_ioctl_226() -> SyscallEntry:
+    SyscallEntry(694, "IOCTL_CMD_226", 1073742050, 1073742050, 1073742050, 3, False)
+
+pub fn linux_ioctl_227() -> SyscallEntry:
+    SyscallEntry(695, "IOCTL_CMD_227", 1073742051, 1073742051, 1073742051, 3, False)
+
+pub fn linux_ioctl_228() -> SyscallEntry:
+    SyscallEntry(696, "IOCTL_CMD_228", 1073742052, 1073742052, 1073742052, 3, False)
+
+pub fn linux_ioctl_229() -> SyscallEntry:
+    SyscallEntry(697, "IOCTL_CMD_229", 1073742053, 1073742053, 1073742053, 3, False)
+
+pub fn linux_ioctl_230() -> SyscallEntry:
+    SyscallEntry(698, "IOCTL_CMD_230", 1073742054, 1073742054, 1073742054, 3, False)
+
+pub fn linux_ioctl_231() -> SyscallEntry:
+    SyscallEntry(699, "IOCTL_CMD_231", 1073742055, 1073742055, 1073742055, 3, False)
+
+pub fn linux_ioctl_232() -> SyscallEntry:
+    SyscallEntry(700, "IOCTL_CMD_232", 1073742056, 1073742056, 1073742056, 3, False)
+
+pub fn linux_ioctl_233() -> SyscallEntry:
+    SyscallEntry(701, "IOCTL_CMD_233", 1073742057, 1073742057, 1073742057, 3, False)
+
+pub fn linux_ioctl_234() -> SyscallEntry:
+    SyscallEntry(702, "IOCTL_CMD_234", 1073742058, 1073742058, 1073742058, 3, False)
+
+pub fn linux_ioctl_235() -> SyscallEntry:
+    SyscallEntry(703, "IOCTL_CMD_235", 1073742059, 1073742059, 1073742059, 3, False)
+
+pub fn linux_ioctl_236() -> SyscallEntry:
+    SyscallEntry(704, "IOCTL_CMD_236", 1073742060, 1073742060, 1073742060, 3, False)
+
+pub fn linux_ioctl_237() -> SyscallEntry:
+    SyscallEntry(705, "IOCTL_CMD_237", 1073742061, 1073742061, 1073742061, 3, False)
+
+pub fn linux_ioctl_238() -> SyscallEntry:
+    SyscallEntry(706, "IOCTL_CMD_238", 1073742062, 1073742062, 1073742062, 3, False)
+
+pub fn linux_ioctl_239() -> SyscallEntry:
+    SyscallEntry(707, "IOCTL_CMD_239", 1073742063, 1073742063, 1073742063, 3, False)
+
+pub fn linux_ioctl_240() -> SyscallEntry:
+    SyscallEntry(708, "IOCTL_CMD_240", 1073742064, 1073742064, 1073742064, 3, False)
+
+pub fn linux_ioctl_241() -> SyscallEntry:
+    SyscallEntry(709, "IOCTL_CMD_241", 1073742065, 1073742065, 1073742065, 3, False)
+
+pub fn linux_ioctl_242() -> SyscallEntry:
+    SyscallEntry(710, "IOCTL_CMD_242", 1073742066, 1073742066, 1073742066, 3, False)
+
+pub fn linux_ioctl_243() -> SyscallEntry:
+    SyscallEntry(711, "IOCTL_CMD_243", 1073742067, 1073742067, 1073742067, 3, False)
+
+pub fn linux_ioctl_244() -> SyscallEntry:
+    SyscallEntry(712, "IOCTL_CMD_244", 1073742068, 1073742068, 1073742068, 3, False)
+
+pub fn linux_ioctl_245() -> SyscallEntry:
+    SyscallEntry(713, "IOCTL_CMD_245", 1073742069, 1073742069, 1073742069, 3, False)
+
+pub fn linux_ioctl_246() -> SyscallEntry:
+    SyscallEntry(714, "IOCTL_CMD_246", 1073742070, 1073742070, 1073742070, 3, False)
+
+pub fn linux_ioctl_247() -> SyscallEntry:
+    SyscallEntry(715, "IOCTL_CMD_247", 1073742071, 1073742071, 1073742071, 3, False)
+
+pub fn linux_ioctl_248() -> SyscallEntry:
+    SyscallEntry(716, "IOCTL_CMD_248", 1073742072, 1073742072, 1073742072, 3, False)
+
+pub fn linux_ioctl_249() -> SyscallEntry:
+    SyscallEntry(717, "IOCTL_CMD_249", 1073742073, 1073742073, 1073742073, 3, False)
+
+pub fn linux_ioctl_250() -> SyscallEntry:
+    SyscallEntry(718, "IOCTL_CMD_250", 1073742074, 1073742074, 1073742074, 3, False)
+
+pub fn linux_syscall_total() -> Int: 718
+
+pub fn linux_resolve_nr(arch_id: Int, entry: SyscallEntry) -> Int:
+    if arch_id == 1:
+        entry.nr_x86_64
+    else:
+        if arch_id == 2:
+            entry.nr_arm64
+        else:
+            entry.nr_riscv64
+

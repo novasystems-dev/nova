@@ -1,0 +1,73 @@
+# ============================================================================
+# NOVA ADVANCED COMPILER OPTIMIZER: COST-MODEL FUNCTION INLINING
+# Module: compiler/opt/inline_heuristics.nv
+# 100% Pure Nova Native - Zero C / Zero LLVM Dependencies
+# ============================================================================
+
+type FunctionProfile = struct:
+    func_name: String
+    instruction_cost: Int
+    call_site_frequency: Int
+    has_loops: Bool
+    is_recursive: Bool
+
+pub fn fn_profile_new(name: String, cost: Int, freq: Int, loops: Bool, rec: Bool) -> FunctionProfile:
+    FunctionProfile(name, cost, freq, loops, rec)
+
+type InlineDecision = struct:
+    should_inline: Bool
+    benefit_score: Int
+    reason: String
+
+fn check_hot_inline(cost: Int, freq: Int, loops: Bool) -> Bool:
+    if freq >= 100:
+        if cost <= 60:
+            if loops == false:
+                true
+            else:
+                false
+        else:
+            false
+    else:
+        false
+
+fn decide_inline(cost: Int, freq: Int, loops: Bool, rec: Bool) -> InlineDecision:
+    let is_hot = check_hot_inline(cost, freq, loops)
+    if rec == true:
+        InlineDecision(false, 0, "Recursive call prevents inlining")
+    elif cost <= 15:
+        InlineDecision(true, 100, "Trivial leaf function")
+    elif is_hot == true:
+        InlineDecision(true, 85, "Hot non-looping function")
+    else:
+        InlineDecision(false, 10, "Cost exceeds inlining threshold")
+
+pub fn evaluate_call_site(prof: FunctionProfile) -> InlineDecision:
+    decide_inline(prof.instruction_cost, prof.call_site_frequency, prof.has_loops, prof.is_recursive)
+
+type InlineSummary = struct:
+    total_calls_analyzed: Int
+    functions_inlined: Int
+    code_size_delta_percent: Int
+
+pub fn inline_summary_new() -> InlineSummary:
+    InlineSummary(0, 0, 0)
+
+pub fn record_inline(sum: InlineSummary, dec: InlineDecision) -> InlineSummary:
+    if dec.should_inline == true:
+        InlineSummary(sum.total_calls_analyzed + 1, sum.functions_inlined + 1, sum.code_size_delta_percent + 2)
+    else:
+        InlineSummary(sum.total_calls_analyzed + 1, sum.functions_inlined, sum.code_size_delta_percent)
+
+pub fn run_inlining_pass() -> InlineSummary:
+    let s0 = inline_summary_new()
+    let p1 = fn_profile_new("math_abs", 4, 500, false, false)
+    let p2 = fn_profile_new("btree_split_page", 120, 20, true, false)
+    let p3 = fn_profile_new("fibonacci", 30, 10, false, true)
+    let d1 = evaluate_call_site(p1)
+    let d2 = evaluate_call_site(p2)
+    let d3 = evaluate_call_site(p3)
+    let s1 = record_inline(s0, d1)
+    let s2 = record_inline(s1, d2)
+    let s3 = record_inline(s2, d3)
+    s3

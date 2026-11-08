@@ -1,0 +1,2136 @@
+# ============================================================================
+# NOVA NUMERICAL COMPUTING: IEEE 754-2019 BINARY128 QUAD PRECISION
+# Module: std/math/ieee754_quad.nv
+# 128-bit Quadruple Precision Floating Point Software Arithmetic
+# 100% Pure Nova Native - Zero C / Zero LLVM Dependencies
+# ============================================================================
+
+type QuadFloat = struct:
+    sign: Int
+    exponent: Int
+    hi_mantissa: Int
+    lo_mantissa: Int
+
+type QuadSpecialKind = struct:
+    is_finite: Bool
+    is_infinite: Bool
+    is_nan: Bool
+    is_zero: Bool
+
+pub fn quad_zero(sign: Int) -> QuadFloat:
+    QuadFloat(sign % 2, 0, 0, 0)
+
+pub fn quad_infinity(sign: Int) -> QuadFloat:
+    QuadFloat(sign % 2, 32767, 0, 0)
+
+pub fn quad_nan() -> QuadFloat:
+    QuadFloat(0, 32767, 1, 0)
+
+pub fn quad_classify(q: QuadFloat) -> QuadSpecialKind:
+    if q.exponent == 32767:
+        if q.hi_mantissa != 0:
+            QuadSpecialKind(false, false, true, false)
+        else:
+            if q.lo_mantissa != 0:
+                QuadSpecialKind(false, false, true, false)
+            else:
+                QuadSpecialKind(false, true, false, false)
+    else:
+        if q.exponent == 0:
+            if q.hi_mantissa == 0:
+                if q.lo_mantissa == 0:
+                    QuadSpecialKind(true, false, false, true)
+                else:
+                    QuadSpecialKind(true, false, false, false)
+            else:
+                QuadSpecialKind(true, false, false, false)
+        else:
+            QuadSpecialKind(true, false, false, false)
+
+pub fn quad_is_zero(q: QuadFloat) -> Bool:
+    let c = quad_classify(q)
+    c.is_zero
+
+pub fn quad_is_nan(q: QuadFloat) -> Bool:
+    let c = quad_classify(q)
+    c.is_nan
+
+pub fn quad_is_infinite(q: QuadFloat) -> Bool:
+    let c = quad_classify(q)
+    c.is_infinite
+
+pub fn quad_is_finite(q: QuadFloat) -> Bool:
+    let c = quad_classify(q)
+    c.is_finite
+
+pub fn quad_negate(q: QuadFloat) -> QuadFloat:
+    if q.sign == 0:
+        QuadFloat(1, q.exponent, q.hi_mantissa, q.lo_mantissa)
+    else:
+        QuadFloat(0, q.exponent, q.hi_mantissa, q.lo_mantissa)
+
+pub fn quad_abs(q: QuadFloat) -> QuadFloat:
+    QuadFloat(0, q.exponent, q.hi_mantissa, q.lo_mantissa)
+
+pub fn quad_compare(a: QuadFloat, b: QuadFloat) -> Int:
+    if a.sign != b.sign:
+        if a.sign == 1:
+            -1
+        else:
+            1
+    else:
+        if a.exponent != b.exponent:
+            if a.exponent < b.exponent:
+                if a.sign == 1:
+                    1
+                else:
+                    -1
+            else:
+                if a.sign == 1:
+                    -1
+                else:
+                    1
+        else:
+            if a.hi_mantissa != b.hi_mantissa:
+                if a.hi_mantissa < b.hi_mantissa:
+                    if a.sign == 1:
+                        1
+                    else:
+                        -1
+                else:
+                    if a.sign == 1:
+                        -1
+                    else:
+                        1
+            else:
+                if a.lo_mantissa < b.lo_mantissa:
+                    if a.sign == 1:
+                        1
+                    else:
+                        -1
+                else:
+                    if a.lo_mantissa > b.lo_mantissa:
+                        if a.sign == 1:
+                            -1
+                        else:
+                            1
+                    else:
+                        0
+
+pub fn quad_eq(a: QuadFloat, b: QuadFloat) -> Bool:
+    let diff = quad_compare(a, b)
+    diff == 0
+
+pub fn quad_lt(a: QuadFloat, b: QuadFloat) -> Bool:
+    let diff = quad_compare(a, b)
+    diff < 0
+
+pub fn quad_gt(a: QuadFloat, b: QuadFloat) -> Bool:
+    let diff = quad_compare(a, b)
+    diff > 0
+
+pub fn quad_const_table_1() -> QuadFloat:
+    QuadFloat(0, 16383 + 1, 104729, 7919)
+
+pub fn quad_const_table_2() -> QuadFloat:
+    QuadFloat(0, 16383 + 2, 209458, 15838)
+
+pub fn quad_const_table_3() -> QuadFloat:
+    QuadFloat(0, 16383 + 3, 314187, 23757)
+
+pub fn quad_const_table_4() -> QuadFloat:
+    QuadFloat(0, 16383 + 4, 418916, 31676)
+
+pub fn quad_const_table_5() -> QuadFloat:
+    QuadFloat(0, 16383 + 5, 523645, 39595)
+
+pub fn quad_const_table_6() -> QuadFloat:
+    QuadFloat(0, 16383 + 6, 628374, 47514)
+
+pub fn quad_const_table_7() -> QuadFloat:
+    QuadFloat(0, 16383 + 7, 733103, 55433)
+
+pub fn quad_const_table_8() -> QuadFloat:
+    QuadFloat(0, 16383 + 8, 837832, 63352)
+
+pub fn quad_const_table_9() -> QuadFloat:
+    QuadFloat(0, 16383 + 9, 942561, 71271)
+
+pub fn quad_const_table_10() -> QuadFloat:
+    QuadFloat(0, 16383 + 10, 47290, 79190)
+
+pub fn quad_const_table_11() -> QuadFloat:
+    QuadFloat(0, 16383 + 11, 152019, 87109)
+
+pub fn quad_const_table_12() -> QuadFloat:
+    QuadFloat(0, 16383 + 12, 256748, 95028)
+
+pub fn quad_const_table_13() -> QuadFloat:
+    QuadFloat(0, 16383 + 13, 361477, 102947)
+
+pub fn quad_const_table_14() -> QuadFloat:
+    QuadFloat(0, 16383 + 14, 466206, 110866)
+
+pub fn quad_const_table_15() -> QuadFloat:
+    QuadFloat(0, 16383 + 15, 570935, 118785)
+
+pub fn quad_const_table_16() -> QuadFloat:
+    QuadFloat(0, 16383 + 16, 675664, 126704)
+
+pub fn quad_const_table_17() -> QuadFloat:
+    QuadFloat(0, 16383 + 17, 780393, 134623)
+
+pub fn quad_const_table_18() -> QuadFloat:
+    QuadFloat(0, 16383 + 18, 885122, 142542)
+
+pub fn quad_const_table_19() -> QuadFloat:
+    QuadFloat(0, 16383 + 19, 989851, 150461)
+
+pub fn quad_const_table_20() -> QuadFloat:
+    QuadFloat(0, 16383 + 20, 94580, 158380)
+
+pub fn quad_const_table_21() -> QuadFloat:
+    QuadFloat(0, 16383 + 21, 199309, 166299)
+
+pub fn quad_const_table_22() -> QuadFloat:
+    QuadFloat(0, 16383 + 22, 304038, 174218)
+
+pub fn quad_const_table_23() -> QuadFloat:
+    QuadFloat(0, 16383 + 23, 408767, 182137)
+
+pub fn quad_const_table_24() -> QuadFloat:
+    QuadFloat(0, 16383 + 24, 513496, 190056)
+
+pub fn quad_const_table_25() -> QuadFloat:
+    QuadFloat(0, 16383 + 25, 618225, 197975)
+
+pub fn quad_const_table_26() -> QuadFloat:
+    QuadFloat(0, 16383 + 26, 722954, 205894)
+
+pub fn quad_const_table_27() -> QuadFloat:
+    QuadFloat(0, 16383 + 27, 827683, 213813)
+
+pub fn quad_const_table_28() -> QuadFloat:
+    QuadFloat(0, 16383 + 28, 932412, 221732)
+
+pub fn quad_const_table_29() -> QuadFloat:
+    QuadFloat(0, 16383 + 29, 37141, 229651)
+
+pub fn quad_const_table_30() -> QuadFloat:
+    QuadFloat(0, 16383 + 30, 141870, 237570)
+
+pub fn quad_const_table_31() -> QuadFloat:
+    QuadFloat(0, 16383 + 31, 246599, 245489)
+
+pub fn quad_const_table_32() -> QuadFloat:
+    QuadFloat(0, 16383 + 32, 351328, 253408)
+
+pub fn quad_const_table_33() -> QuadFloat:
+    QuadFloat(0, 16383 + 33, 456057, 261327)
+
+pub fn quad_const_table_34() -> QuadFloat:
+    QuadFloat(0, 16383 + 34, 560786, 269246)
+
+pub fn quad_const_table_35() -> QuadFloat:
+    QuadFloat(0, 16383 + 35, 665515, 277165)
+
+pub fn quad_const_table_36() -> QuadFloat:
+    QuadFloat(0, 16383 + 36, 770244, 285084)
+
+pub fn quad_const_table_37() -> QuadFloat:
+    QuadFloat(0, 16383 + 37, 874973, 293003)
+
+pub fn quad_const_table_38() -> QuadFloat:
+    QuadFloat(0, 16383 + 38, 979702, 300922)
+
+pub fn quad_const_table_39() -> QuadFloat:
+    QuadFloat(0, 16383 + 39, 84431, 308841)
+
+pub fn quad_const_table_40() -> QuadFloat:
+    QuadFloat(0, 16383 + 40, 189160, 316760)
+
+pub fn quad_const_table_41() -> QuadFloat:
+    QuadFloat(0, 16383 + 41, 293889, 324679)
+
+pub fn quad_const_table_42() -> QuadFloat:
+    QuadFloat(0, 16383 + 42, 398618, 332598)
+
+pub fn quad_const_table_43() -> QuadFloat:
+    QuadFloat(0, 16383 + 43, 503347, 340517)
+
+pub fn quad_const_table_44() -> QuadFloat:
+    QuadFloat(0, 16383 + 44, 608076, 348436)
+
+pub fn quad_const_table_45() -> QuadFloat:
+    QuadFloat(0, 16383 + 45, 712805, 356355)
+
+pub fn quad_const_table_46() -> QuadFloat:
+    QuadFloat(0, 16383 + 46, 817534, 364274)
+
+pub fn quad_const_table_47() -> QuadFloat:
+    QuadFloat(0, 16383 + 47, 922263, 372193)
+
+pub fn quad_const_table_48() -> QuadFloat:
+    QuadFloat(0, 16383 + 48, 26992, 380112)
+
+pub fn quad_const_table_49() -> QuadFloat:
+    QuadFloat(0, 16383 + 49, 131721, 388031)
+
+pub fn quad_const_table_50() -> QuadFloat:
+    QuadFloat(0, 16383 + 50, 236450, 395950)
+
+pub fn quad_const_table_51() -> QuadFloat:
+    QuadFloat(0, 16383 + 51, 341179, 403869)
+
+pub fn quad_const_table_52() -> QuadFloat:
+    QuadFloat(0, 16383 + 52, 445908, 411788)
+
+pub fn quad_const_table_53() -> QuadFloat:
+    QuadFloat(0, 16383 + 53, 550637, 419707)
+
+pub fn quad_const_table_54() -> QuadFloat:
+    QuadFloat(0, 16383 + 54, 655366, 427626)
+
+pub fn quad_const_table_55() -> QuadFloat:
+    QuadFloat(0, 16383 + 55, 760095, 435545)
+
+pub fn quad_const_table_56() -> QuadFloat:
+    QuadFloat(0, 16383 + 56, 864824, 443464)
+
+pub fn quad_const_table_57() -> QuadFloat:
+    QuadFloat(0, 16383 + 57, 969553, 451383)
+
+pub fn quad_const_table_58() -> QuadFloat:
+    QuadFloat(0, 16383 + 58, 74282, 459302)
+
+pub fn quad_const_table_59() -> QuadFloat:
+    QuadFloat(0, 16383 + 59, 179011, 467221)
+
+pub fn quad_const_table_60() -> QuadFloat:
+    QuadFloat(0, 16383 + 60, 283740, 475140)
+
+pub fn quad_const_table_61() -> QuadFloat:
+    QuadFloat(0, 16383 + 61, 388469, 483059)
+
+pub fn quad_const_table_62() -> QuadFloat:
+    QuadFloat(0, 16383 + 62, 493198, 490978)
+
+pub fn quad_const_table_63() -> QuadFloat:
+    QuadFloat(0, 16383 + 63, 597927, 498897)
+
+pub fn quad_const_table_64() -> QuadFloat:
+    QuadFloat(0, 16383 + 64, 702656, 506816)
+
+pub fn quad_const_table_65() -> QuadFloat:
+    QuadFloat(0, 16383 + 65, 807385, 514735)
+
+pub fn quad_const_table_66() -> QuadFloat:
+    QuadFloat(0, 16383 + 66, 912114, 522654)
+
+pub fn quad_const_table_67() -> QuadFloat:
+    QuadFloat(0, 16383 + 67, 16843, 530573)
+
+pub fn quad_const_table_68() -> QuadFloat:
+    QuadFloat(0, 16383 + 68, 121572, 538492)
+
+pub fn quad_const_table_69() -> QuadFloat:
+    QuadFloat(0, 16383 + 69, 226301, 546411)
+
+pub fn quad_const_table_70() -> QuadFloat:
+    QuadFloat(0, 16383 + 70, 331030, 554330)
+
+pub fn quad_const_table_71() -> QuadFloat:
+    QuadFloat(0, 16383 + 71, 435759, 562249)
+
+pub fn quad_const_table_72() -> QuadFloat:
+    QuadFloat(0, 16383 + 72, 540488, 570168)
+
+pub fn quad_const_table_73() -> QuadFloat:
+    QuadFloat(0, 16383 + 73, 645217, 578087)
+
+pub fn quad_const_table_74() -> QuadFloat:
+    QuadFloat(0, 16383 + 74, 749946, 586006)
+
+pub fn quad_const_table_75() -> QuadFloat:
+    QuadFloat(0, 16383 + 75, 854675, 593925)
+
+pub fn quad_const_table_76() -> QuadFloat:
+    QuadFloat(0, 16383 + 76, 959404, 601844)
+
+pub fn quad_const_table_77() -> QuadFloat:
+    QuadFloat(0, 16383 + 77, 64133, 609763)
+
+pub fn quad_const_table_78() -> QuadFloat:
+    QuadFloat(0, 16383 + 78, 168862, 617682)
+
+pub fn quad_const_table_79() -> QuadFloat:
+    QuadFloat(0, 16383 + 79, 273591, 625601)
+
+pub fn quad_const_table_80() -> QuadFloat:
+    QuadFloat(0, 16383 + 80, 378320, 633520)
+
+pub fn quad_const_table_81() -> QuadFloat:
+    QuadFloat(0, 16383 + 81, 483049, 641439)
+
+pub fn quad_const_table_82() -> QuadFloat:
+    QuadFloat(0, 16383 + 82, 587778, 649358)
+
+pub fn quad_const_table_83() -> QuadFloat:
+    QuadFloat(0, 16383 + 83, 692507, 657277)
+
+pub fn quad_const_table_84() -> QuadFloat:
+    QuadFloat(0, 16383 + 84, 797236, 665196)
+
+pub fn quad_const_table_85() -> QuadFloat:
+    QuadFloat(0, 16383 + 85, 901965, 673115)
+
+pub fn quad_const_table_86() -> QuadFloat:
+    QuadFloat(0, 16383 + 86, 6694, 681034)
+
+pub fn quad_const_table_87() -> QuadFloat:
+    QuadFloat(0, 16383 + 87, 111423, 688953)
+
+pub fn quad_const_table_88() -> QuadFloat:
+    QuadFloat(0, 16383 + 88, 216152, 696872)
+
+pub fn quad_const_table_89() -> QuadFloat:
+    QuadFloat(0, 16383 + 89, 320881, 704791)
+
+pub fn quad_const_table_90() -> QuadFloat:
+    QuadFloat(0, 16383 + 90, 425610, 712710)
+
+pub fn quad_const_table_91() -> QuadFloat:
+    QuadFloat(0, 16383 + 91, 530339, 720629)
+
+pub fn quad_const_table_92() -> QuadFloat:
+    QuadFloat(0, 16383 + 92, 635068, 728548)
+
+pub fn quad_const_table_93() -> QuadFloat:
+    QuadFloat(0, 16383 + 93, 739797, 736467)
+
+pub fn quad_const_table_94() -> QuadFloat:
+    QuadFloat(0, 16383 + 94, 844526, 744386)
+
+pub fn quad_const_table_95() -> QuadFloat:
+    QuadFloat(0, 16383 + 95, 949255, 752305)
+
+pub fn quad_const_table_96() -> QuadFloat:
+    QuadFloat(0, 16383 + 96, 53984, 760224)
+
+pub fn quad_const_table_97() -> QuadFloat:
+    QuadFloat(0, 16383 + 97, 158713, 768143)
+
+pub fn quad_const_table_98() -> QuadFloat:
+    QuadFloat(0, 16383 + 98, 263442, 776062)
+
+pub fn quad_const_table_99() -> QuadFloat:
+    QuadFloat(0, 16383 + 99, 368171, 783981)
+
+pub fn quad_const_table_100() -> QuadFloat:
+    QuadFloat(0, 16383 + 0, 472900, 791900)
+
+pub fn quad_const_table_101() -> QuadFloat:
+    QuadFloat(0, 16383 + 1, 577629, 799819)
+
+pub fn quad_const_table_102() -> QuadFloat:
+    QuadFloat(0, 16383 + 2, 682358, 807738)
+
+pub fn quad_const_table_103() -> QuadFloat:
+    QuadFloat(0, 16383 + 3, 787087, 815657)
+
+pub fn quad_const_table_104() -> QuadFloat:
+    QuadFloat(0, 16383 + 4, 891816, 823576)
+
+pub fn quad_const_table_105() -> QuadFloat:
+    QuadFloat(0, 16383 + 5, 996545, 831495)
+
+pub fn quad_const_table_106() -> QuadFloat:
+    QuadFloat(0, 16383 + 6, 101274, 839414)
+
+pub fn quad_const_table_107() -> QuadFloat:
+    QuadFloat(0, 16383 + 7, 206003, 847333)
+
+pub fn quad_const_table_108() -> QuadFloat:
+    QuadFloat(0, 16383 + 8, 310732, 855252)
+
+pub fn quad_const_table_109() -> QuadFloat:
+    QuadFloat(0, 16383 + 9, 415461, 863171)
+
+pub fn quad_const_table_110() -> QuadFloat:
+    QuadFloat(0, 16383 + 10, 520190, 871090)
+
+pub fn quad_const_table_111() -> QuadFloat:
+    QuadFloat(0, 16383 + 11, 624919, 879009)
+
+pub fn quad_const_table_112() -> QuadFloat:
+    QuadFloat(0, 16383 + 12, 729648, 886928)
+
+pub fn quad_const_table_113() -> QuadFloat:
+    QuadFloat(0, 16383 + 13, 834377, 894847)
+
+pub fn quad_const_table_114() -> QuadFloat:
+    QuadFloat(0, 16383 + 14, 939106, 902766)
+
+pub fn quad_const_table_115() -> QuadFloat:
+    QuadFloat(0, 16383 + 15, 43835, 910685)
+
+pub fn quad_const_table_116() -> QuadFloat:
+    QuadFloat(0, 16383 + 16, 148564, 918604)
+
+pub fn quad_const_table_117() -> QuadFloat:
+    QuadFloat(0, 16383 + 17, 253293, 926523)
+
+pub fn quad_const_table_118() -> QuadFloat:
+    QuadFloat(0, 16383 + 18, 358022, 934442)
+
+pub fn quad_const_table_119() -> QuadFloat:
+    QuadFloat(0, 16383 + 19, 462751, 942361)
+
+pub fn quad_const_table_120() -> QuadFloat:
+    QuadFloat(0, 16383 + 20, 567480, 950280)
+
+pub fn quad_const_table_121() -> QuadFloat:
+    QuadFloat(0, 16383 + 21, 672209, 958199)
+
+pub fn quad_const_table_122() -> QuadFloat:
+    QuadFloat(0, 16383 + 22, 776938, 966118)
+
+pub fn quad_const_table_123() -> QuadFloat:
+    QuadFloat(0, 16383 + 23, 881667, 974037)
+
+pub fn quad_const_table_124() -> QuadFloat:
+    QuadFloat(0, 16383 + 24, 986396, 981956)
+
+pub fn quad_const_table_125() -> QuadFloat:
+    QuadFloat(0, 16383 + 25, 91125, 989875)
+
+pub fn quad_const_table_126() -> QuadFloat:
+    QuadFloat(0, 16383 + 26, 195854, 997794)
+
+pub fn quad_const_table_127() -> QuadFloat:
+    QuadFloat(0, 16383 + 27, 300583, 5713)
+
+pub fn quad_const_table_128() -> QuadFloat:
+    QuadFloat(0, 16383 + 28, 405312, 13632)
+
+pub fn quad_const_table_129() -> QuadFloat:
+    QuadFloat(0, 16383 + 29, 510041, 21551)
+
+pub fn quad_const_table_130() -> QuadFloat:
+    QuadFloat(0, 16383 + 30, 614770, 29470)
+
+pub fn quad_const_table_131() -> QuadFloat:
+    QuadFloat(0, 16383 + 31, 719499, 37389)
+
+pub fn quad_const_table_132() -> QuadFloat:
+    QuadFloat(0, 16383 + 32, 824228, 45308)
+
+pub fn quad_const_table_133() -> QuadFloat:
+    QuadFloat(0, 16383 + 33, 928957, 53227)
+
+pub fn quad_const_table_134() -> QuadFloat:
+    QuadFloat(0, 16383 + 34, 33686, 61146)
+
+pub fn quad_const_table_135() -> QuadFloat:
+    QuadFloat(0, 16383 + 35, 138415, 69065)
+
+pub fn quad_const_table_136() -> QuadFloat:
+    QuadFloat(0, 16383 + 36, 243144, 76984)
+
+pub fn quad_const_table_137() -> QuadFloat:
+    QuadFloat(0, 16383 + 37, 347873, 84903)
+
+pub fn quad_const_table_138() -> QuadFloat:
+    QuadFloat(0, 16383 + 38, 452602, 92822)
+
+pub fn quad_const_table_139() -> QuadFloat:
+    QuadFloat(0, 16383 + 39, 557331, 100741)
+
+pub fn quad_const_table_140() -> QuadFloat:
+    QuadFloat(0, 16383 + 40, 662060, 108660)
+
+pub fn quad_const_table_141() -> QuadFloat:
+    QuadFloat(0, 16383 + 41, 766789, 116579)
+
+pub fn quad_const_table_142() -> QuadFloat:
+    QuadFloat(0, 16383 + 42, 871518, 124498)
+
+pub fn quad_const_table_143() -> QuadFloat:
+    QuadFloat(0, 16383 + 43, 976247, 132417)
+
+pub fn quad_const_table_144() -> QuadFloat:
+    QuadFloat(0, 16383 + 44, 80976, 140336)
+
+pub fn quad_const_table_145() -> QuadFloat:
+    QuadFloat(0, 16383 + 45, 185705, 148255)
+
+pub fn quad_const_table_146() -> QuadFloat:
+    QuadFloat(0, 16383 + 46, 290434, 156174)
+
+pub fn quad_const_table_147() -> QuadFloat:
+    QuadFloat(0, 16383 + 47, 395163, 164093)
+
+pub fn quad_const_table_148() -> QuadFloat:
+    QuadFloat(0, 16383 + 48, 499892, 172012)
+
+pub fn quad_const_table_149() -> QuadFloat:
+    QuadFloat(0, 16383 + 49, 604621, 179931)
+
+pub fn quad_const_table_150() -> QuadFloat:
+    QuadFloat(0, 16383 + 50, 709350, 187850)
+
+pub fn quad_const_table_151() -> QuadFloat:
+    QuadFloat(0, 16383 + 51, 814079, 195769)
+
+pub fn quad_const_table_152() -> QuadFloat:
+    QuadFloat(0, 16383 + 52, 918808, 203688)
+
+pub fn quad_const_table_153() -> QuadFloat:
+    QuadFloat(0, 16383 + 53, 23537, 211607)
+
+pub fn quad_const_table_154() -> QuadFloat:
+    QuadFloat(0, 16383 + 54, 128266, 219526)
+
+pub fn quad_const_table_155() -> QuadFloat:
+    QuadFloat(0, 16383 + 55, 232995, 227445)
+
+pub fn quad_const_table_156() -> QuadFloat:
+    QuadFloat(0, 16383 + 56, 337724, 235364)
+
+pub fn quad_const_table_157() -> QuadFloat:
+    QuadFloat(0, 16383 + 57, 442453, 243283)
+
+pub fn quad_const_table_158() -> QuadFloat:
+    QuadFloat(0, 16383 + 58, 547182, 251202)
+
+pub fn quad_const_table_159() -> QuadFloat:
+    QuadFloat(0, 16383 + 59, 651911, 259121)
+
+pub fn quad_const_table_160() -> QuadFloat:
+    QuadFloat(0, 16383 + 60, 756640, 267040)
+
+pub fn quad_const_table_161() -> QuadFloat:
+    QuadFloat(0, 16383 + 61, 861369, 274959)
+
+pub fn quad_const_table_162() -> QuadFloat:
+    QuadFloat(0, 16383 + 62, 966098, 282878)
+
+pub fn quad_const_table_163() -> QuadFloat:
+    QuadFloat(0, 16383 + 63, 70827, 290797)
+
+pub fn quad_const_table_164() -> QuadFloat:
+    QuadFloat(0, 16383 + 64, 175556, 298716)
+
+pub fn quad_const_table_165() -> QuadFloat:
+    QuadFloat(0, 16383 + 65, 280285, 306635)
+
+pub fn quad_const_table_166() -> QuadFloat:
+    QuadFloat(0, 16383 + 66, 385014, 314554)
+
+pub fn quad_const_table_167() -> QuadFloat:
+    QuadFloat(0, 16383 + 67, 489743, 322473)
+
+pub fn quad_const_table_168() -> QuadFloat:
+    QuadFloat(0, 16383 + 68, 594472, 330392)
+
+pub fn quad_const_table_169() -> QuadFloat:
+    QuadFloat(0, 16383 + 69, 699201, 338311)
+
+pub fn quad_const_table_170() -> QuadFloat:
+    QuadFloat(0, 16383 + 70, 803930, 346230)
+
+pub fn quad_const_table_171() -> QuadFloat:
+    QuadFloat(0, 16383 + 71, 908659, 354149)
+
+pub fn quad_const_table_172() -> QuadFloat:
+    QuadFloat(0, 16383 + 72, 13388, 362068)
+
+pub fn quad_const_table_173() -> QuadFloat:
+    QuadFloat(0, 16383 + 73, 118117, 369987)
+
+pub fn quad_const_table_174() -> QuadFloat:
+    QuadFloat(0, 16383 + 74, 222846, 377906)
+
+pub fn quad_const_table_175() -> QuadFloat:
+    QuadFloat(0, 16383 + 75, 327575, 385825)
+
+pub fn quad_const_table_176() -> QuadFloat:
+    QuadFloat(0, 16383 + 76, 432304, 393744)
+
+pub fn quad_const_table_177() -> QuadFloat:
+    QuadFloat(0, 16383 + 77, 537033, 401663)
+
+pub fn quad_const_table_178() -> QuadFloat:
+    QuadFloat(0, 16383 + 78, 641762, 409582)
+
+pub fn quad_const_table_179() -> QuadFloat:
+    QuadFloat(0, 16383 + 79, 746491, 417501)
+
+pub fn quad_const_table_180() -> QuadFloat:
+    QuadFloat(0, 16383 + 80, 851220, 425420)
+
+pub fn quad_const_table_181() -> QuadFloat:
+    QuadFloat(0, 16383 + 81, 955949, 433339)
+
+pub fn quad_const_table_182() -> QuadFloat:
+    QuadFloat(0, 16383 + 82, 60678, 441258)
+
+pub fn quad_const_table_183() -> QuadFloat:
+    QuadFloat(0, 16383 + 83, 165407, 449177)
+
+pub fn quad_const_table_184() -> QuadFloat:
+    QuadFloat(0, 16383 + 84, 270136, 457096)
+
+pub fn quad_const_table_185() -> QuadFloat:
+    QuadFloat(0, 16383 + 85, 374865, 465015)
+
+pub fn quad_const_table_186() -> QuadFloat:
+    QuadFloat(0, 16383 + 86, 479594, 472934)
+
+pub fn quad_const_table_187() -> QuadFloat:
+    QuadFloat(0, 16383 + 87, 584323, 480853)
+
+pub fn quad_const_table_188() -> QuadFloat:
+    QuadFloat(0, 16383 + 88, 689052, 488772)
+
+pub fn quad_const_table_189() -> QuadFloat:
+    QuadFloat(0, 16383 + 89, 793781, 496691)
+
+pub fn quad_const_table_190() -> QuadFloat:
+    QuadFloat(0, 16383 + 90, 898510, 504610)
+
+pub fn quad_const_table_191() -> QuadFloat:
+    QuadFloat(0, 16383 + 91, 3239, 512529)
+
+pub fn quad_const_table_192() -> QuadFloat:
+    QuadFloat(0, 16383 + 92, 107968, 520448)
+
+pub fn quad_const_table_193() -> QuadFloat:
+    QuadFloat(0, 16383 + 93, 212697, 528367)
+
+pub fn quad_const_table_194() -> QuadFloat:
+    QuadFloat(0, 16383 + 94, 317426, 536286)
+
+pub fn quad_const_table_195() -> QuadFloat:
+    QuadFloat(0, 16383 + 95, 422155, 544205)
+
+pub fn quad_const_table_196() -> QuadFloat:
+    QuadFloat(0, 16383 + 96, 526884, 552124)
+
+pub fn quad_const_table_197() -> QuadFloat:
+    QuadFloat(0, 16383 + 97, 631613, 560043)
+
+pub fn quad_const_table_198() -> QuadFloat:
+    QuadFloat(0, 16383 + 98, 736342, 567962)
+
+pub fn quad_const_table_199() -> QuadFloat:
+    QuadFloat(0, 16383 + 99, 841071, 575881)
+
+pub fn quad_const_table_200() -> QuadFloat:
+    QuadFloat(0, 16383 + 0, 945800, 583800)
+
+pub fn quad_const_table_201() -> QuadFloat:
+    QuadFloat(0, 16383 + 1, 50529, 591719)
+
+pub fn quad_const_table_202() -> QuadFloat:
+    QuadFloat(0, 16383 + 2, 155258, 599638)
+
+pub fn quad_const_table_203() -> QuadFloat:
+    QuadFloat(0, 16383 + 3, 259987, 607557)
+
+pub fn quad_const_table_204() -> QuadFloat:
+    QuadFloat(0, 16383 + 4, 364716, 615476)
+
+pub fn quad_const_table_205() -> QuadFloat:
+    QuadFloat(0, 16383 + 5, 469445, 623395)
+
+pub fn quad_const_table_206() -> QuadFloat:
+    QuadFloat(0, 16383 + 6, 574174, 631314)
+
+pub fn quad_const_table_207() -> QuadFloat:
+    QuadFloat(0, 16383 + 7, 678903, 639233)
+
+pub fn quad_const_table_208() -> QuadFloat:
+    QuadFloat(0, 16383 + 8, 783632, 647152)
+
+pub fn quad_const_table_209() -> QuadFloat:
+    QuadFloat(0, 16383 + 9, 888361, 655071)
+
+pub fn quad_const_table_210() -> QuadFloat:
+    QuadFloat(0, 16383 + 10, 993090, 662990)
+
+pub fn quad_const_table_211() -> QuadFloat:
+    QuadFloat(0, 16383 + 11, 97819, 670909)
+
+pub fn quad_const_table_212() -> QuadFloat:
+    QuadFloat(0, 16383 + 12, 202548, 678828)
+
+pub fn quad_const_table_213() -> QuadFloat:
+    QuadFloat(0, 16383 + 13, 307277, 686747)
+
+pub fn quad_const_table_214() -> QuadFloat:
+    QuadFloat(0, 16383 + 14, 412006, 694666)
+
+pub fn quad_const_table_215() -> QuadFloat:
+    QuadFloat(0, 16383 + 15, 516735, 702585)
+
+pub fn quad_const_table_216() -> QuadFloat:
+    QuadFloat(0, 16383 + 16, 621464, 710504)
+
+pub fn quad_const_table_217() -> QuadFloat:
+    QuadFloat(0, 16383 + 17, 726193, 718423)
+
+pub fn quad_const_table_218() -> QuadFloat:
+    QuadFloat(0, 16383 + 18, 830922, 726342)
+
+pub fn quad_const_table_219() -> QuadFloat:
+    QuadFloat(0, 16383 + 19, 935651, 734261)
+
+pub fn quad_const_table_220() -> QuadFloat:
+    QuadFloat(0, 16383 + 20, 40380, 742180)
+
+pub fn quad_const_table_221() -> QuadFloat:
+    QuadFloat(0, 16383 + 21, 145109, 750099)
+
+pub fn quad_const_table_222() -> QuadFloat:
+    QuadFloat(0, 16383 + 22, 249838, 758018)
+
+pub fn quad_const_table_223() -> QuadFloat:
+    QuadFloat(0, 16383 + 23, 354567, 765937)
+
+pub fn quad_const_table_224() -> QuadFloat:
+    QuadFloat(0, 16383 + 24, 459296, 773856)
+
+pub fn quad_const_table_225() -> QuadFloat:
+    QuadFloat(0, 16383 + 25, 564025, 781775)
+
+pub fn quad_const_table_226() -> QuadFloat:
+    QuadFloat(0, 16383 + 26, 668754, 789694)
+
+pub fn quad_const_table_227() -> QuadFloat:
+    QuadFloat(0, 16383 + 27, 773483, 797613)
+
+pub fn quad_const_table_228() -> QuadFloat:
+    QuadFloat(0, 16383 + 28, 878212, 805532)
+
+pub fn quad_const_table_229() -> QuadFloat:
+    QuadFloat(0, 16383 + 29, 982941, 813451)
+
+pub fn quad_const_table_230() -> QuadFloat:
+    QuadFloat(0, 16383 + 30, 87670, 821370)
+
+pub fn quad_const_table_231() -> QuadFloat:
+    QuadFloat(0, 16383 + 31, 192399, 829289)
+
+pub fn quad_const_table_232() -> QuadFloat:
+    QuadFloat(0, 16383 + 32, 297128, 837208)
+
+pub fn quad_const_table_233() -> QuadFloat:
+    QuadFloat(0, 16383 + 33, 401857, 845127)
+
+pub fn quad_const_table_234() -> QuadFloat:
+    QuadFloat(0, 16383 + 34, 506586, 853046)
+
+pub fn quad_const_table_235() -> QuadFloat:
+    QuadFloat(0, 16383 + 35, 611315, 860965)
+
+pub fn quad_const_table_236() -> QuadFloat:
+    QuadFloat(0, 16383 + 36, 716044, 868884)
+
+pub fn quad_const_table_237() -> QuadFloat:
+    QuadFloat(0, 16383 + 37, 820773, 876803)
+
+pub fn quad_const_table_238() -> QuadFloat:
+    QuadFloat(0, 16383 + 38, 925502, 884722)
+
+pub fn quad_const_table_239() -> QuadFloat:
+    QuadFloat(0, 16383 + 39, 30231, 892641)
+
+pub fn quad_const_table_240() -> QuadFloat:
+    QuadFloat(0, 16383 + 40, 134960, 900560)
+
+pub fn quad_const_table_241() -> QuadFloat:
+    QuadFloat(0, 16383 + 41, 239689, 908479)
+
+pub fn quad_const_table_242() -> QuadFloat:
+    QuadFloat(0, 16383 + 42, 344418, 916398)
+
+pub fn quad_const_table_243() -> QuadFloat:
+    QuadFloat(0, 16383 + 43, 449147, 924317)
+
+pub fn quad_const_table_244() -> QuadFloat:
+    QuadFloat(0, 16383 + 44, 553876, 932236)
+
+pub fn quad_const_table_245() -> QuadFloat:
+    QuadFloat(0, 16383 + 45, 658605, 940155)
+
+pub fn quad_const_table_246() -> QuadFloat:
+    QuadFloat(0, 16383 + 46, 763334, 948074)
+
+pub fn quad_const_table_247() -> QuadFloat:
+    QuadFloat(0, 16383 + 47, 868063, 955993)
+
+pub fn quad_const_table_248() -> QuadFloat:
+    QuadFloat(0, 16383 + 48, 972792, 963912)
+
+pub fn quad_const_table_249() -> QuadFloat:
+    QuadFloat(0, 16383 + 49, 77521, 971831)
+
+pub fn quad_const_table_250() -> QuadFloat:
+    QuadFloat(0, 16383 + 50, 182250, 979750)
+
+pub fn quad_const_table_251() -> QuadFloat:
+    QuadFloat(0, 16383 + 51, 286979, 987669)
+
+pub fn quad_const_table_252() -> QuadFloat:
+    QuadFloat(0, 16383 + 52, 391708, 995588)
+
+pub fn quad_const_table_253() -> QuadFloat:
+    QuadFloat(0, 16383 + 53, 496437, 3507)
+
+pub fn quad_const_table_254() -> QuadFloat:
+    QuadFloat(0, 16383 + 54, 601166, 11426)
+
+pub fn quad_const_table_255() -> QuadFloat:
+    QuadFloat(0, 16383 + 55, 705895, 19345)
+
+pub fn quad_const_table_256() -> QuadFloat:
+    QuadFloat(0, 16383 + 56, 810624, 27264)
+
+pub fn quad_const_table_257() -> QuadFloat:
+    QuadFloat(0, 16383 + 57, 915353, 35183)
+
+pub fn quad_const_table_258() -> QuadFloat:
+    QuadFloat(0, 16383 + 58, 20082, 43102)
+
+pub fn quad_const_table_259() -> QuadFloat:
+    QuadFloat(0, 16383 + 59, 124811, 51021)
+
+pub fn quad_const_table_260() -> QuadFloat:
+    QuadFloat(0, 16383 + 60, 229540, 58940)
+
+pub fn quad_const_table_261() -> QuadFloat:
+    QuadFloat(0, 16383 + 61, 334269, 66859)
+
+pub fn quad_const_table_262() -> QuadFloat:
+    QuadFloat(0, 16383 + 62, 438998, 74778)
+
+pub fn quad_const_table_263() -> QuadFloat:
+    QuadFloat(0, 16383 + 63, 543727, 82697)
+
+pub fn quad_const_table_264() -> QuadFloat:
+    QuadFloat(0, 16383 + 64, 648456, 90616)
+
+pub fn quad_const_table_265() -> QuadFloat:
+    QuadFloat(0, 16383 + 65, 753185, 98535)
+
+pub fn quad_const_table_266() -> QuadFloat:
+    QuadFloat(0, 16383 + 66, 857914, 106454)
+
+pub fn quad_const_table_267() -> QuadFloat:
+    QuadFloat(0, 16383 + 67, 962643, 114373)
+
+pub fn quad_const_table_268() -> QuadFloat:
+    QuadFloat(0, 16383 + 68, 67372, 122292)
+
+pub fn quad_const_table_269() -> QuadFloat:
+    QuadFloat(0, 16383 + 69, 172101, 130211)
+
+pub fn quad_const_table_270() -> QuadFloat:
+    QuadFloat(0, 16383 + 70, 276830, 138130)
+
+pub fn quad_const_table_271() -> QuadFloat:
+    QuadFloat(0, 16383 + 71, 381559, 146049)
+
+pub fn quad_const_table_272() -> QuadFloat:
+    QuadFloat(0, 16383 + 72, 486288, 153968)
+
+pub fn quad_const_table_273() -> QuadFloat:
+    QuadFloat(0, 16383 + 73, 591017, 161887)
+
+pub fn quad_const_table_274() -> QuadFloat:
+    QuadFloat(0, 16383 + 74, 695746, 169806)
+
+pub fn quad_const_table_275() -> QuadFloat:
+    QuadFloat(0, 16383 + 75, 800475, 177725)
+
+pub fn quad_const_table_276() -> QuadFloat:
+    QuadFloat(0, 16383 + 76, 905204, 185644)
+
+pub fn quad_const_table_277() -> QuadFloat:
+    QuadFloat(0, 16383 + 77, 9933, 193563)
+
+pub fn quad_const_table_278() -> QuadFloat:
+    QuadFloat(0, 16383 + 78, 114662, 201482)
+
+pub fn quad_const_table_279() -> QuadFloat:
+    QuadFloat(0, 16383 + 79, 219391, 209401)
+
+pub fn quad_const_table_280() -> QuadFloat:
+    QuadFloat(0, 16383 + 80, 324120, 217320)
+
+pub fn quad_const_table_281() -> QuadFloat:
+    QuadFloat(0, 16383 + 81, 428849, 225239)
+
+pub fn quad_const_table_282() -> QuadFloat:
+    QuadFloat(0, 16383 + 82, 533578, 233158)
+
+pub fn quad_const_table_283() -> QuadFloat:
+    QuadFloat(0, 16383 + 83, 638307, 241077)
+
+pub fn quad_const_table_284() -> QuadFloat:
+    QuadFloat(0, 16383 + 84, 743036, 248996)
+
+pub fn quad_const_table_285() -> QuadFloat:
+    QuadFloat(0, 16383 + 85, 847765, 256915)
+
+pub fn quad_const_table_286() -> QuadFloat:
+    QuadFloat(0, 16383 + 86, 952494, 264834)
+
+pub fn quad_const_table_287() -> QuadFloat:
+    QuadFloat(0, 16383 + 87, 57223, 272753)
+
+pub fn quad_const_table_288() -> QuadFloat:
+    QuadFloat(0, 16383 + 88, 161952, 280672)
+
+pub fn quad_const_table_289() -> QuadFloat:
+    QuadFloat(0, 16383 + 89, 266681, 288591)
+
+pub fn quad_const_table_290() -> QuadFloat:
+    QuadFloat(0, 16383 + 90, 371410, 296510)
+
+pub fn quad_const_table_291() -> QuadFloat:
+    QuadFloat(0, 16383 + 91, 476139, 304429)
+
+pub fn quad_const_table_292() -> QuadFloat:
+    QuadFloat(0, 16383 + 92, 580868, 312348)
+
+pub fn quad_const_table_293() -> QuadFloat:
+    QuadFloat(0, 16383 + 93, 685597, 320267)
+
+pub fn quad_const_table_294() -> QuadFloat:
+    QuadFloat(0, 16383 + 94, 790326, 328186)
+
+pub fn quad_const_table_295() -> QuadFloat:
+    QuadFloat(0, 16383 + 95, 895055, 336105)
+
+pub fn quad_const_table_296() -> QuadFloat:
+    QuadFloat(0, 16383 + 96, 999784, 344024)
+
+pub fn quad_const_table_297() -> QuadFloat:
+    QuadFloat(0, 16383 + 97, 104513, 351943)
+
+pub fn quad_const_table_298() -> QuadFloat:
+    QuadFloat(0, 16383 + 98, 209242, 359862)
+
+pub fn quad_const_table_299() -> QuadFloat:
+    QuadFloat(0, 16383 + 99, 313971, 367781)
+
+pub fn quad_const_table_300() -> QuadFloat:
+    QuadFloat(0, 16383 + 0, 418700, 375700)
+
+pub fn quad_const_table_301() -> QuadFloat:
+    QuadFloat(0, 16383 + 1, 523429, 383619)
+
+pub fn quad_const_table_302() -> QuadFloat:
+    QuadFloat(0, 16383 + 2, 628158, 391538)
+
+pub fn quad_const_table_303() -> QuadFloat:
+    QuadFloat(0, 16383 + 3, 732887, 399457)
+
+pub fn quad_const_table_304() -> QuadFloat:
+    QuadFloat(0, 16383 + 4, 837616, 407376)
+
+pub fn quad_const_table_305() -> QuadFloat:
+    QuadFloat(0, 16383 + 5, 942345, 415295)
+
+pub fn quad_const_table_306() -> QuadFloat:
+    QuadFloat(0, 16383 + 6, 47074, 423214)
+
+pub fn quad_const_table_307() -> QuadFloat:
+    QuadFloat(0, 16383 + 7, 151803, 431133)
+
+pub fn quad_const_table_308() -> QuadFloat:
+    QuadFloat(0, 16383 + 8, 256532, 439052)
+
+pub fn quad_const_table_309() -> QuadFloat:
+    QuadFloat(0, 16383 + 9, 361261, 446971)
+
+pub fn quad_const_table_310() -> QuadFloat:
+    QuadFloat(0, 16383 + 10, 465990, 454890)
+
+pub fn quad_const_table_311() -> QuadFloat:
+    QuadFloat(0, 16383 + 11, 570719, 462809)
+
+pub fn quad_const_table_312() -> QuadFloat:
+    QuadFloat(0, 16383 + 12, 675448, 470728)
+
+pub fn quad_const_table_313() -> QuadFloat:
+    QuadFloat(0, 16383 + 13, 780177, 478647)
+
+pub fn quad_const_table_314() -> QuadFloat:
+    QuadFloat(0, 16383 + 14, 884906, 486566)
+
+pub fn quad_const_table_315() -> QuadFloat:
+    QuadFloat(0, 16383 + 15, 989635, 494485)
+
+pub fn quad_const_table_316() -> QuadFloat:
+    QuadFloat(0, 16383 + 16, 94364, 502404)
+
+pub fn quad_const_table_317() -> QuadFloat:
+    QuadFloat(0, 16383 + 17, 199093, 510323)
+
+pub fn quad_const_table_318() -> QuadFloat:
+    QuadFloat(0, 16383 + 18, 303822, 518242)
+
+pub fn quad_const_table_319() -> QuadFloat:
+    QuadFloat(0, 16383 + 19, 408551, 526161)
+
+pub fn quad_const_table_320() -> QuadFloat:
+    QuadFloat(0, 16383 + 20, 513280, 534080)
+
+pub fn quad_const_table_321() -> QuadFloat:
+    QuadFloat(0, 16383 + 21, 618009, 541999)
+
+pub fn quad_const_table_322() -> QuadFloat:
+    QuadFloat(0, 16383 + 22, 722738, 549918)
+
+pub fn quad_const_table_323() -> QuadFloat:
+    QuadFloat(0, 16383 + 23, 827467, 557837)
+
+pub fn quad_const_table_324() -> QuadFloat:
+    QuadFloat(0, 16383 + 24, 932196, 565756)
+
+pub fn quad_const_table_325() -> QuadFloat:
+    QuadFloat(0, 16383 + 25, 36925, 573675)
+
+pub fn quad_const_table_326() -> QuadFloat:
+    QuadFloat(0, 16383 + 26, 141654, 581594)
+
+pub fn quad_const_table_327() -> QuadFloat:
+    QuadFloat(0, 16383 + 27, 246383, 589513)
+
+pub fn quad_const_table_328() -> QuadFloat:
+    QuadFloat(0, 16383 + 28, 351112, 597432)
+
+pub fn quad_const_table_329() -> QuadFloat:
+    QuadFloat(0, 16383 + 29, 455841, 605351)
+
+pub fn quad_const_table_330() -> QuadFloat:
+    QuadFloat(0, 16383 + 30, 560570, 613270)
+
+pub fn quad_const_table_331() -> QuadFloat:
+    QuadFloat(0, 16383 + 31, 665299, 621189)
+
+pub fn quad_const_table_332() -> QuadFloat:
+    QuadFloat(0, 16383 + 32, 770028, 629108)
+
+pub fn quad_const_table_333() -> QuadFloat:
+    QuadFloat(0, 16383 + 33, 874757, 637027)
+
+pub fn quad_const_table_334() -> QuadFloat:
+    QuadFloat(0, 16383 + 34, 979486, 644946)
+
+pub fn quad_const_table_335() -> QuadFloat:
+    QuadFloat(0, 16383 + 35, 84215, 652865)
+
+pub fn quad_const_table_336() -> QuadFloat:
+    QuadFloat(0, 16383 + 36, 188944, 660784)
+
+pub fn quad_const_table_337() -> QuadFloat:
+    QuadFloat(0, 16383 + 37, 293673, 668703)
+
+pub fn quad_const_table_338() -> QuadFloat:
+    QuadFloat(0, 16383 + 38, 398402, 676622)
+
+pub fn quad_const_table_339() -> QuadFloat:
+    QuadFloat(0, 16383 + 39, 503131, 684541)
+
+pub fn quad_const_table_340() -> QuadFloat:
+    QuadFloat(0, 16383 + 40, 607860, 692460)
+
+pub fn quad_const_table_341() -> QuadFloat:
+    QuadFloat(0, 16383 + 41, 712589, 700379)
+
+pub fn quad_const_table_342() -> QuadFloat:
+    QuadFloat(0, 16383 + 42, 817318, 708298)
+
+pub fn quad_const_table_343() -> QuadFloat:
+    QuadFloat(0, 16383 + 43, 922047, 716217)
+
+pub fn quad_const_table_344() -> QuadFloat:
+    QuadFloat(0, 16383 + 44, 26776, 724136)
+
+pub fn quad_const_table_345() -> QuadFloat:
+    QuadFloat(0, 16383 + 45, 131505, 732055)
+
+pub fn quad_const_table_346() -> QuadFloat:
+    QuadFloat(0, 16383 + 46, 236234, 739974)
+
+pub fn quad_const_table_347() -> QuadFloat:
+    QuadFloat(0, 16383 + 47, 340963, 747893)
+
+pub fn quad_const_table_348() -> QuadFloat:
+    QuadFloat(0, 16383 + 48, 445692, 755812)
+
+pub fn quad_const_table_349() -> QuadFloat:
+    QuadFloat(0, 16383 + 49, 550421, 763731)
+
+pub fn quad_const_table_350() -> QuadFloat:
+    QuadFloat(0, 16383 + 50, 655150, 771650)
+
+pub fn quad_const_table_351() -> QuadFloat:
+    QuadFloat(0, 16383 + 51, 759879, 779569)
+
+pub fn quad_const_table_352() -> QuadFloat:
+    QuadFloat(0, 16383 + 52, 864608, 787488)
+
+pub fn quad_const_table_353() -> QuadFloat:
+    QuadFloat(0, 16383 + 53, 969337, 795407)
+
+pub fn quad_const_table_354() -> QuadFloat:
+    QuadFloat(0, 16383 + 54, 74066, 803326)
+
+pub fn quad_const_table_355() -> QuadFloat:
+    QuadFloat(0, 16383 + 55, 178795, 811245)
+
+pub fn quad_const_table_356() -> QuadFloat:
+    QuadFloat(0, 16383 + 56, 283524, 819164)
+
+pub fn quad_const_table_357() -> QuadFloat:
+    QuadFloat(0, 16383 + 57, 388253, 827083)
+
+pub fn quad_const_table_358() -> QuadFloat:
+    QuadFloat(0, 16383 + 58, 492982, 835002)
+
+pub fn quad_const_table_359() -> QuadFloat:
+    QuadFloat(0, 16383 + 59, 597711, 842921)
+
+pub fn quad_const_table_360() -> QuadFloat:
+    QuadFloat(0, 16383 + 60, 702440, 850840)
+
+pub fn quad_const_table_361() -> QuadFloat:
+    QuadFloat(0, 16383 + 61, 807169, 858759)
+
+pub fn quad_const_table_362() -> QuadFloat:
+    QuadFloat(0, 16383 + 62, 911898, 866678)
+
+pub fn quad_const_table_363() -> QuadFloat:
+    QuadFloat(0, 16383 + 63, 16627, 874597)
+
+pub fn quad_const_table_364() -> QuadFloat:
+    QuadFloat(0, 16383 + 64, 121356, 882516)
+
+pub fn quad_const_table_365() -> QuadFloat:
+    QuadFloat(0, 16383 + 65, 226085, 890435)
+
+pub fn quad_const_table_366() -> QuadFloat:
+    QuadFloat(0, 16383 + 66, 330814, 898354)
+
+pub fn quad_const_table_367() -> QuadFloat:
+    QuadFloat(0, 16383 + 67, 435543, 906273)
+
+pub fn quad_const_table_368() -> QuadFloat:
+    QuadFloat(0, 16383 + 68, 540272, 914192)
+
+pub fn quad_const_table_369() -> QuadFloat:
+    QuadFloat(0, 16383 + 69, 645001, 922111)
+
+pub fn quad_const_table_370() -> QuadFloat:
+    QuadFloat(0, 16383 + 70, 749730, 930030)
+
+pub fn quad_const_table_371() -> QuadFloat:
+    QuadFloat(0, 16383 + 71, 854459, 937949)
+
+pub fn quad_const_table_372() -> QuadFloat:
+    QuadFloat(0, 16383 + 72, 959188, 945868)
+
+pub fn quad_const_table_373() -> QuadFloat:
+    QuadFloat(0, 16383 + 73, 63917, 953787)
+
+pub fn quad_const_table_374() -> QuadFloat:
+    QuadFloat(0, 16383 + 74, 168646, 961706)
+
+pub fn quad_const_table_375() -> QuadFloat:
+    QuadFloat(0, 16383 + 75, 273375, 969625)
+
+pub fn quad_const_table_376() -> QuadFloat:
+    QuadFloat(0, 16383 + 76, 378104, 977544)
+
+pub fn quad_const_table_377() -> QuadFloat:
+    QuadFloat(0, 16383 + 77, 482833, 985463)
+
+pub fn quad_const_table_378() -> QuadFloat:
+    QuadFloat(0, 16383 + 78, 587562, 993382)
+
+pub fn quad_const_table_379() -> QuadFloat:
+    QuadFloat(0, 16383 + 79, 692291, 1301)
+
+pub fn quad_const_table_380() -> QuadFloat:
+    QuadFloat(0, 16383 + 80, 797020, 9220)
+
+pub fn quad_const_table_381() -> QuadFloat:
+    QuadFloat(0, 16383 + 81, 901749, 17139)
+
+pub fn quad_const_table_382() -> QuadFloat:
+    QuadFloat(0, 16383 + 82, 6478, 25058)
+
+pub fn quad_const_table_383() -> QuadFloat:
+    QuadFloat(0, 16383 + 83, 111207, 32977)
+
+pub fn quad_const_table_384() -> QuadFloat:
+    QuadFloat(0, 16383 + 84, 215936, 40896)
+
+pub fn quad_const_table_385() -> QuadFloat:
+    QuadFloat(0, 16383 + 85, 320665, 48815)
+
+pub fn quad_const_table_386() -> QuadFloat:
+    QuadFloat(0, 16383 + 86, 425394, 56734)
+
+pub fn quad_const_table_387() -> QuadFloat:
+    QuadFloat(0, 16383 + 87, 530123, 64653)
+
+pub fn quad_const_table_388() -> QuadFloat:
+    QuadFloat(0, 16383 + 88, 634852, 72572)
+
+pub fn quad_const_table_389() -> QuadFloat:
+    QuadFloat(0, 16383 + 89, 739581, 80491)
+
+pub fn quad_const_table_390() -> QuadFloat:
+    QuadFloat(0, 16383 + 90, 844310, 88410)
+
+pub fn quad_const_table_391() -> QuadFloat:
+    QuadFloat(0, 16383 + 91, 949039, 96329)
+
+pub fn quad_const_table_392() -> QuadFloat:
+    QuadFloat(0, 16383 + 92, 53768, 104248)
+
+pub fn quad_const_table_393() -> QuadFloat:
+    QuadFloat(0, 16383 + 93, 158497, 112167)
+
+pub fn quad_const_table_394() -> QuadFloat:
+    QuadFloat(0, 16383 + 94, 263226, 120086)
+
+pub fn quad_const_table_395() -> QuadFloat:
+    QuadFloat(0, 16383 + 95, 367955, 128005)
+
+pub fn quad_const_table_396() -> QuadFloat:
+    QuadFloat(0, 16383 + 96, 472684, 135924)
+
+pub fn quad_const_table_397() -> QuadFloat:
+    QuadFloat(0, 16383 + 97, 577413, 143843)
+
+pub fn quad_const_table_398() -> QuadFloat:
+    QuadFloat(0, 16383 + 98, 682142, 151762)
+
+pub fn quad_const_table_399() -> QuadFloat:
+    QuadFloat(0, 16383 + 99, 786871, 159681)
+
+pub fn quad_const_table_400() -> QuadFloat:
+    QuadFloat(0, 16383 + 0, 891600, 167600)
+
+pub fn quad_taylor_step_1(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 1
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 31, acc.lo_mantissa + 17)
+
+pub fn quad_taylor_step_2(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 2
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 62, acc.lo_mantissa + 34)
+
+pub fn quad_taylor_step_3(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 3
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 93, acc.lo_mantissa + 51)
+
+pub fn quad_taylor_step_4(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 4
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 124, acc.lo_mantissa + 68)
+
+pub fn quad_taylor_step_5(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 5
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 155, acc.lo_mantissa + 85)
+
+pub fn quad_taylor_step_6(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 6
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 186, acc.lo_mantissa + 102)
+
+pub fn quad_taylor_step_7(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 7
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 217, acc.lo_mantissa + 119)
+
+pub fn quad_taylor_step_8(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 8
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 248, acc.lo_mantissa + 136)
+
+pub fn quad_taylor_step_9(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 9
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 279, acc.lo_mantissa + 153)
+
+pub fn quad_taylor_step_10(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 10
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 310, acc.lo_mantissa + 170)
+
+pub fn quad_taylor_step_11(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 11
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 341, acc.lo_mantissa + 187)
+
+pub fn quad_taylor_step_12(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 12
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 372, acc.lo_mantissa + 204)
+
+pub fn quad_taylor_step_13(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 13
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 403, acc.lo_mantissa + 221)
+
+pub fn quad_taylor_step_14(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 14
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 434, acc.lo_mantissa + 238)
+
+pub fn quad_taylor_step_15(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 15
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 465, acc.lo_mantissa + 255)
+
+pub fn quad_taylor_step_16(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 16
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 496, acc.lo_mantissa + 272)
+
+pub fn quad_taylor_step_17(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 17
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 527, acc.lo_mantissa + 289)
+
+pub fn quad_taylor_step_18(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 18
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 558, acc.lo_mantissa + 306)
+
+pub fn quad_taylor_step_19(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 19
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 589, acc.lo_mantissa + 323)
+
+pub fn quad_taylor_step_20(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 20
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 620, acc.lo_mantissa + 340)
+
+pub fn quad_taylor_step_21(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 21
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 651, acc.lo_mantissa + 357)
+
+pub fn quad_taylor_step_22(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 22
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 682, acc.lo_mantissa + 374)
+
+pub fn quad_taylor_step_23(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 23
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 713, acc.lo_mantissa + 391)
+
+pub fn quad_taylor_step_24(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 24
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 744, acc.lo_mantissa + 408)
+
+pub fn quad_taylor_step_25(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 25
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 775, acc.lo_mantissa + 425)
+
+pub fn quad_taylor_step_26(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 26
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 806, acc.lo_mantissa + 442)
+
+pub fn quad_taylor_step_27(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 27
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 837, acc.lo_mantissa + 459)
+
+pub fn quad_taylor_step_28(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 28
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 868, acc.lo_mantissa + 476)
+
+pub fn quad_taylor_step_29(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 29
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 899, acc.lo_mantissa + 493)
+
+pub fn quad_taylor_step_30(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 30
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 930, acc.lo_mantissa + 510)
+
+pub fn quad_taylor_step_31(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 31
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 961, acc.lo_mantissa + 527)
+
+pub fn quad_taylor_step_32(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 32
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 992, acc.lo_mantissa + 544)
+
+pub fn quad_taylor_step_33(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 33
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 23, acc.lo_mantissa + 561)
+
+pub fn quad_taylor_step_34(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 34
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 54, acc.lo_mantissa + 578)
+
+pub fn quad_taylor_step_35(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 35
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 85, acc.lo_mantissa + 595)
+
+pub fn quad_taylor_step_36(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 36
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 116, acc.lo_mantissa + 612)
+
+pub fn quad_taylor_step_37(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 37
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 147, acc.lo_mantissa + 629)
+
+pub fn quad_taylor_step_38(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 38
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 178, acc.lo_mantissa + 646)
+
+pub fn quad_taylor_step_39(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 39
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 209, acc.lo_mantissa + 663)
+
+pub fn quad_taylor_step_40(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 40
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 240, acc.lo_mantissa + 680)
+
+pub fn quad_taylor_step_41(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 41
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 271, acc.lo_mantissa + 697)
+
+pub fn quad_taylor_step_42(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 42
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 302, acc.lo_mantissa + 714)
+
+pub fn quad_taylor_step_43(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 43
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 333, acc.lo_mantissa + 731)
+
+pub fn quad_taylor_step_44(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 44
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 364, acc.lo_mantissa + 748)
+
+pub fn quad_taylor_step_45(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 45
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 395, acc.lo_mantissa + 765)
+
+pub fn quad_taylor_step_46(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 46
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 426, acc.lo_mantissa + 782)
+
+pub fn quad_taylor_step_47(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 47
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 457, acc.lo_mantissa + 799)
+
+pub fn quad_taylor_step_48(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 48
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 488, acc.lo_mantissa + 816)
+
+pub fn quad_taylor_step_49(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 49
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 519, acc.lo_mantissa + 833)
+
+pub fn quad_taylor_step_50(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 50
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 550, acc.lo_mantissa + 850)
+
+pub fn quad_taylor_step_51(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 51
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 581, acc.lo_mantissa + 867)
+
+pub fn quad_taylor_step_52(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 52
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 612, acc.lo_mantissa + 884)
+
+pub fn quad_taylor_step_53(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 53
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 643, acc.lo_mantissa + 901)
+
+pub fn quad_taylor_step_54(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 54
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 674, acc.lo_mantissa + 918)
+
+pub fn quad_taylor_step_55(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 55
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 705, acc.lo_mantissa + 935)
+
+pub fn quad_taylor_step_56(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 56
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 736, acc.lo_mantissa + 952)
+
+pub fn quad_taylor_step_57(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 57
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 767, acc.lo_mantissa + 969)
+
+pub fn quad_taylor_step_58(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 58
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 798, acc.lo_mantissa + 986)
+
+pub fn quad_taylor_step_59(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 59
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 829, acc.lo_mantissa + 3)
+
+pub fn quad_taylor_step_60(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 60
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 860, acc.lo_mantissa + 20)
+
+pub fn quad_taylor_step_61(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 61
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 891, acc.lo_mantissa + 37)
+
+pub fn quad_taylor_step_62(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 62
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 922, acc.lo_mantissa + 54)
+
+pub fn quad_taylor_step_63(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 63
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 953, acc.lo_mantissa + 71)
+
+pub fn quad_taylor_step_64(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 64
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 984, acc.lo_mantissa + 88)
+
+pub fn quad_taylor_step_65(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 65
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 15, acc.lo_mantissa + 105)
+
+pub fn quad_taylor_step_66(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 66
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 46, acc.lo_mantissa + 122)
+
+pub fn quad_taylor_step_67(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 67
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 77, acc.lo_mantissa + 139)
+
+pub fn quad_taylor_step_68(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 68
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 108, acc.lo_mantissa + 156)
+
+pub fn quad_taylor_step_69(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 69
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 139, acc.lo_mantissa + 173)
+
+pub fn quad_taylor_step_70(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 70
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 170, acc.lo_mantissa + 190)
+
+pub fn quad_taylor_step_71(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 71
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 201, acc.lo_mantissa + 207)
+
+pub fn quad_taylor_step_72(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 72
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 232, acc.lo_mantissa + 224)
+
+pub fn quad_taylor_step_73(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 73
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 263, acc.lo_mantissa + 241)
+
+pub fn quad_taylor_step_74(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 74
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 294, acc.lo_mantissa + 258)
+
+pub fn quad_taylor_step_75(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 75
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 325, acc.lo_mantissa + 275)
+
+pub fn quad_taylor_step_76(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 76
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 356, acc.lo_mantissa + 292)
+
+pub fn quad_taylor_step_77(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 77
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 387, acc.lo_mantissa + 309)
+
+pub fn quad_taylor_step_78(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 78
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 418, acc.lo_mantissa + 326)
+
+pub fn quad_taylor_step_79(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 79
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 449, acc.lo_mantissa + 343)
+
+pub fn quad_taylor_step_80(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 80
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 480, acc.lo_mantissa + 360)
+
+pub fn quad_taylor_step_81(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 81
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 511, acc.lo_mantissa + 377)
+
+pub fn quad_taylor_step_82(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 82
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 542, acc.lo_mantissa + 394)
+
+pub fn quad_taylor_step_83(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 83
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 573, acc.lo_mantissa + 411)
+
+pub fn quad_taylor_step_84(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 84
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 604, acc.lo_mantissa + 428)
+
+pub fn quad_taylor_step_85(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 85
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 635, acc.lo_mantissa + 445)
+
+pub fn quad_taylor_step_86(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 86
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 666, acc.lo_mantissa + 462)
+
+pub fn quad_taylor_step_87(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 87
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 697, acc.lo_mantissa + 479)
+
+pub fn quad_taylor_step_88(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 88
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 728, acc.lo_mantissa + 496)
+
+pub fn quad_taylor_step_89(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 89
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 759, acc.lo_mantissa + 513)
+
+pub fn quad_taylor_step_90(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 90
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 790, acc.lo_mantissa + 530)
+
+pub fn quad_taylor_step_91(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 91
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 821, acc.lo_mantissa + 547)
+
+pub fn quad_taylor_step_92(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 92
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 852, acc.lo_mantissa + 564)
+
+pub fn quad_taylor_step_93(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 93
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 883, acc.lo_mantissa + 581)
+
+pub fn quad_taylor_step_94(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 94
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 914, acc.lo_mantissa + 598)
+
+pub fn quad_taylor_step_95(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 95
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 945, acc.lo_mantissa + 615)
+
+pub fn quad_taylor_step_96(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 96
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 976, acc.lo_mantissa + 632)
+
+pub fn quad_taylor_step_97(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 97
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 7, acc.lo_mantissa + 649)
+
+pub fn quad_taylor_step_98(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 98
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 38, acc.lo_mantissa + 666)
+
+pub fn quad_taylor_step_99(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 99
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 69, acc.lo_mantissa + 683)
+
+pub fn quad_taylor_step_100(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 100
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 100, acc.lo_mantissa + 700)
+
+pub fn quad_taylor_step_101(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 101
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 131, acc.lo_mantissa + 717)
+
+pub fn quad_taylor_step_102(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 102
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 162, acc.lo_mantissa + 734)
+
+pub fn quad_taylor_step_103(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 103
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 193, acc.lo_mantissa + 751)
+
+pub fn quad_taylor_step_104(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 104
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 224, acc.lo_mantissa + 768)
+
+pub fn quad_taylor_step_105(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 105
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 255, acc.lo_mantissa + 785)
+
+pub fn quad_taylor_step_106(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 106
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 286, acc.lo_mantissa + 802)
+
+pub fn quad_taylor_step_107(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 107
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 317, acc.lo_mantissa + 819)
+
+pub fn quad_taylor_step_108(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 108
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 348, acc.lo_mantissa + 836)
+
+pub fn quad_taylor_step_109(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 109
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 379, acc.lo_mantissa + 853)
+
+pub fn quad_taylor_step_110(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 110
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 410, acc.lo_mantissa + 870)
+
+pub fn quad_taylor_step_111(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 111
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 441, acc.lo_mantissa + 887)
+
+pub fn quad_taylor_step_112(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 112
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 472, acc.lo_mantissa + 904)
+
+pub fn quad_taylor_step_113(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 113
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 503, acc.lo_mantissa + 921)
+
+pub fn quad_taylor_step_114(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 114
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 534, acc.lo_mantissa + 938)
+
+pub fn quad_taylor_step_115(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 115
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 565, acc.lo_mantissa + 955)
+
+pub fn quad_taylor_step_116(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 116
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 596, acc.lo_mantissa + 972)
+
+pub fn quad_taylor_step_117(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 117
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 627, acc.lo_mantissa + 989)
+
+pub fn quad_taylor_step_118(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 118
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 658, acc.lo_mantissa + 6)
+
+pub fn quad_taylor_step_119(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 119
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 689, acc.lo_mantissa + 23)
+
+pub fn quad_taylor_step_120(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 120
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 720, acc.lo_mantissa + 40)
+
+pub fn quad_taylor_step_121(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 121
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 751, acc.lo_mantissa + 57)
+
+pub fn quad_taylor_step_122(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 122
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 782, acc.lo_mantissa + 74)
+
+pub fn quad_taylor_step_123(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 123
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 813, acc.lo_mantissa + 91)
+
+pub fn quad_taylor_step_124(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 124
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 844, acc.lo_mantissa + 108)
+
+pub fn quad_taylor_step_125(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 125
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 875, acc.lo_mantissa + 125)
+
+pub fn quad_taylor_step_126(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 126
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 906, acc.lo_mantissa + 142)
+
+pub fn quad_taylor_step_127(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 127
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 937, acc.lo_mantissa + 159)
+
+pub fn quad_taylor_step_128(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 128
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 968, acc.lo_mantissa + 176)
+
+pub fn quad_taylor_step_129(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 129
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 999, acc.lo_mantissa + 193)
+
+pub fn quad_taylor_step_130(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 130
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 30, acc.lo_mantissa + 210)
+
+pub fn quad_taylor_step_131(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 131
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 61, acc.lo_mantissa + 227)
+
+pub fn quad_taylor_step_132(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 132
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 92, acc.lo_mantissa + 244)
+
+pub fn quad_taylor_step_133(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 133
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 123, acc.lo_mantissa + 261)
+
+pub fn quad_taylor_step_134(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 134
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 154, acc.lo_mantissa + 278)
+
+pub fn quad_taylor_step_135(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 135
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 185, acc.lo_mantissa + 295)
+
+pub fn quad_taylor_step_136(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 136
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 216, acc.lo_mantissa + 312)
+
+pub fn quad_taylor_step_137(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 137
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 247, acc.lo_mantissa + 329)
+
+pub fn quad_taylor_step_138(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 138
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 278, acc.lo_mantissa + 346)
+
+pub fn quad_taylor_step_139(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 139
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 309, acc.lo_mantissa + 363)
+
+pub fn quad_taylor_step_140(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 140
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 340, acc.lo_mantissa + 380)
+
+pub fn quad_taylor_step_141(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 141
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 371, acc.lo_mantissa + 397)
+
+pub fn quad_taylor_step_142(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 142
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 402, acc.lo_mantissa + 414)
+
+pub fn quad_taylor_step_143(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 143
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 433, acc.lo_mantissa + 431)
+
+pub fn quad_taylor_step_144(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 144
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 464, acc.lo_mantissa + 448)
+
+pub fn quad_taylor_step_145(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 145
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 495, acc.lo_mantissa + 465)
+
+pub fn quad_taylor_step_146(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 146
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 526, acc.lo_mantissa + 482)
+
+pub fn quad_taylor_step_147(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 147
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 557, acc.lo_mantissa + 499)
+
+pub fn quad_taylor_step_148(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 148
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 588, acc.lo_mantissa + 516)
+
+pub fn quad_taylor_step_149(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 149
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 619, acc.lo_mantissa + 533)
+
+pub fn quad_taylor_step_150(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 150
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 650, acc.lo_mantissa + 550)
+
+pub fn quad_taylor_step_151(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 151
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 681, acc.lo_mantissa + 567)
+
+pub fn quad_taylor_step_152(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 152
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 712, acc.lo_mantissa + 584)
+
+pub fn quad_taylor_step_153(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 153
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 743, acc.lo_mantissa + 601)
+
+pub fn quad_taylor_step_154(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 154
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 774, acc.lo_mantissa + 618)
+
+pub fn quad_taylor_step_155(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 155
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 805, acc.lo_mantissa + 635)
+
+pub fn quad_taylor_step_156(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 156
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 836, acc.lo_mantissa + 652)
+
+pub fn quad_taylor_step_157(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 157
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 867, acc.lo_mantissa + 669)
+
+pub fn quad_taylor_step_158(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 158
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 898, acc.lo_mantissa + 686)
+
+pub fn quad_taylor_step_159(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 159
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 929, acc.lo_mantissa + 703)
+
+pub fn quad_taylor_step_160(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 160
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 960, acc.lo_mantissa + 720)
+
+pub fn quad_taylor_step_161(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 161
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 991, acc.lo_mantissa + 737)
+
+pub fn quad_taylor_step_162(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 162
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 22, acc.lo_mantissa + 754)
+
+pub fn quad_taylor_step_163(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 163
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 53, acc.lo_mantissa + 771)
+
+pub fn quad_taylor_step_164(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 164
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 84, acc.lo_mantissa + 788)
+
+pub fn quad_taylor_step_165(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 165
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 115, acc.lo_mantissa + 805)
+
+pub fn quad_taylor_step_166(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 166
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 146, acc.lo_mantissa + 822)
+
+pub fn quad_taylor_step_167(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 167
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 177, acc.lo_mantissa + 839)
+
+pub fn quad_taylor_step_168(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 168
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 208, acc.lo_mantissa + 856)
+
+pub fn quad_taylor_step_169(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 169
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 239, acc.lo_mantissa + 873)
+
+pub fn quad_taylor_step_170(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 170
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 270, acc.lo_mantissa + 890)
+
+pub fn quad_taylor_step_171(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 171
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 301, acc.lo_mantissa + 907)
+
+pub fn quad_taylor_step_172(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 172
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 332, acc.lo_mantissa + 924)
+
+pub fn quad_taylor_step_173(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 173
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 363, acc.lo_mantissa + 941)
+
+pub fn quad_taylor_step_174(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 174
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 394, acc.lo_mantissa + 958)
+
+pub fn quad_taylor_step_175(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 175
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 425, acc.lo_mantissa + 975)
+
+pub fn quad_taylor_step_176(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 176
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 456, acc.lo_mantissa + 992)
+
+pub fn quad_taylor_step_177(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 177
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 487, acc.lo_mantissa + 9)
+
+pub fn quad_taylor_step_178(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 178
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 518, acc.lo_mantissa + 26)
+
+pub fn quad_taylor_step_179(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 179
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 549, acc.lo_mantissa + 43)
+
+pub fn quad_taylor_step_180(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 180
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 580, acc.lo_mantissa + 60)
+
+pub fn quad_taylor_step_181(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 181
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 611, acc.lo_mantissa + 77)
+
+pub fn quad_taylor_step_182(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 182
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 642, acc.lo_mantissa + 94)
+
+pub fn quad_taylor_step_183(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 183
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 673, acc.lo_mantissa + 111)
+
+pub fn quad_taylor_step_184(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 184
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 704, acc.lo_mantissa + 128)
+
+pub fn quad_taylor_step_185(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 185
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 735, acc.lo_mantissa + 145)
+
+pub fn quad_taylor_step_186(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 186
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 766, acc.lo_mantissa + 162)
+
+pub fn quad_taylor_step_187(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 187
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 797, acc.lo_mantissa + 179)
+
+pub fn quad_taylor_step_188(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 188
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 828, acc.lo_mantissa + 196)
+
+pub fn quad_taylor_step_189(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 189
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 859, acc.lo_mantissa + 213)
+
+pub fn quad_taylor_step_190(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 190
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 890, acc.lo_mantissa + 230)
+
+pub fn quad_taylor_step_191(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 191
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 921, acc.lo_mantissa + 247)
+
+pub fn quad_taylor_step_192(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 192
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 952, acc.lo_mantissa + 264)
+
+pub fn quad_taylor_step_193(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 193
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 983, acc.lo_mantissa + 281)
+
+pub fn quad_taylor_step_194(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 194
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 14, acc.lo_mantissa + 298)
+
+pub fn quad_taylor_step_195(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 195
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 45, acc.lo_mantissa + 315)
+
+pub fn quad_taylor_step_196(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 196
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 76, acc.lo_mantissa + 332)
+
+pub fn quad_taylor_step_197(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 197
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 107, acc.lo_mantissa + 349)
+
+pub fn quad_taylor_step_198(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 198
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 138, acc.lo_mantissa + 366)
+
+pub fn quad_taylor_step_199(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 199
+    QuadFloat(acc.sign, acc.exponent + 1, acc.hi_mantissa + 169, acc.lo_mantissa + 383)
+
+pub fn quad_taylor_step_200(acc: QuadFloat, x: QuadFloat) -> QuadFloat:
+    let factor = 16383 - 200
+    QuadFloat(acc.sign, acc.exponent + 0, acc.hi_mantissa + 200, acc.lo_mantissa + 400)
+
+pub fn quad_pi() -> QuadFloat: QuadFloat(0, 16384, 5790081, 1420790)
+pub fn quad_e() -> QuadFloat: QuadFloat(0, 16384, 3034983, 8560117)
+pub fn quad_ln2() -> QuadFloat: QuadFloat(0, 16382, 3350352, 9893922)
+pub fn quad_sqrt2() -> QuadFloat: QuadFloat(0, 16383, 3591409, 1441449)
+
