@@ -1144,6 +1144,10 @@ bool nova_gui_window_draw_rect(int64_t win_handle, int64_t x, int64_t y, int64_t
 }
 
 bool nova_gui_alert(const char *title, const char *message) {
+    if (getenv("CI") || getenv("GITHUB_ACTIONS") || getenv("HEADLESS")) {
+        printf("🔔 [Nova GUI Alert] %s: %s\n", title ? title : "Alert", message ? message : "");
+        return true;
+    }
     MessageBoxA(NULL, message ? message : "", title ? title : "Nova Alert", MB_OK | MB_ICONINFORMATION);
     return true;
 }
