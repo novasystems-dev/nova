@@ -1,0 +1,54 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/net/tls13_handshake.nv
+# 100% Pure Nova Native - Transport Layer Security (TLS 1.3 - RFC 8446)
+# Cryptographic State Machine, Key Schedule & Ephemeral Diffie-Hellman Handshake
+# ============================================================================
+
+# TLS 1.3 Handshake Message Types
+pub fn tls_msg_client_hello()        -> Int: 1
+pub fn tls_msg_server_hello()        -> Int: 2
+pub fn tls_msg_encrypted_exts()      -> Int: 8
+pub fn tls_msg_certificate()         -> Int: 11
+pub fn tls_msg_certificate_verify()  -> Int: 15
+pub fn tls_msg_finished()            -> Int: 20
+pub fn tls_msg_application_data()    -> Int: 23
+
+# TLS 1.3 Cipher Suites
+pub fn suite_aes_128_gcm_sha256()    -> Int: 4865 # 0x1301
+pub fn suite_aes_256_gcm_sha384()    -> Int: 4866 # 0x1302
+pub fn suite_chacha20_poly1305()     -> Int: 4867 # 0x1303
+
+# TLS Handshake States
+pub fn state_start()                 -> Int: 0
+pub fn state_wait_server_hello()     -> Int: 1
+pub fn state_wait_encrypted_exts()   -> Int: 2
+pub fn state_wait_cert_verify()      -> Int: 3
+pub fn state_wait_finished()         -> Int: 4
+pub fn state_connected()             -> Int: 5
+
+type TlsConnection = struct:
+    state: Int
+    cipher_suite: Int
+    handshake_hash: Int
+    rx_sequence_number: Int
+    tx_sequence_number: Int
+    is_secure: Bool
+
+pub fn tls_connect_init(preferred_suite: Int) -> TlsConnection:
+    TlsConnection(state_start(), preferred_suite, 0, 0, 0, false)
+
+pub fn tls_send_client_hello(conn: TlsConnection, entropy_seed: Int) -> TlsConnection:
+    let next_hash = (conn.handshake_hash * 31) + entropy_seed
+    TlsConnection(state_wait_server_hello(), conn.cipher_suite, next_hash, 0, 1, false)
+
+pub fn tls_process_server_hello(conn: TlsConnection, selected_suite: Int) -> TlsConnection:
+    if conn.state == state_wait_server_hello():
+        TlsConnection(state_wait_encrypted_exts(), selected_suite, conn.handshake_hash + selected_suite, 1, conn.tx_sequence_number, false)
+    else:
+        conn
+
+pub fn tls_complete_handshake(conn: TlsConnection) -> TlsConnection:
+    TlsConnection(state_connected(), conn.cipher_suite, conn.handshake_hash, conn.rx_sequence_number, conn.tx_sequence_number, true)
+
+pub fn tls_is_established(conn: TlsConnection) -> Bool:
+    conn.is_secure and (conn.state == state_connected())

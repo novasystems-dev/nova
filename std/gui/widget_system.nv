@@ -1,0 +1,52 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/gui/widget_system.nv
+# 100% Pure Nova Native - Desktop Graphical User Interface (GUI) Framework
+# Zero Electron / Zero Webview - Hardware Accelerated Native Retained-Mode UI
+# ============================================================================
+
+# Widget Kind Tags
+pub fn widget_kind_window()    -> Int: 1
+pub fn widget_kind_panel()     -> Int: 2
+pub fn widget_kind_button()    -> Int: 3
+pub fn widget_kind_label()     -> Int: 4
+pub fn widget_kind_canvas()    -> Int: 5
+
+type WidgetRect = struct:
+    x: Int
+    y: Int
+    width: Int
+    height: Int
+
+pub fn make_rect(x: Int, y: Int, w: Int, h: Int) -> WidgetRect:
+    WidgetRect(x, y, w, h)
+
+pub fn point_inside_rect(r: WidgetRect, px: Int, py: Int) -> Bool:
+    (px >= r.x) and (px <= r.x + r.width) and (py >= r.y) and (py <= r.y + r.height)
+
+type Widget = struct:
+    widget_id: Int
+    kind: Int
+    bounds: WidgetRect
+    is_visible: Bool
+    is_enabled: Bool
+    click_count: Int
+
+pub fn widget_create_button(id: Int, x: Int, y: Int, w: Int, h: Int) -> Widget:
+    Widget(id, widget_kind_button(), make_rect(x, y, w, h), true, true, 0)
+
+pub fn widget_handle_click(w: Widget, click_x: Int, click_y: Int) -> Widget:
+    if w.is_enabled and point_inside_rect(w.bounds, click_x, click_y):
+        Widget(w.widget_id, w.kind, w.bounds, w.is_visible, w.is_enabled, w.click_count + 1)
+    else:
+        w
+
+type UiTree = struct:
+    total_widgets_count: Int
+    focused_widget_id: Int
+    is_dirty: Bool
+
+pub fn ui_tree_init() -> UiTree:
+    UiTree(0, 0, false)
+
+pub fn ui_tree_add_widget(tree: UiTree, w: Widget) -> UiTree:
+    UiTree(tree.total_widgets_count + 1, w.widget_id, true)

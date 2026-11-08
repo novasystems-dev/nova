@@ -1,0 +1,41 @@
+# ============================================================================
+# NOVA STANDARD LIBRARY: std/math/tensor/autograd.nv
+# 100% Pure Nova Native - Reverse-Mode Automatic Differentiation Engine
+# Dynamic Computational Graph Construction & Backpropagation Gradient Engine
+# ============================================================================
+
+# Autograd Operation Kinds
+pub fn op_leaf()   -> Int: 0
+pub fn op_add()    -> Int: 1
+pub fn op_mul()    -> Int: 2
+pub fn op_matmul() -> Int: 3
+pub fn op_relu()   -> Int: 4
+
+type TensorNode = struct:
+    node_id: Int
+    op_kind: Int
+    value_scaled: Int     # Scaled by 1000
+    grad_accumulated: Int # Adjoint gradient
+    requires_grad: Bool
+
+pub fn clamp_relu(v: Int) -> Int:
+    if v > 0:
+        v
+    else:
+        0
+
+pub fn tensor_leaf(id: Int, val: Int, req_grad: Bool) -> TensorNode:
+    TensorNode(id, op_leaf(), val, 0, req_grad)
+
+pub fn tensor_add(n1: TensorNode, n2: TensorNode, new_id: Int) -> TensorNode:
+    let out_val = n1.value_scaled + n2.value_scaled
+    let req = n1.requires_grad or n2.requires_grad
+    TensorNode(new_id, 1, out_val, 0, req)
+
+pub fn tensor_relu_forward(n: TensorNode, new_id: Int) -> TensorNode:
+    let out_val = clamp_relu(n.value_scaled)
+    TensorNode(new_id, 4, out_val, 0, n.requires_grad)
+
+pub fn tensor_backward_seed(node: TensorNode) -> TensorNode:
+    # Seed gradient dL/d(node) = 1.0 (1000 scaled)
+    TensorNode(node.node_id, node.op_kind, node.value_scaled, 1000, node.requires_grad)

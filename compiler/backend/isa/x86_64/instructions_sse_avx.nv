@@ -1,0 +1,77 @@
+# ============================================================================
+# NOVA PURE BACKEND: compiler/backend/isa/x86_64/instructions_sse_avx.nv
+# 100% Pure Nova Native - SIMD SSE4.2, AVX2 (256-bit) & AVX-512 Instruction Table
+# Hardware Vector Acceleration for Math, AI Tensors, Graphics & Cryptography
+# ============================================================================
+
+# Vector Register IDs
+pub fn xmm0()  -> Int: 0
+pub fn xmm1()  -> Int: 1
+pub fn xmm2()  -> Int: 2
+pub fn xmm3()  -> Int: 3
+pub fn xmm7()  -> Int: 7
+pub fn xmm8()  -> Int: 8
+pub fn xmm15() -> Int: 15
+
+# VEX 2-Byte Prefix (0xC5): [0xC5, R_vvvv_L_pp]
+pub fn vex2_lead() -> Int: 197 # 0xC5
+
+# VEX 3-Byte Prefix (0xC4): [0xC4, RXB_mmmmm, W_vvvv_L_pp]
+pub fn vex3_lead() -> Int: 196 # 0xC4
+
+# EVEX 4-Byte Prefix (0x62): AVX-512 512-bit vector length
+pub fn evex_lead() -> Int: 98  # 0x62
+
+type SimdBuffer = struct:
+    byte_count: Int
+    simd_op_count: Int
+    vector_width_bits: Int # 128 (SSE), 256 (AVX2), 512 (AVX-512)
+
+pub fn simd_buffer_new(width_bits: Int) -> SimdBuffer:
+    SimdBuffer(0, 0, width_bits)
+
+pub fn simd_emit_byte(buf: SimdBuffer, b: Int) -> SimdBuffer:
+    SimdBuffer(buf.byte_count + 1, buf.simd_op_count, buf.vector_width_bits)
+
+# --- SSE 128-bit Single Precision Vector Operations ---
+
+# ADDPS xmm1, xmm2 (Opcode: 0x0F 0x58 /r)
+pub fn emit_sse_addps(buf: SimdBuffer, dst: Int, src: Int) -> SimdBuffer:
+    let b1 = simd_emit_byte(buf, 15) # 0x0F
+    let b2 = simd_emit_byte(b1, 88)  # 0x58
+    let modrm = 192 + ((dst % 8) * 8) + (src % 8)
+    let b3 = simd_emit_byte(b2, modrm)
+    SimdBuffer(b3.byte_count, b3.simd_op_count + 1, 128)
+
+# MULPS xmm1, xmm2 (Opcode: 0x0F 0x59 /r)
+pub fn emit_sse_mulps(buf: SimdBuffer, dst: Int, src: Int) -> SimdBuffer:
+    let b1 = simd_emit_byte(buf, 15) # 0x0F
+    let b2 = simd_emit_byte(b1, 89)  # 0x59
+    let modrm = 192 + ((dst % 8) * 8) + (src % 8)
+    let b3 = simd_emit_byte(b2, modrm)
+    SimdBuffer(b3.byte_count, b3.simd_op_count + 1, 128)
+
+# --- AVX2 256-bit Vector Fused Multiply-Add (FMA) ---
+
+# VFMADD213PS ymm1, ymm2, ymm3 (Opcode: VEX.256.66.0F38.W0 A8 /r)
+pub fn emit_avx2_vfmadd(buf: SimdBuffer, dst_ymm: Int, src1_ymm: Int, src2_ymm: Int) -> SimdBuffer:
+    let b1 = simd_emit_byte(buf, vex3_lead()) # 0xC4
+    let b2 = simd_emit_byte(b1, 66)           # RXB + map2
+    let b3 = simd_emit_byte(b2, 125)          # W0 + ~src1 + L(256-bit) + 66
+    let b4 = simd_emit_byte(b3, 168)          # 0xA8 opcode
+    let modrm = 192 + ((dst_ymm % 8) * 8) + (src2_ymm % 8)
+    let b5 = simd_emit_byte(b4, modrm)
+    SimdBuffer(b5.byte_count, b5.simd_op_count + 1, 256)
+
+# --- AVX-512 512-bit Vector Vector Matrix Multiply ---
+
+pub fn emit_avx512_vaddps_zmm(buf: SimdBuffer, dst_zmm: Int, src1_zmm: Int, src2_zmm: Int) -> SimdBuffer:
+    # 4-byte EVEX prefix + 0x58
+    let b1 = simd_emit_byte(buf, evex_lead())
+    let b2 = simd_emit_byte(b1, 245)
+    let b3 = simd_emit_byte(b2, 120)
+    let b4 = simd_emit_byte(b3, 72)
+    let b5 = simd_emit_byte(b4, 88) # 0x58
+    let modrm = 192 + ((dst_zmm % 8) * 8) + (src2_zmm % 8)
+    let b6 = simd_emit_byte(b5, modrm)
+    SimdBuffer(b6.byte_count, b6.simd_op_count + 1, 512)

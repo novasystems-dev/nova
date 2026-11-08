@@ -1,0 +1,76 @@
+# ============================================================================
+# NOVA PURE RUNTIME: std/runtime/sys/windows_x64.nv
+# 100% Pure Nova Native - Windows x64 Direct NT-Syscall & Kernel32 Architecture
+# Standalone Execution without MSVCRT.DLL / Zero C Runtime Dependency
+# ============================================================================
+
+# Windows Standard Handles
+pub fn std_input_handle()  -> Int: 0 - 10
+pub fn std_output_handle() -> Int: 0 - 11
+pub fn std_error_handle()  -> Int: 0 - 12
+
+# Windows Virtual Memory Allocation Types
+pub fn mem_commit()        -> Int: 4096      # 0x1000
+pub fn mem_reserve()       -> Int: 8192      # 0x2000
+pub fn mem_decommit()      -> Int: 16384     # 0x4000
+pub fn mem_release()       -> Int: 32768     # 0x8000
+
+# Windows Page Protection Constants
+pub fn page_noaccess()          -> Int: 1    # 0x01
+pub fn page_readonly()          -> Int: 2    # 0x02
+pub fn page_readwrite()         -> Int: 4    # 0x04
+pub fn page_writecopy()         -> Int: 8    # 0x08
+pub fn page_execute()           -> Int: 16   # 0x10
+pub fn page_execute_read()      -> Int: 32   # 0x20
+pub fn page_execute_readwrite() -> Int: 64   # 0x40
+
+# Windows File Access Rights
+pub fn generic_read()    -> Int: 2147483648  # 0x80000000
+pub fn generic_write()   -> Int: 1073741824  # 0x40000000
+pub fn generic_execute() -> Int: 536870912   # 0x20000000
+pub fn generic_all()     -> Int: 268435456   # 0x10000000
+
+# Windows File Creation Dispositions
+pub fn create_new()        -> Int: 1
+pub fn create_always()     -> Int: 2
+pub fn open_existing()     -> Int: 3
+pub fn open_always()       -> Int: 4
+pub fn truncate_existing() -> Int: 5
+
+# Direct NT-Syscall Service Numbers (SSN - Win10/Win11 x64 Kernel)
+pub fn ssn_nt_read_file()                 -> Int: 6
+pub fn ssn_nt_write_file()                -> Int: 8
+pub fn ssn_nt_create_file()               -> Int: 85
+pub fn ssn_nt_close()                     -> Int: 15
+pub fn ssn_nt_allocate_virtual_memory()   -> Int: 24
+pub fn ssn_nt_free_virtual_memory()       -> Int: 30
+pub fn ssn_nt_protect_virtual_memory()    -> Int: 80
+pub fn ssn_nt_query_virtual_memory()      -> Int: 35
+pub fn ssn_nt_create_thread_ex()          -> Int: 189
+pub fn ssn_nt_terminate_process()         -> Int: 44
+pub fn ssn_nt_wait_for_single_object()    -> Int: 4
+pub fn ssn_nt_delay_execution()           -> Int: 52
+pub fn ssn_nt_yield_execution()           -> Int: 70
+pub fn ssn_nt_query_system_information()  -> Int: 54
+
+type WinNtSyscall = struct:
+    service_number: Int
+    arg0: Int
+    arg1: Int
+    arg2: Int
+    arg3: Int
+    arg4: Int
+
+pub fn make_win_syscall(ssn: Int, a0: Int, a1: Int, a2: Int, a3: Int, a4: Int) -> WinNtSyscall:
+    WinNtSyscall(ssn, a0, a1, a2, a3, a4)
+
+type WinNtResult = struct:
+    ntstatus: Int
+    is_success: Bool
+
+pub fn eval_ntstatus(status: Int) -> WinNtResult:
+    # STATUS_SUCCESS is 0
+    if status >= 0:
+        WinNtResult(status, true)
+    else:
+        WinNtResult(status, false)

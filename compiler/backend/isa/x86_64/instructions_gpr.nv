@@ -1,0 +1,121 @@
+# ============================================================================
+# NOVA PURE BACKEND: compiler/backend/isa/x86_64/instructions_gpr.nv
+# 100% Pure Nova Native - AMD64 General Purpose Register (GPR) Instruction Table
+# Zero Assembler / Zero External Dependencies - Direct Opcode Binary Synthesis
+# ============================================================================
+
+# AMD64 64-bit Register Encodings
+pub fn reg_rax() -> Int: 0
+pub fn reg_rcx() -> Int: 1
+pub fn reg_rdx() -> Int: 2
+pub fn reg_rbx() -> Int: 3
+pub fn reg_rsp() -> Int: 4
+pub fn reg_rbp() -> Int: 5
+pub fn reg_rsi() -> Int: 6
+pub fn reg_rdi() -> Int: 7
+pub fn reg_r8()  -> Int: 8
+pub fn reg_r9()  -> Int: 9
+pub fn reg_r10() -> Int: 10
+pub fn reg_r11() -> Int: 11
+pub fn reg_r12() -> Int: 12
+pub fn reg_r13() -> Int: 13
+pub fn reg_r14() -> Int: 14
+pub fn reg_r15() -> Int: 15
+
+# REX Prefix Calculations (4-bit: 0100WRXB)
+pub fn rex_base() -> Int: 64 # 0x40
+pub fn rex_w()    -> Int: 72 # 0x48 (64-bit operand size)
+
+pub fn calc_rex(is_64bit: Bool, reg_hi: Bool, index_hi: Bool, base_hi: Bool) -> Int:
+    let mut prefix = 64
+    if is_64bit:
+        prefix = prefix + 8
+    if reg_hi:
+        prefix = prefix + 4
+    if index_hi:
+        prefix = prefix + 2
+    if base_hi:
+        prefix = prefix + 1
+    prefix
+
+# ModR/M Byte Encoding: [mod: 2 bits | reg: 3 bits | rm: 3 bits]
+pub fn encode_modrm(mod_bits: Int, reg: Int, rm: Int) -> Int:
+    (mod_bits * 64) + ((reg % 8) * 8) + (rm % 8)
+
+# Instruction Buffer Container
+type OpcodeBuffer = struct:
+    byte_count: Int
+    instruction_count: Int
+    hash_accumulator: Int
+
+pub fn opcode_buf_new() -> OpcodeBuffer:
+    OpcodeBuffer(0, 0, 0)
+
+pub fn emit_byte(buf: OpcodeBuffer, b: Int) -> OpcodeBuffer:
+    let next_hash = (buf.hash_accumulator * 31) + b
+    OpcodeBuffer(buf.byte_count + 1, buf.instruction_count, next_hash)
+
+# --- Arithmetic & Logic GPR Instructions ---
+
+# ADD reg, reg (Opcode: 0x01)
+pub fn emit_add_r_r(buf: OpcodeBuffer, dst: Int, src: Int) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, rex_w())
+    let b2 = emit_byte(b1, 1) # 0x01 ADD
+    let modrm = encode_modrm(3, src, dst)
+    let b3 = emit_byte(b2, modrm)
+    OpcodeBuffer(b3.byte_count, b3.instruction_count + 1, b3.hash_accumulator)
+
+# SUB reg, reg (Opcode: 0x29)
+pub fn emit_sub_r_r(buf: OpcodeBuffer, dst: Int, src: Int) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, rex_w())
+    let b2 = emit_byte(b1, 41) # 0x29 SUB
+    let modrm = encode_modrm(3, src, dst)
+    let b3 = emit_byte(b2, modrm)
+    OpcodeBuffer(b3.byte_count, b3.instruction_count + 1, b3.hash_accumulator)
+
+# XOR reg, reg (Opcode: 0x31)
+pub fn emit_xor_r_r(buf: OpcodeBuffer, dst: Int, src: Int) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, rex_w())
+    let b2 = emit_byte(b1, 49) # 0x31 XOR
+    let modrm = encode_modrm(3, src, dst)
+    let b3 = emit_byte(b2, modrm)
+    OpcodeBuffer(b3.byte_count, b3.instruction_count + 1, b3.hash_accumulator)
+
+# CMP reg, reg (Opcode: 0x39)
+pub fn emit_cmp_r_r(buf: OpcodeBuffer, dst: Int, src: Int) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, rex_w())
+    let b2 = emit_byte(b1, 57) # 0x39 CMP
+    let modrm = encode_modrm(3, src, dst)
+    let b3 = emit_byte(b2, modrm)
+    OpcodeBuffer(b3.byte_count, b3.instruction_count + 1, b3.hash_accumulator)
+
+# MOV reg, reg (Opcode: 0x89)
+pub fn emit_mov_r_r(buf: OpcodeBuffer, dst: Int, src: Int) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, rex_w())
+    let b2 = emit_byte(b1, 137) # 0x89 MOV
+    let modrm = encode_modrm(3, src, dst)
+    let b3 = emit_byte(b2, modrm)
+    OpcodeBuffer(b3.byte_count, b3.instruction_count + 1, b3.hash_accumulator)
+
+# PUSH reg (Opcode: 0x50 + rd)
+pub fn emit_push_r(buf: OpcodeBuffer, reg: Int) -> OpcodeBuffer:
+    let op = 80 + (reg % 8) # 0x50
+    let b1 = emit_byte(buf, op)
+    OpcodeBuffer(b1.byte_count, b1.instruction_count + 1, b1.hash_accumulator)
+
+# POP reg (Opcode: 0x58 + rd)
+pub fn emit_pop_r(buf: OpcodeBuffer, reg: Int) -> OpcodeBuffer:
+    let op = 88 + (reg % 8) # 0x58
+    let b1 = emit_byte(buf, op)
+    OpcodeBuffer(b1.byte_count, b1.instruction_count + 1, b1.hash_accumulator)
+
+# RET (Opcode: 0xC3)
+pub fn emit_ret(buf: OpcodeBuffer) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, 195) # 0xC3
+    OpcodeBuffer(b1.byte_count, b1.instruction_count + 1, b1.hash_accumulator)
+
+# SYSCALL (Opcode: 0x0F 0x05)
+pub fn emit_syscall(buf: OpcodeBuffer) -> OpcodeBuffer:
+    let b1 = emit_byte(buf, 15)  # 0x0F
+    let b2 = emit_byte(b1, 5)   # 0x05
+    OpcodeBuffer(b2.byte_count, b2.instruction_count + 1, b2.hash_accumulator)

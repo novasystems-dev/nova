@@ -1,0 +1,276 @@
+# ============================================================================
+# NOVA PURE RUNTIME: std/runtime/sys/linux_x86_64.nv
+# 100% Pure Nova Native - Linux AMD64 Kernel System Call Architecture
+# Complete POSIX Direct Syscall Layer - Zero C / Zero Libc / Zero Dependencies
+# ============================================================================
+
+# System Call Numbers (x86_64 Linux ABI)
+pub fn sys_read()             -> Int: 0
+pub fn sys_write()            -> Int: 1
+pub fn sys_open()             -> Int: 2
+pub fn sys_close()            -> Int: 3
+pub fn sys_stat()             -> Int: 4
+pub fn sys_fstat()            -> Int: 5
+pub fn sys_lstat()            -> Int: 6
+pub fn sys_poll()             -> Int: 7
+pub fn sys_lseek()            -> Int: 8
+pub fn sys_mmap()             -> Int: 9
+pub fn sys_mprotect()         -> Int: 10
+pub fn sys_munmap()           -> Int: 11
+pub fn sys_brk()              -> Int: 12
+pub fn sys_rt_sigaction()     -> Int: 13
+pub fn sys_rt_sigprocmask()   -> Int: 14
+pub fn sys_ioctl()            -> Int: 16
+pub fn sys_pread64()          -> Int: 17
+pub fn sys_pwrite64()         -> Int: 18
+pub fn sys_readv()            -> Int: 19
+pub fn sys_writev()           -> Int: 20
+pub fn sys_access()           -> Int: 21
+pub fn sys_pipe()             -> Int: 22
+pub fn sys_select()           -> Int: 23
+pub fn sys_sched_yield()      -> Int: 24
+pub fn sys_mremap()           -> Int: 25
+pub fn sys_msync()            -> Int: 26
+pub fn sys_mincore()          -> Int: 27
+pub fn sys_madvise()          -> Int: 28
+pub fn sys_dup()              -> Int: 32
+pub fn sys_dup2()             -> Int: 33
+pub fn sys_pause()            -> Int: 34
+pub fn sys_nanosleep()        -> Int: 35
+pub fn sys_getitimer()        -> Int: 36
+pub fn sys_alarm()            -> Int: 37
+pub fn sys_setitimer()        -> Int: 38
+pub fn sys_getpid()           -> Int: 39
+pub fn sys_sendfile()         -> Int: 40
+pub fn sys_socket()           -> Int: 41
+pub fn sys_connect()          -> Int: 42
+pub fn sys_accept()           -> Int: 43
+pub fn sys_sendto()           -> Int: 44
+pub fn sys_recvfrom()         -> Int: 45
+pub fn sys_sendmsg()          -> Int: 46
+pub fn sys_recvmsg()          -> Int: 47
+pub fn sys_shutdown()         -> Int: 48
+pub fn sys_bind()             -> Int: 49
+pub fn sys_listen()           -> Int: 50
+pub fn sys_getsockname()      -> Int: 51
+pub fn sys_getpeername()      -> Int: 52
+pub fn sys_socketpair()       -> Int: 53
+pub fn sys_setsockopt()       -> Int: 54
+pub fn sys_getsockopt()       -> Int: 55
+pub fn sys_clone()            -> Int: 56
+pub fn sys_fork()             -> Int: 57
+pub fn sys_vfork()            -> Int: 58
+pub fn sys_execve()           -> Int: 59
+pub fn sys_exit()             -> Int: 60
+pub fn sys_wait4()            -> Int: 61
+pub fn sys_kill()             -> Int: 62
+pub fn sys_uname()            -> Int: 63
+pub fn sys_fcntl()            -> Int: 72
+pub fn sys_fsync()            -> Int: 74
+pub fn sys_fdatasync()        -> Int: 75
+pub fn sys_truncate()         -> Int: 76
+pub fn sys_ftruncate()        -> Int: 77
+pub fn sys_getdents()         -> Int: 78
+pub fn sys_getcwd()           -> Int: 79
+pub fn sys_chdir()            -> Int: 80
+pub fn sys_fchdir()           -> Int: 81
+pub fn sys_rename()           -> Int: 82
+pub fn sys_mkdir()            -> Int: 83
+pub fn sys_rmdir()            -> Int: 84
+pub fn sys_creat()            -> Int: 85
+pub fn sys_link()             -> Int: 86
+pub fn sys_unlink()           -> Int: 87
+pub fn sys_symlink()          -> Int: 88
+pub fn sys_readlink()         -> Int: 89
+pub fn sys_chmod()            -> Int: 90
+pub fn sys_fchmod()           -> Int: 91
+pub fn sys_chown()            -> Int: 92
+pub fn sys_fchown()           -> Int: 93
+pub fn sys_lchown()           -> Int: 94
+pub fn sys_umask()            -> Int: 95
+pub fn sys_gettimeofday()     -> Int: 96
+pub fn sys_getrlimit()        -> Int: 97
+pub fn sys_getrusage()        -> Int: 98
+pub fn sys_sysinfo()          -> Int: 99
+pub fn sys_times()            -> Int: 100
+pub fn sys_ptrace()           -> Int: 101
+pub fn sys_getuid()           -> Int: 102
+pub fn sys_syslog()           -> Int: 103
+pub fn sys_getgid()           -> Int: 104
+pub fn sys_setuid()           -> Int: 105
+pub fn sys_setgid()           -> Int: 106
+pub fn sys_geteuid()          -> Int: 107
+pub fn sys_getegid()          -> Int: 108
+pub fn sys_setpgid()          -> Int: 109
+pub fn sys_getppid()          -> Int: 110
+pub fn sys_getpgrp()          -> Int: 111
+pub fn sys_setsid()           -> Int: 112
+pub fn sys_setreuid()         -> Int: 113
+pub fn sys_setregid()         -> Int: 114
+pub fn sys_getgroups()        -> Int: 115
+pub fn sys_setgroups()        -> Int: 116
+pub fn sys_setresuid()        -> Int: 117
+pub fn sys_getresuid()        -> Int: 118
+pub fn sys_setresgid()        -> Int: 119
+pub fn sys_getresgid()        -> Int: 120
+pub fn sys_getpgid()          -> Int: 121
+pub fn sys_setfsuid()         -> Int: 122
+pub fn sys_setfsgid()         -> Int: 123
+pub fn sys_getsid()           -> Int: 124
+pub fn sys_capget()           -> Int: 125
+pub fn sys_capset()           -> Int: 126
+pub fn sys_rt_sigsuspend()    -> Int: 130
+pub fn sys_utime()            -> Int: 132
+pub fn sys_mknod()            -> Int: 133
+pub fn sys_futex()            -> Int: 202
+pub fn sys_sched_setaffinity()-> Int: 203
+pub fn sys_sched_getaffinity()-> Int: 204
+pub fn sys_epoll_create()     -> Int: 213
+pub fn sys_getdents64()       -> Int: 217
+pub fn sys_set_tid_address()  -> Int: 218
+pub fn sys_restart_syscall()  -> Int: 219
+pub fn sys_semtimedop()       -> Int: 220
+pub fn sys_fadvise64()        -> Int: 221
+pub fn sys_timer_create()     -> Int: 222
+pub fn sys_timer_settime()    -> Int: 223
+pub fn sys_timer_gettime()    -> Int: 224
+pub fn sys_timer_getoverrun() -> Int: 225
+pub fn sys_timer_delete()     -> Int: 226
+pub fn sys_clock_settime()    -> Int: 227
+pub fn sys_clock_gettime()    -> Int: 228
+pub fn sys_clock_getres()     -> Int: 229
+pub fn sys_clock_nanosleep()  -> Int: 230
+pub fn sys_exit_group()       -> Int: 231
+pub fn sys_epoll_wait()       -> Int: 232
+pub fn sys_epoll_ctl()        -> Int: 233
+pub fn sys_tgkill()           -> Int: 234
+pub fn sys_utimes()           -> Int: 235
+pub fn sys_openat()           -> Int: 257
+pub fn sys_mkdirat()          -> Int: 258
+pub fn sys_mknodat()          -> Int: 259
+pub fn sys_fchownat()         -> Int: 260
+pub fn sys_futimesat()        -> Int: 261
+pub fn sys_newfstatat()       -> Int: 262
+pub fn sys_unlinkat()         -> Int: 263
+pub fn sys_renameat()         -> Int: 264
+pub fn sys_linkat()           -> Int: 265
+pub fn sys_symlinkat()        -> Int: 266
+pub fn sys_readlinkat()       -> Int: 267
+pub fn sys_fchmodat()         -> Int: 268
+pub fn sys_faccessat()        -> Int: 269
+pub fn sys_pselect6()         -> Int: 270
+pub fn sys_ppoll()            -> Int: 271
+pub fn sys_unshare()          -> Int: 272
+pub fn sys_set_robust_list()  -> Int: 273
+pub fn sys_get_robust_list()  -> Int: 274
+pub fn sys_splice()           -> Int: 275
+pub fn sys_tee()              -> Int: 276
+pub fn sys_sync_file_range()  -> Int: 277
+pub fn sys_vmsplice()         -> Int: 278
+pub fn sys_move_pages()       -> Int: 279
+pub fn sys_utimensat()        -> Int: 280
+pub fn sys_epoll_pwait()      -> Int: 281
+pub fn sys_signalfd()         -> Int: 282
+pub fn sys_timerfd_create()   -> Int: 283
+pub fn sys_eventfd()          -> Int: 284
+pub fn sys_fallocate()        -> Int: 285
+pub fn sys_timerfd_settime()  -> Int: 286
+pub fn sys_timerfd_gettime()  -> Int: 287
+pub fn sys_accept4()          -> Int: 288
+pub fn sys_signalfd4()        -> Int: 289
+pub fn sys_eventfd2()         -> Int: 290
+pub fn sys_epoll_create1()    -> Int: 291
+pub fn sys_dup3()             -> Int: 292
+pub fn sys_pipe2()            -> Int: 293
+pub fn sys_inotify_init1()    -> Int: 294
+pub fn sys_preadv()           -> Int: 295
+pub fn sys_pwritev()          -> Int: 296
+pub fn sys_rt_tgsigqueueinfo()-> Int: 297
+pub fn sys_perf_event_open()  -> Int: 298
+pub fn sys_recvmmsg()         -> Int: 299
+pub fn sys_fanotify_init()    -> Int: 300
+pub fn sys_fanotify_mark()    -> Int: 301
+pub fn sys_prlimit64()        -> Int: 302
+pub fn sys_name_to_handle_at()-> Int: 303
+pub fn sys_open_by_handle_at()-> Int: 304
+pub fn sys_clock_adjtime()    -> Int: 305
+pub fn sys_syncfs()           -> Int: 306
+pub fn sys_sendmmsg()         -> Int: 307
+pub fn sys_setns()            -> Int: 308
+pub fn sys_getcpu()           -> Int: 309
+pub fn sys_process_vm_readv() -> Int: 310
+pub fn sys_process_vm_writev()-> Int: 311
+pub fn sys_kcmp()             -> Int: 312
+pub fn sys_finit_module()     -> Int: 313
+pub fn sys_sched_setattr()    -> Int: 314
+pub fn sys_sched_getattr()    -> Int: 315
+pub fn sys_renameat2()        -> Int: 316
+pub fn sys_seccomp()          -> Int: 317
+pub fn sys_getrandom()        -> Int: 318
+pub fn sys_memfd_create()     -> Int: 319
+pub fn sys_kexec_file_load()  -> Int: 320
+pub fn sys_bpf()              -> Int: 321
+pub fn sys_execveat()         -> Int: 322
+pub fn sys_userfaultfd()      -> Int: 323
+pub fn sys_membarrier()       -> Int: 324
+pub fn sys_mlock2()           -> Int: 325
+pub fn sys_copy_file_range()  -> Int: 326
+pub fn sys_preadv2()          -> Int: 327
+pub fn sys_pwritev2()         -> Int: 328
+pub fn sys_pkey_mprotect()    -> Int: 329
+pub fn sys_pkey_alloc()       -> Int: 330
+pub fn sys_pkey_free()        -> Int: 331
+pub fn sys_statx()            -> Int: 332
+pub fn sys_io_uring_setup()   -> Int: 425
+pub fn sys_io_uring_enter()   -> Int: 426
+pub fn sys_io_uring_register()-> Int: 427
+pub fn sys_openat2()          -> Int: 437
+pub fn sys_pidfd_getfd()      -> Int: 438
+pub fn sys_faccessat2()       -> Int: 439
+pub fn sys_process_madvise()  -> Int: 440
+pub fn sys_epoll_pwait2()     -> Int: 441
+pub fn sys_mount_setattr()    -> Int: 442
+pub fn sys_quotactl_fd()      -> Int: 443
+pub fn sys_landlock_create_ruleset() -> Int: 444
+pub fn sys_landlock_add_rule()-> Int: 445
+pub fn sys_landlock_restrict_self()  -> Int: 446
+pub fn sys_memfd_secret()     -> Int: 447
+pub fn sys_process_mrelease() -> Int: 448
+pub fn sys_futex_waitv()      -> Int: 449
+pub fn sys_set_mempolicy_home_node() -> Int: 450
+
+# Invocations & Result Representation
+type SyscallResult = struct:
+    return_value: Int
+    is_error: Bool
+    errno_code: Int
+
+pub fn make_syscall_result(ret: Int) -> SyscallResult:
+    if ret < 0:
+        SyscallResult(ret, true, 0 - ret)
+    else:
+        SyscallResult(ret, false, 0)
+
+type SyscallInvocation = struct:
+    nr: Int
+    a0: Int
+    a1: Int
+    a2: Int
+    a3: Int
+    a4: Int
+    a5: Int
+
+pub fn syscall0(nr: Int) -> SyscallInvocation:
+    SyscallInvocation(nr, 0, 0, 0, 0, 0, 0)
+
+pub fn syscall1(nr: Int, a0: Int) -> SyscallInvocation:
+    SyscallInvocation(nr, a0, 0, 0, 0, 0, 0)
+
+pub fn syscall2(nr: Int, a0: Int, a1: Int) -> SyscallInvocation:
+    SyscallInvocation(nr, a0, a1, 0, 0, 0, 0)
+
+pub fn syscall3(nr: Int, a0: Int, a1: Int, a2: Int) -> SyscallInvocation:
+    SyscallInvocation(nr, a0, a1, a2, 0, 0, 0)
+
+pub fn syscall6(nr: Int, a0: Int, a1: Int, a2: Int, a3: Int, a4: Int, a5: Int) -> SyscallInvocation:
+    SyscallInvocation(nr, a0, a1, a2, a3, a4, a5)

@@ -1,0 +1,55 @@
+# ============================================================================
+# NOVA PURE RUNTIME: std/runtime/sys/macos_arm64.nv
+# 100% Pure Nova Native - Apple Silicon macOS ARM64 Kernel Architecture
+# Direct XNU / BSD System Call & Mach Trap Layer - Zero libSystem Dependency
+# ============================================================================
+
+# macOS XNU BSD System Call Numbers (Class 2: 0x2000000 + Unix Syscall)
+pub fn xnu_sys_exit()        -> Int: 33554433   # 0x2000001
+pub fn xnu_sys_fork()        -> Int: 33554434   # 0x2000002
+pub fn xnu_sys_read()        -> Int: 33554435   # 0x2000003
+pub fn xnu_sys_write()       -> Int: 33554436   # 0x2000004
+pub fn xnu_sys_open()        -> Int: 33554437   # 0x2000005
+pub fn xnu_sys_close()       -> Int: 33554438   # 0x2000006
+pub fn xnu_sys_wait4()       -> Int: 33554439   # 0x2000007
+pub fn xnu_sys_munmap()      -> Int: 33554505   # 0x2000049 (73)
+pub fn xnu_sys_mprotect()    -> Int: 33554506   # 0x200004A (74)
+pub fn xnu_sys_mmap()        -> Int: 33554629   # 0x20000C5 (197)
+pub fn xnu_sys_kqueue()      -> Int: 33554794   # 0x200016A (362)
+pub fn xnu_sys_kevent()      -> Int: 33554795   # 0x200016B (363)
+pub fn xnu_sys_bsdthread_create()    -> Int: 33554792 # 0x2000168 (360)
+pub fn xnu_sys_bsdthread_terminate() -> Int: 33554793 # 0x2000169 (361)
+
+# macOS Mach Traps (Fast IPC)
+pub fn mach_msg_trap()       -> Int: 0 - 31
+pub fn mach_reply_port()     -> Int: 0 - 26
+pub fn mach_thread_self()    -> Int: 0 - 27
+pub fn mach_task_self()      -> Int: 0 - 28
+pub fn mach_host_self()      -> Int: 0 - 29
+
+# macOS Apple Silicon 16KB Page Alignment Constants
+pub fn macos_page_size()     -> Int: 16384      # 16 KB hardware pages
+pub fn macos_page_mask()     -> Int: 16383
+
+type XnuSyscall = struct:
+    syscall_code: Int
+    x0: Int
+    x1: Int
+    x2: Int
+    x3: Int
+    x4: Int
+    x5: Int
+
+pub fn make_xnu_syscall(code: Int, a0: Int, a1: Int, a2: Int) -> XnuSyscall:
+    XnuSyscall(code, a0, a1, a2, 0, 0, 0)
+
+type XnuResult = struct:
+    raw_return: Int
+    is_carry_flag_set: Bool
+    errno_code: Int
+
+pub fn eval_xnu_result(ret: Int, carry: Bool) -> XnuResult:
+    if carry:
+        XnuResult(ret, true, ret)
+    else:
+        XnuResult(ret, false, 0)
