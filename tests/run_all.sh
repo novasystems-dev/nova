@@ -2,14 +2,14 @@
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export NOVA_RUNTIME="$ROOT_DIR/runtime"
-mkdir -p /tmp bin 2>/dev/null || true
+mkdir -p /tmp /d/tmp /c/tmp D:/tmp C:/tmp bin 2>/dev/null || true
 
 WIN_LIBS=""
 if [[ "${OSTYPE:-}" == "msys"* ]] || [[ "${OSTYPE:-}" == "cygwin"* ]] || [[ "$(uname -s)" == *"MINGW"* ]]; then
     WIN_LIBS="-lws2_32 -lgdi32 -luser32"
 fi
 
-if [ ! -f bin/novac ] && [ ! -f bin/novac.exe ] || ! (./bin/novac --version 2>/dev/null || ./bin/novac.exe --version 2>/dev/null) >/dev/null 2>&1; then
+if [ ! -f bin/novac ] && [ ! -f bin/novac.exe ] || ! (./bin/novac version 2>/dev/null || ./bin/novac.exe version 2>/dev/null) >/dev/null 2>&1; then
     echo "-> Bootstrapping native novac compiler from C99 genesis snapshot..."
     gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o bin/novac
     if [ -f bin/novac.exe ]; then cp -f bin/novac.exe bin/novac; fi
@@ -289,12 +289,12 @@ run_test "Orbit dependency tree inspection" "./bin/orbit tree"
 run_test "Orbit package registry search" "./bin/orbit search http"
 run_test "Orbit dry-run publish verification" "./bin/orbit publish"
 run_test "Orbit dependency vendor command" "./bin/orbit vendor && rm -rf vendor"
-run_test "Interactive REPL evaluation pipeline" "REPL_BIN='./bin/nova-repl'; if command -v python3 >/dev/null 2>&1; then REPL_BIN='python3 ./bin/nova-repl'; elif command -v python >/dev/null 2>&1; then REPL_BIN='python ./bin/nova-repl'; fi; out=\$(printf 'let x = 21\nx * 2\n:quit\n' | \$REPL_BIN); echo \"\$out\" | grep -q '42'"
+run_test "Interactive REPL evaluation pipeline" "REPL_BIN='./bin/nova-repl'; if command -v python3 >/dev/null 2>&1; then REPL_BIN='python3 ./bin/nova-repl'; elif command -v python >/dev/null 2>&1; then REPL_BIN='python ./bin/nova-repl'; fi; export NOVAC_BIN=\"\$(pwd)/bin/novac\"; out=\$(printf 'let x = 21\nx * 2\n:quit\n' | \$REPL_BIN); echo \"\$out\" | grep -q '42'"
 run_test "Nova-fmt formatter" "./bin/nova-fmt examples/*.nv std/*.nv"
 run_test "Nova-lint linter" "./bin/nova-lint examples/*.nv std/*.nv"
 run_test "Nova-doc generator execution" "./bin/nova-doc >/dev/null"
 run_test "Nova-runner desktop execution engine (--version)" "./bin/nova-runner --version | grep -q '0.31.00'"
-run_test "Nova-runner console-hold execution (--hold)" "DOC_BIN='./bin/nova-doc'; if [ -f \"\${DOC_BIN}.exe\" ]; then DOC_BIN=\"\${DOC_BIN}.exe\"; fi; echo '' | ./bin/nova-runner --hold \"\$DOC_BIN\" --version | grep -q 'Process exited with code: 0'"
+run_test "Nova-runner console-hold execution (--hold)" "DOC_BIN='bin/nova-doc'; if [ -f \"\${DOC_BIN}.exe\" ]; then DOC_BIN=\"\${DOC_BIN}.exe\"; fi; echo '' | ./bin/nova-runner --hold \"\$DOC_BIN\" --version | grep -q 'Process exited with code: 0'"
 run_test "Orbit package creation with .nv source (orbit new)" "./bin/orbit new /tmp/test_nv_pkg >/dev/null && [ -f /tmp/test_nv_pkg/src/main.nv ] && rm -rf /tmp/test_nv_pkg"
 run_test "Orbit multi-module Java-style project build (enterprise_service)" "(cd examples/enterprise_service && ../../bin/orbit build >/dev/null)"
 run_test "Execute enterprise_service.nova bundle" "APP_BIN='./examples/enterprise_service/target/release/app.nova'; if [ -f \"\${APP_BIN}.exe\" ]; then APP_BIN=\"\${APP_BIN}.exe\"; fi; if [ -f \"\$APP_BIN\" ]; then \"\$APP_BIN\" >/dev/null; fi && rm -rf examples/enterprise_service/target examples/enterprise_service/bin"
@@ -310,6 +310,10 @@ gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_r
 gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS $EXTRA_LINK_FLAGS -o ./bin/novac-3
 N2="bin/novac-2"; if [ -f "${N2}.exe" ]; then N2="${N2}.exe"; fi
 N3="bin/novac-3"; if [ -f "${N3}.exe" ]; then N3="${N3}.exe"; fi
+if command -v codesign >/dev/null 2>&1; then
+    codesign --remove-signature "$N2" 2>/dev/null || true
+    codesign --remove-signature "$N3" 2>/dev/null || true
+fi
 run_test "Fixed-point hash equality (novac-2 vs novac-3)" "H2=\$(get_sha256 $N2); H3=\$(get_sha256 $N3); [ -n \"\$H2\" ] && [ \"\$H2\" = \"\$H3\" ] && rm -f bin/novac-2 bin/novac-3 bin/novac-2.exe bin/novac-3.exe"
 run_test "Standalone C99 Genesis snapshot build (Zero Haskell)" "gcc -O3 -std=c99 -I./runtime compiler/bootstrap/novac_bootstrap.c runtime/nova_rt.c -lpthread -lm $WIN_LIBS -o ./novac_c99 && (./novac_c99.exe --version 2>/dev/null || ./novac_c99 --version 2>/dev/null || true) >/dev/null && rm -f ./novac_c99 ./novac_c99.exe"
 

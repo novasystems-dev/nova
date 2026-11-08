@@ -78,6 +78,7 @@ jobs:
           which z3 || true
           gcc --version
           z3 --version
+          mkdir -p /tmp /d/tmp /c/tmp D:/tmp C:/tmp 2>/dev/null || true
           echo "=== Testing MinGW-w64 GCC linking with runtime/nova_rt.c ==="
           printf '#include "nova_rt.h"\nint main(int argc, char** argv){ nova_set_args(argc, argv); return 0; }\n' > test_link.c
           if ! gcc -O3 -std=c99 -I./runtime test_link.c runtime/nova_rt.c -lpthread -lm -lws2_32 -lgdi32 -luser32 -o test_link.exe 2>&1 | tee link.log; then

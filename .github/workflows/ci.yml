@@ -40,10 +40,18 @@ jobs:
         cd stage0
         cabal update
         cabal build
-        RAW_BIN=$(cabal -v0 list-bin novac)
+        RAW_BIN=$(cabal -v0 list-bin novac 2>/dev/null || true)
         cd ..
-        cp -f "$RAW_BIN" bin/novac
+        NOVAC_BIN=$(echo "$RAW_BIN" | tr '\\' '/')
+        if [ ! -f "$NOVAC_BIN" ]; then
+          FALLBACK_BIN=$(find stage0/dist-newstyle -type f \( -name "novac" -o -name "novac.exe" \) | head -n 1)
+          if [ -n "$FALLBACK_BIN" ] && [ -f "$FALLBACK_BIN" ]; then
+            NOVAC_BIN="$FALLBACK_BIN"
+          fi
+        fi
+        cp -f "$NOVAC_BIN" bin/novac
         chmod +x bin/novac
+        rm -rf stage0
         ./bin/novac version
         echo "=== Compiling Native Orbit & Nova-Doc ==="
         ./bin/novac build tests/tools/orbit/main.nv

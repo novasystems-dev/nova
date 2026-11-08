@@ -35,7 +35,17 @@ static void print_usage(const char *prog) {
 static int run_target_with_hold(const char *target, int argc, char **argv, int start_idx) {
     /* Construct execution command */
     char cmd[4096];
+#ifdef _WIN32
+    char norm_target[4096];
+    strncpy(norm_target, target, sizeof(norm_target) - 1);
+    norm_target[sizeof(norm_target) - 1] = '\0';
+    for (char *p = norm_target; *p; p++) {
+        if (*p == '/') *p = '\\';
+    }
+    int offset = snprintf(cmd, sizeof(cmd), "\"%s\"", norm_target);
+#else
     int offset = snprintf(cmd, sizeof(cmd), "\"%s\"", target);
+#endif
     for (int i = start_idx; i < argc; i++) {
         offset += snprintf(cmd + offset, sizeof(cmd) - offset, " \"%s\"", argv[i]);
         if (offset >= (int)sizeof(cmd) - 1) break;
