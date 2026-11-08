@@ -44,7 +44,7 @@ jobs:
         cd ..
         cp -f "$RAW_BIN" bin/novac
         chmod +x bin/novac
-        ./bin/novac --version
+        ./bin/novac version
         echo "=== Compiling Native Orbit & Nova-Doc ==="
         ./bin/novac build tests/tools/orbit/main.nv
         if [ -f main.out ]; then cp -f main.out bin/orbit; cp -f main.out tests/tools/orbit/orbit; rm -f main.out; fi
